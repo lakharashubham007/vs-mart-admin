@@ -1,85 +1,146 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
-/* Sync with Support/Product Management Aesthetics */
+/* Unified Stock Management Premium Design */
 .stock-page-container {
-    padding: 0.5rem;
+    padding: 0.2rem;
     width: 100%;
     font-family: 'Outfit', sans-serif;
 }
 
 .stock-content-pane {
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.5);
     border-radius: var(--radius);
-    padding: 2.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    min-height: calc(100vh - 120px);
+    padding: 1.5rem;
 }
 
-.stock-glass-card {
+/* Unified Card Layout */
+.stock-unified-card {
     background: hsl(var(--card) / 0.4);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.3);
     border-radius: var(--radius);
-    padding: 2.5rem;
+    overflow: hidden;
     transition: all 0.3s ease;
+    margin-top: 1rem;
 }
 
-.stock-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2.5rem;
+.stock-unified-card:hover {
+    border-color: hsl(var(--primary) / 0.2);
+    box-shadow: var(--shadow-premium);
 }
 
-.stock-field-group {
+/* Search & Filter Header within the card */
+.stock-card-filter-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    gap: 1.25rem;
+    align-items: center;
+    background: hsl(var(--secondary) / 0.1);
+    flex-wrap: wrap;
 }
 
-.stock-field-group.full-width {
-    grid-column: 1 / -1;
-}
-
-.stock-label {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: hsl(var(--muted-foreground));
+.stock-search-box {
+    flex: 1;
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.25rem;
+    min-width: 300px;
 }
 
-.stock-input,
-.stock-select {
-    padding: 1rem 1.25rem;
-    background: hsl(var(--secondary) / 0.2);
-    border: 1px solid hsl(var(--border) / 0.4);
-    border-radius: 1rem;
-    font-size: 1rem;
-    color: hsl(var(--foreground));
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+.stock-search-box svg {
+    position: absolute;
+    left: 1.25rem;
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+}
+
+.stock-search-input {
     width: 100%;
-    outline: none;
-}
-
-.stock-input:focus,
-.stock-select:focus {
-    border-color: hsl(var(--primary));
+    padding: 0.85rem 1rem 0.85rem 3.25rem;
     background: hsl(var(--card));
-    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
-    transform: translateY(-1px);
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 12px;
+    color: hsl(var(--foreground));
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
-/* Header Styles */
+.stock-search-input:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
+}
+
+/* Table Styles inside Unified Card */
+.stock-table-wrapper {
+    overflow-x: auto;
+}
+
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stock-table th {
+    background: hsl(var(--secondary) / 0.3);
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: hsl(var(--muted-foreground));
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+}
+
+.stock-table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.05);
+    font-size: 0.9rem;
+    color: hsl(var(--foreground));
+    vertical-align: middle;
+}
+
+.stock-row {
+    transition: all 0.2s ease;
+}
+
+.stock-row:hover {
+    background: hsl(var(--primary) / 0.02);
+}
+
+/* Batch Tag & Status Badges */
+.batch-tag {
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid hsl(var(--primary) / 0.2);
+}
+
+.status-indicator {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Stock In Form Specifics */
 .stock-header-section {
-    margin-bottom: 2.5rem;
-    border-bottom: 1px solid hsl(var(--border) / 0.3);
+    margin-bottom: 2rem;
     padding-bottom: 1.5rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
 }
 
 .stock-header-title {
@@ -96,57 +157,74 @@
     font-size: 1rem;
 }
 
-/* Preview Section Mirroring Support */
-.stock-preview-section {
-    margin-top: 3.5rem;
-    padding: 3rem;
+.stock-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.stock-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.stock-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stock-input {
+    padding: 0.85rem 1.25rem;
     background: hsl(var(--secondary) / 0.1);
-    border-radius: 2rem;
-    border: 1px dashed hsl(var(--border) / 0.5);
+    border: 1px solid hsl(var(--border) / 0.4);
+    border-radius: 12px;
+    color: hsl(var(--foreground));
+    transition: all 0.3s ease;
+    width: 100%;
 }
 
-.preview-badge-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
+.stock-input:focus {
+    background: hsl(var(--card));
+    border-color: hsl(var(--primary));
+    outline: none;
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
 }
 
-.preview-badge-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: hsl(var(--primary));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Preview Section */
+.stock-preview-section {
+    margin-top: 3rem;
+    padding: 2.5rem;
+    background: hsl(var(--secondary) / 0.05);
+    border-radius: 1.5rem;
+    border: 1px dashed hsl(var(--border) / 0.4);
 }
 
 .stock-preview-card {
-    background: white;
-    border-radius: 24px;
-    padding: 24px;
+    background: hsl(var(--card));
+    padding: 1.5rem;
+    border-radius: 1rem;
     display: flex;
-    align-items: center;
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
-    border: 1px solid #f0f0f0;
-    max-width: 500px;
-    transition: transform 0.3s ease;
-}
-
-.stock-preview-card:hover {
-    transform: translateY(-8px);
+    gap: 1.5rem;
+    box-shadow: var(--shadow-premium);
+    border: 1px solid hsl(var(--border) / 0.1);
 }
 
 .preview-img-box {
     width: 80px;
     height: 80px;
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
-    margin-right: 20px;
-    background: #f8f8f8;
-    border: 1px solid #eee;
+    background: hsl(var(--secondary) / 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .preview-img-box img {
@@ -155,184 +233,68 @@
     object-fit: cover;
 }
 
+/* Pagination Footer */
+.stock-pagination {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: hsl(var(--secondary) / 0.05);
+    border-top: 1px solid hsl(var(--border) / 0.1);
+}
+
 .stock-action-footer {
-    margin-top: 3.5rem;
-    padding-top: 2rem;
-    border-top: 1px solid hsl(var(--border) / 0.3);
     display: flex;
     justify-content: flex-end;
-    gap: 1.5rem;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid hsl(var(--border) / 0.1);
 }
 
 .premium-btn-primary {
     background: hsl(var(--primary));
-    color: white;
-    padding: 0 2.5rem;
-    height: 56px;
-    border-radius: 1rem;
-    font-weight: 800;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: hsl(var(--primary-foreground));
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
     border: none;
     cursor: pointer;
-    box-shadow: 0 8px 24px hsl(var(--primary) / 0.25);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.premium-btn-primary:hover:not(:disabled) {
+.premium-btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px hsl(var(--primary) / 0.35);
-    filter: brightness(1.05);
+    box-shadow: 0 8px 24px hsl(var(--primary) / 0.3);
 }
 
 .premium-btn-secondary {
-    background: transparent;
-    color: hsl(var(--foreground));
-    padding: 0 2rem;
-    height: 56px;
-    border-radius: 1rem;
-    font-weight: 800;
-    transition: all 0.2s ease;
-    border: 2px solid hsl(var(--border));
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.premium-btn-secondary:hover:not(:disabled) {
     background: hsl(var(--secondary) / 0.5);
-    border-color: hsl(var(--foreground));
+    color: hsl(var(--foreground));
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    border: 1px solid hsl(var(--border) / 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* Status Badges */
-.inventory-status-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+.premium-btn-secondary:hover {
+    background: hsl(var(--secondary));
 }
 
-/* ============================================
-   RESPONSIVE — Full Breakpoints
-   ============================================ */
-
-/* Tablets & small laptops (≤1024px): 2 → 1 column grid */
-@media (max-width: 1024px) {
-    .stock-content-pane {
-        padding: 1.75rem;
-    }
-
-    .stock-glass-card {
-        padding: 1.75rem;
-    }
-
-    .stock-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-
-    .stock-preview-section {
-        padding: 2rem;
-    }
-
-    .stock-header-title {
-        font-size: 1.4rem;
-    }
-}
-
-/* Mobile landscape / narrow tablet (≤768px): 1-column */
 @media (max-width: 768px) {
-    .stock-content-pane {
-        padding: 1.25rem;
-        border-radius: calc(var(--radius) * 0.75);
-    }
-
-    .stock-glass-card {
-        padding: 1.25rem;
-    }
-
     .stock-grid {
         grid-template-columns: 1fr;
-        gap: 1.25rem;
     }
-
-    .stock-header-title {
-        font-size: 1.2rem;
+    .stock-card-filter-header {
+        flex-direction: column;
+        align-items: stretch;
     }
-
-    .stock-header-sub {
-        font-size: 0.875rem;
-    }
-
-    .stock-action-footer {
-        flex-direction: column-reverse;
-        gap: 0.75rem;
-    }
-
-    .premium-btn-primary,
-    .premium-btn-secondary {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .stock-preview-section {
-        padding: 1.25rem;
-        margin-top: 2rem;
-    }
-
     .stock-preview-card {
         flex-direction: column;
-        align-items: flex-start;
-        max-width: 100%;
-    }
-
-    .preview-img-box {
-        margin-right: 0;
-        margin-bottom: 1rem;
-    }
-}
-
-/* Small phones (≤480px) */
-@media (max-width: 480px) {
-    .stock-content-pane {
-        padding: 1rem 0.75rem;
-    }
-
-    .stock-glass-card {
-        padding: 1rem 0.75rem;
-    }
-
-    .stock-grid {
-        gap: 1rem;
-    }
-
-    .stock-label {
-        font-size: 0.68rem;
-    }
-
-    .stock-input,
-    .stock-select {
-        font-size: 0.9rem;
-        padding: 0.75rem 1rem;
-    }
-
-    .premium-btn-primary,
-    .premium-btn-secondary {
-        height: 48px;
-        font-size: 0.9rem;
-    }
-
-    .stock-header-title {
-        font-size: 1.1rem;
     }
 }

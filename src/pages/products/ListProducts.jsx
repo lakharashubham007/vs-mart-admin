@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import productService from '../../services/productService';
 import Loader from '../../components/Loader';
+import CustomSelect from '../../components/CustomSelect';
 import { BASE_IMAGE_URL } from '../../config/env';
 import '../category/Category.css';
 import './Product.css';
