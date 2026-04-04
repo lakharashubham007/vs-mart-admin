@@ -4,6 +4,7 @@ import { X, Image as ImageIcon, Zap, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import productService from '../services/productService';
 import CustomSelect from './CustomSelect';
+import { BASE_IMAGE_URL } from '../config/env';
 import './QuickCreateModal.css';
 
 
@@ -27,8 +28,6 @@ const QuickCreateModal = ({ isOpen, onClose, type, onSuccess, masters = {}, edit
     const [colorCode, setColorCode] = useState('#000000');
     const [variantTypeId, setVariantTypeId] = useState('');
     const [rate, setRate] = useState(0);
-
-    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     // Populate data for Edit Mode
     useEffect(() => {
@@ -372,7 +371,7 @@ const QuickCreateModal = ({ isOpen, onClose, type, onSuccess, masters = {}, edit
                                                 <X size={14} />
                                             </button>
                                             <img
-                                                src={`${API_BASE_URL}/${existingImage}`}
+                                                src={`${BASE_IMAGE_URL}/${existingImage}`}
                                                 alt="Existing"
                                                 className="quick-modal-image-preview"
                                             />

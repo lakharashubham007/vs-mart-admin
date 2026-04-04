@@ -206,8 +206,8 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                                                 {item.image || item.productId?.images?.thumbnail ? (
                                                     <img
                                                         src={item.image
-                                                            ? (item.image.startsWith('http') ? item.image : `http://localhost:5000/${item.image}`)
-                                                            : (item.productId?.images?.thumbnail?.startsWith('http') ? item.productId.images.thumbnail : `http://localhost:5000/${item.productId.images.thumbnail}`)
+                                                            ? (item.image.startsWith('http') ? item.image : `${BASE_IMAGE_URL}/${item.image}`)
+                                                            : (item.productId?.images?.thumbnail?.startsWith('http') ? item.productId.images.thumbnail : `${BASE_IMAGE_URL}/${item.productId.images.thumbnail}`)
                                                         }
                                                         alt={item.name}
                                                         className="item-img"

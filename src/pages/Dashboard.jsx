@@ -24,7 +24,7 @@ const fmtNum = (n) => {
 };
 
 const Sk = ({ h = 16, w = '100%', r = 8 }) => (
-    <div className="sk" style={{ height: h, width: w, borderRadius: r }} />
+    <div className="vg-skeleton" style={{ height: h, width: w, borderRadius: r }} />
 );
 
 export default function Dashboard() {
@@ -138,7 +138,7 @@ export default function Dashboard() {
                                 <p className="vg-m-label">{m.label}</p>
                                 <h2 className="vg-m-value">{m.val}</h2>
                             </div>
-                            <div className={`vg-icon-box ${m.color}`} style={{ color: m.text === 'white' ? '#fff' : '#0D2C22' }}>
+                            <div className={`vg-icon-box ${m.color}`} style={{ color: m.text === 'white' ? 'white' : 'inherit' }}>
                                 {m.icon}
                             </div>
                         </div>
@@ -216,7 +216,7 @@ export default function Dashboard() {
                 <div className="vg-card vg-stock-area">
                     <div className="vg-card-header">
                         <div><h3>Inventory Health</h3><p>Live distribution analysis</p></div>
-                        <Package size={18} color="#00884A" />
+                        <Package size={18} style={{ color: 'hsl(var(--primary))' }} />
                     </div>
                     {!stockDyn ? <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}><Sk h={50} /><Sk h={50} /><Sk h={50} /><Sk h={50} /></div> : (
                         <div className="dyn-stock-grid">
@@ -285,7 +285,7 @@ export default function Dashboard() {
                 <div className="vg-card vg-best-sellers">
                     <div className="vg-card-header">
                         <div><h3>Best Performance</h3><p>Elite selling inventory</p></div>
-                        <TrendingUp size={18} color="#00884A" />
+                        <TrendingUp size={18} style={{ color: 'hsl(var(--primary))' }} />
                     </div>
                     <div className="bs-list">
                         {loading ? [1, 2, 3, 4, 5].map(k => <Sk key={k} h={64} r={12} />) : (

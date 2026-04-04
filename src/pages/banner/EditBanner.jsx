@@ -6,6 +6,7 @@ import bannerService from '../../services/bannerService';
 import Loader from '../../components/Loader';
 import CustomDatePicker from '../../components/CustomDatePicker';
 import './Banner.css';
+import { BASE_IMAGE_URL } from '../../config/env';
 
 const EditBanner = () => {
     const { id } = useParams();
@@ -23,7 +24,6 @@ const EditBanner = () => {
 
     const [previewUrl, setPreviewUrl] = useState(null);
     const fileInputRef = useRef(null);
-    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     useEffect(() => {
         fetchBannerDetails();
@@ -44,7 +44,7 @@ const EditBanner = () => {
                     isActive: banner.isActive,
                     image: null // Current image path is kept if no new file is selected
                 });
-                setPreviewUrl(`${API_BASE_URL}/${banner.image}`);
+                setPreviewUrl(`${BASE_IMAGE_URL}/${banner.image}`);
             }
         } catch (error) {
             toast.error('Failed to load banner details');

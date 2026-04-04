@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import productService from '../../services/productService';
 import Loader from '../../components/Loader';
-import CustomSelect from '../../components/CustomSelect';
+import { BASE_IMAGE_URL } from '../../config/env';
 import '../category/Category.css';
 import './Product.css';
 
@@ -331,7 +331,7 @@ const ListProducts = () => {
                                                         title="View Image Gallery"
                                                     >
                                                         {product.images?.thumbnail ? (
-                                                            <img src={`http://localhost:5000/${product.images.thumbnail}`} alt="" />
+                                                            <img src={`${BASE_IMAGE_URL}/${product.images.thumbnail}`} alt="" />
                                                         ) : (
                                                             <Package size={20} className="text-muted-foreground" />
                                                         )}
@@ -391,8 +391,8 @@ const ListProducts = () => {
                                                             className="action-btn"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                setSelectedQrCode(product.qrCode ? `http://localhost:5000${product.qrCode}` : '');
-                                                                setSelectedBarcode(product.barcode ? `http://localhost:5000${product.barcode}` : '');
+                                                                setSelectedQrCode(product.qrCode ? `${BASE_IMAGE_URL}${product.qrCode}` : '');
+                                                                setSelectedBarcode(product.barcode ? `${BASE_IMAGE_URL}${product.barcode}` : '');
                                                                 setSelectedQrTitle(`${product.name}`);
                                                                 setModalType('QR');
                                                                 setQrModalOpen(true);
@@ -435,8 +435,8 @@ const ListProducts = () => {
                                                                                 className="variant-qr-thumb"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
-                                                                                    setSelectedQrCode(v.qrCode ? `http://localhost:5000${v.qrCode}` : '');
-                                                                                    setSelectedBarcode(v.barcode ? `http://localhost:5000${v.barcode}` : '');
+                                                                                    setSelectedQrCode(v.qrCode ? `${BASE_IMAGE_URL}${v.qrCode}` : '');
+                                                                                    setSelectedBarcode(v.barcode ? `${BASE_IMAGE_URL}${v.barcode}` : '');
                                                                                     const attrText = v.attributes?.map(attr => attr.valueName || attr.valueId?.name || attr.valueId?.valueName || attr.valueId?.value).join(' / ') || 'Variant';
                                                                                     setSelectedQrTitle(`${attrText}`);
                                                                                     setModalType('QR');
@@ -609,7 +609,7 @@ const ListProducts = () => {
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--foreground))' }}>Primary Thumbnail</span>
                                             </div>
                                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                                                <img draggable="false" src={`http://localhost:5000/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         </div>
                                     )}
@@ -626,7 +626,7 @@ const ListProducts = () => {
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))' }}>Gallery Image {idx + 1}</span>
                                             </div>
                                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                                                <img draggable="false" src={`http://localhost:5000/${img}`} alt={`Gallery ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${img}`} alt={`Gallery ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         </div>
                                     ))}
@@ -668,7 +668,7 @@ const ListProducts = () => {
                                                     filter: selectedDisplayImage === selectedProductForGallery.images.thumbnail ? 'none' : 'grayscale(40%)'
                                                 }}
                                             >
-                                                <img draggable="false" src={`http://localhost:5000/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail View" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail View" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         )}
 
@@ -698,7 +698,7 @@ const ListProducts = () => {
                                                     filter: selectedDisplayImage === img ? 'none' : 'grayscale(40%)'
                                                 }}
                                             >
-                                                <img draggable="false" src={`http://localhost:5000/${img}`} alt={`Gallery View ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${img}`} alt={`Gallery View ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         ))}
                                     </div>
