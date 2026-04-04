@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production build
+/dist
+/build
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache
+.cache/
+.parcel-cache/
+.vite/
+
+# Testing
+coverage/
+
+# Misc
+*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional: Storybook
+storybook-static/
+
+# Optional: ESLint cache
+.eslintcache
+
+# Optional: stylelint cache
+.stylelintcache

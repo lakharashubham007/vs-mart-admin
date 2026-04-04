@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: 142 60% 45%;
+  /* Luxury Green #2ecc71 */
+  --primary-foreground: 260 45% 6%;
+
+  /* Dark Theme - Deep Obsidian Luxury */
+  --background: 265 50% 4%;
+  --foreground: 265 30% 98%;
+  --card: 265 30% 10%;
+  --card-foreground: 265 30% 98%;
+  --popover: 265 30% 10%;
+  --popover-foreground: 265 30% 98%;
+  --secondary: 265 25% 14%;
+  --secondary-foreground: 142 60% 45%;
+  --muted: 265 25% 14%;
+  --muted-foreground: 265 15% 65%;
+  --accent: 142 60% 45%;
+  --accent-foreground: 265 50% 4%;
+  --destructive: 0 100% 60%;
+  --destructive-foreground: 265 30% 98%;
+  --border: 265 25% 18%;
+  --input: 265 25% 18%;
+  --ring: 142 60% 45%;
+  --radius: 0.85rem;
+
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --header-height: 70px;
+
+  --glass-bg: rgba(18, 12, 30, 0.85);
+  /* Deep luxury glass */
+  --glass-border: rgba(35, 143, 66, 0.2);
+  --glass-shadow: 0 15px 45px 0 rgba(0, 0, 0, 0.6);
+  --shadow-premium: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+}
+
+.light-theme {
+  /* Premium Gray & White Format */
+  --background: 210 20% 98%;
+  /* Light Gray Backdrop */
+  --foreground: 222 47% 11%;
+  /* Deep Slate/Gray Text */
+  --card: 0 0% 100%;
+  /* Pure White Surfaces */
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 142 60% 35%;
+  /* Premium Luxury Green for light mode */
+  --primary-foreground: 210 20% 98%;
+  --secondary: 210 20% 94%;
+  --secondary-foreground: 142 60% 35%;
+  --muted: 210 20% 94%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 20% 94%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 142 60% 35%;
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(35, 143, 66, 0.15);
+  --glass-shadow: 0 10px 30px 0 rgba(35, 143, 66, 0.05);
+  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+/* Hide Spinners for number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}

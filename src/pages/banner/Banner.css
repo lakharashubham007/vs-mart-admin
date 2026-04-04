@@ -1,0 +1,395 @@
+.banner-page-container {
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.banner-glass-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.filter-card {
+    margin-bottom: 2rem;
+}
+
+.banner-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 1rem;
+    background: hsl(var(--secondary) / 0.5);
+    border-radius: 8px;
+    height: 44px;
+}
+
+.banner-search-wrapper input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.banner-table-wrapper {
+    background: hsl(var(--card));
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.banner-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.banner-table th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    background: hsl(var(--secondary) / 0.3);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.banner-row {
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+}
+
+.banner-row td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+}
+
+.banner-cell-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.banner-img-preview {
+    width: 140px;
+    aspect-ratio: 16 / 6;
+    border-radius: 6px;
+    overflow: hidden;
+    background: hsl(var(--secondary));
+    border: 1px solid hsl(var(--border) / 0.5);
+    flex-shrink: 0;
+}
+
+.banner-img-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-title-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.banner-id-text {
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+}
+
+.schedule-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.date-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: hsl(var(--foreground));
+}
+
+.date-item.expiry {
+    color: hsl(var(--destructive));
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-badge.active {
+    background: hsl(142, 70%, 95%);
+    color: hsl(142, 76%, 36%);
+}
+
+.status-badge.inactive {
+    background: hsl(var(--secondary));
+    color: hsl(var(--muted-foreground));
+}
+
+.banner-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: hsl(var(--secondary) / 0.5);
+    border: 1px solid hsl(var(--border) / 0.5);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+}
+
+.action-btn.delete:hover {
+    background: hsl(var(--destructive) / 0.1);
+    color: hsl(var(--destructive));
+}
+
+.empty-state {
+    padding: 4rem !important;
+    text-align: center;
+    color: hsl(var(--muted-foreground));
+}
+
+/* Form Styles */
+.banner-form-view {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.banner-form-flex {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+}
+
+.banner-inputs-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.banner-preview-column {
+    width: 450px;
+    position: sticky;
+    top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.banner-upload-zone {
+    border: 2px dashed hsl(var(--border) / 0.8);
+    border-radius: 16px;
+    width: 100%;
+    aspect-ratio: 16 / 6;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: hsl(var(--secondary) / 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.banner-upload-zone:hover {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.banner-upload-zone.has-image {
+    padding: 0;
+    border-style: solid;
+    border-color: hsl(var(--primary) / 0.3);
+}
+
+.preview-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+}
+
+.banner-upload-zone:hover .preview-overlay {
+    opacity: 1;
+}
+
+.aspect-ratio-tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: hsl(var(--primary));
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+}
+
+/* Luxury Toggle Switch */
+.luxury-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: hsl(var(--secondary) / 0.3);
+    border: 1.5px solid hsl(var(--border) / 0.8);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.luxury-toggle-container:hover {
+    background: hsl(var(--secondary) / 0.5);
+    border-color: hsl(var(--primary) / 0.4);
+}
+
+.luxury-toggle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.luxury-toggle-label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: hsl(var(--foreground));
+}
+
+.luxury-toggle-sub {
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+}
+
+.luxury-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    background: hsl(var(--muted));
+    border-radius: 20px;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.luxury-switch.active {
+    background: hsl(var(--primary));
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+}
+
+.luxury-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.luxury-switch.active .luxury-knob {
+    left: 25px;
+    transform: scale(1.1);
+}
+
+/* Internal Banner Form Grid (For grouping fields within columns) */
+.banner-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.banner-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.banner-form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: hsl(var(--foreground) / 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.banner-input-fancy {
+    width: 100%;
+    height: 52px;
+    padding: 0 1.5rem;
+    background: hsl(var(--secondary) / 0.4);
+    border: 1.5px solid hsl(var(--border) / 0.8);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: hsl(var(--foreground));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.banner-input-fancy:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    background: hsl(var(--secondary) / 0.6);
+}
+
+.banner-input-fancy:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    background: hsl(var(--card));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.15);
+}
+
+@media (max-width: 1024px) {
+    .banner-form-flex {
+        flex-direction: column;
+    }
+
+    .banner-preview-column {
+        width: 100%;
+        position: static;
+        order: -1;
+        /* Move preview to top on mobile */
+    }
+}
+
+@media (max-width: 600px) {
+    .banner-field-row {
+        grid-template-columns: 1fr;
+    }
+}

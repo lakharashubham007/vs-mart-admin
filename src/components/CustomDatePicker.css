@@ -1,0 +1,213 @@
+/* Custom Date Picker */
+.cdp-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cdp-label {
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(var(--muted-foreground));
+    margin-left: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Trigger */
+.cdp-trigger {
+    width: 100%;
+    background: hsl(var(--secondary) / 0.5);
+    border: 1px solid hsl(var(--border) / 0.5);
+    padding: 0 1rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    min-height: 52px;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.cdp-trigger:hover {
+    background: hsl(var(--secondary));
+    border-color: hsl(var(--primary) / 0.3);
+}
+
+.cdp-trigger.active {
+    background: hsl(var(--secondary));
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
+}
+
+.cdp-icon-left {
+    color: hsl(var(--muted-foreground));
+    flex-shrink: 0;
+}
+
+.cdp-selected-text {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: hsl(var(--foreground));
+}
+
+.cdp-placeholder {
+    flex: 1;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.cdp-clear-btn {
+    background: hsl(var(--secondary));
+    border: none;
+    color: hsl(var(--muted-foreground));
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.cdp-clear-btn:hover {
+    background: hsl(var(--destructive) / 0.15);
+    color: hsl(var(--destructive));
+}
+
+/* Dropdown */
+.cdp-dropdown {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 1.1rem;
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    padding: 0.6rem;
+    min-width: 256px;
+}
+
+/* Header */
+.cdp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.1rem 0 0.5rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.25);
+    margin-bottom: 0.5rem;
+}
+
+.cdp-month-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: hsl(var(--foreground));
+    letter-spacing: 0.02em;
+}
+
+.cdp-nav-btn {
+    background: hsl(var(--secondary) / 0.7);
+    border: 1px solid hsl(var(--border) / 0.3);
+    border-radius: 0.5rem;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: hsl(var(--foreground));
+    transition: all 0.15s;
+    padding: 0;
+}
+
+.cdp-nav-btn:hover {
+    background: hsl(var(--primary) / 0.12);
+    border-color: hsl(var(--primary) / 0.25);
+    color: hsl(var(--primary));
+}
+
+/* Day grid — compact */
+.cdp-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.cdp-day-name {
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: hsl(var(--muted-foreground));
+    padding: 3px 0;
+}
+
+.cdp-day-btn {
+    background: transparent;
+    border: none;
+    border-radius: 0.45rem;
+    width: 100%;
+    aspect-ratio: 1;
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.cdp-day-btn:hover {
+    background: hsl(var(--secondary));
+    color: hsl(var(--primary));
+}
+
+.cdp-day-btn.today {
+    border: 1.5px solid hsl(var(--primary) / 0.45);
+    color: hsl(var(--primary));
+    font-weight: 800;
+}
+
+.cdp-day-btn.selected {
+    background: hsl(var(--primary));
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 3px 10px hsl(var(--primary) / 0.35);
+}
+
+.cdp-day-btn.selected:hover {
+    background: hsl(var(--primary));
+    color: #fff;
+}
+
+/* Animations */
+.animate-cdp {
+    animation: cdpFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.cdp-down {
+    transform-origin: top center;
+}
+
+.cdp-up {
+    transform-origin: bottom center;
+}
+
+@keyframes cdpFadeIn {
+    from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}

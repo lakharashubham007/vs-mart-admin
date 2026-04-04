@@ -1,0 +1,1513 @@
+/* Premium Product Management Styles */
+
+.category-page-container {
+    padding: 0.2rem;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Header Section - Harmonized with ListCategory */
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid hsl(var(--border));
+}
+
+.product-header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    margin-bottom: 0.25rem;
+}
+
+.product-header p {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Card Structure - Role Level */
+.category-content-pane {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Glass Cards - Sync with Category */
+.category-glass-card {
+    background: hsl(var(--card) / 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--border) / 0.3);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.category-glass-card:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    background: hsl(var(--card) / 0.5);
+}
+
+/* Product Search/Filter Bar (Mirrored from Category) */
+.category-filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.category-search-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 250px;
+}
+
+.category-search-wrapper svg {
+    position: absolute;
+    left: 1rem;
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+}
+
+.category-search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.8rem;
+    background: hsl(var(--secondary) / 0.3);
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: var(--radius);
+    color: hsl(var(--foreground));
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.category-search-input:focus {
+    outline: none;
+    background: hsl(var(--card));
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
+}
+
+.category-filter-group {
+    min-width: 140px;
+    flex: 1;
+    max-width: 200px;
+}
+
+/* Make CustomSelect match the standard secondary-button height in ListCategory */
+.category-filter-group .custom-select-trigger {
+    padding: 0.65rem 1rem !important;
+    min-height: 42px !important;
+    background: transparent !important;
+    border: 1px solid hsl(var(--border) / 0.5) !important;
+    color: hsl(var(--foreground)) !important;
+    font-size: 0.95rem !important;
+}
+
+.category-filter-group .selected-text,
+.category-filter-group .placeholder-text {
+    font-size: 0.9rem !important;
+}
+
+/* Product Table Structure */
+.category-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border) / 0.3);
+}
+
+.category-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.category-table th {
+    background: hsl(var(--secondary) / 0.5);
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(var(--muted-foreground));
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.category-table td {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.2);
+    font-size: 0.9rem;
+    color: hsl(var(--foreground));
+}
+
+.category-table tr:hover {
+    background: hsl(var(--primary) / 0.03);
+}
+
+.product-input:focus,
+.product-select:focus {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
+}
+
+.product-textarea {
+    min-height: 120px;
+    resize: none;
+}
+
+/* Quick Add Button Aesthetic */
+.quick-add-link {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-add-link:hover {
+    background: hsl(var(--primary));
+    color: white;
+}
+
+/* Buttons */
+.action-footer {
+    padding: 2rem 2.5rem;
+    background: hsl(var(--secondary) / 0.1);
+    border-top: 1px solid hsl(var(--border) / 0.1);
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-premium-outline {
+    padding: 0.875rem 2rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    border: 1px solid hsl(var(--border));
+    background: transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-premium-outline:hover {
+    background: hsl(var(--secondary) / 0.3);
+}
+
+.btn-premium-primary {
+    padding: 0.875rem 2.5rem;
+    border-radius: 1rem;
+    font-weight: 800;
+    background: hsl(var(--primary));
+    color: white;
+    border: none;
+    box-shadow: 0 8px 20px -6px hsl(var(--primary) / 0.5);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.btn-premium-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -8px hsl(var(--primary) / 0.6);
+}
+
+/* Form Layout Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.product-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.product-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(var(--muted-foreground));
+}
+
+/* ─── Add New chip button (used in AddProduct beside Category label) ─── */
+.add-new-chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 3px;
+    background: #ffffff;
+    border: 1px solid #6ee7b7;
+    border-radius: 999px;
+    color: #059669;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.add-new-chip-btn:hover {
+    background: #d1fae5;
+    border-color: #34d399;
+    color: #065f46;
+    box-shadow: 0 4px 16px -4px rgba(52, 211, 153, 0.45);
+    transform: translateY(-1px);
+}
+
+.add-new-chip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #a7f3d0;
+    color: #059669;
+    flex-shrink: 0;
+    transition: background 0.4s ease, color 0.4s ease;
+}
+
+.add-new-chip-btn:hover .add-new-chip-icon {
+    background: #34d399;
+    color: #ffffff;
+}
+
+.product-input,
+.product-select {
+    padding: 0.8rem 1.2rem;
+    background: hsl(var(--secondary) / 0.2);
+    border: 1px solid hsl(var(--border) / 0.4);
+    border-radius: 0.8rem;
+    font-size: 0.95rem;
+    color: hsl(var(--foreground));
+    transition: all 0.2s;
+}
+
+.product-input:focus,
+.product-select:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    background: hsl(var(--card));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
+}
+
+.product-textarea {
+    min-height: 120px;
+    resize: none;
+}
+
+/* Tab Navbar (Add Product Page) */
+.product-tab-navbar {
+    display: flex;
+    background: hsl(var(--card) / 0.3);
+    border-radius: 1rem;
+    padding: 0.4rem;
+    border: 1px solid hsl(var(--border) / 0.3);
+    width: 100%;
+}
+
+.tab-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-nav-item:hover {
+    color: hsl(var(--foreground));
+}
+
+.tab-nav-item.active {
+    background: hsl(var(--card));
+    color: hsl(var(--primary));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Table Styles - Premium List */
+.premium-table-container {
+    margin-top: 2rem;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.75rem;
+}
+
+.premium-table th {
+    padding: 1.25rem 1.5rem;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-foreground));
+    text-align: left;
+    border-bottom: 2px solid hsl(var(--secondary));
+}
+
+.premium-table tr {
+    background: hsl(var(--card) / 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-table tr:hover {
+    background: hsl(var(--card));
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+}
+
+.premium-table td {
+    padding: 1.5rem;
+}
+
+.premium-table tr td:first-child {
+    border-radius: 1.5rem 0 0 1.5rem;
+}
+
+.premium-table tr td:last-child {
+    border-radius: 0 1rem 1rem 0;
+}
+
+/* Enterprise Compact Modifiers (Now Advanced Detailed) */
+.compact-enterprise-row td {
+    padding: 1rem 1.25rem !important;
+    vertical-align: middle;
+}
+
+.compact-enterprise-row:hover {
+    background: hsl(var(--primary) / 0.04) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.status-line {
+    width: 3px;
+    height: 24px;
+    border-radius: 10px;
+    margin-right: 0.25rem;
+}
+
+.premium-table thead th {
+    padding: 1rem !important;
+    border-bottom: 1px solid hsl(var(--border) / 0.1) !important;
+    background: hsl(var(--secondary) / 0.05);
+}
+
+/* Stock Intensity */
+.stock-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.stock-high {
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+}
+
+.stock-mid {
+    background: #eab3081a;
+    color: #eab308;
+}
+
+.stock-low {
+    background: #ef44441a;
+    color: #ef4444;
+}
+
+/* Image Upload Enhancements */
+.image-upload-zone {
+    transition: all 0.4s;
+    background: linear-gradient(135deg, hsl(var(--secondary) / 0.1) 0%, hsl(var(--secondary) / 0.05) 100%);
+}
+
+.image-upload-zone:hover {
+    border-color: hsl(var(--primary));
+    transform: scale(1.01);
+}
+
+/* Premium Variant List (Industry Standard UI) */
+.premium-variant-row {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr 1.5fr 1fr 1fr 0.5fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.4);
+    border-radius: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-variant-row:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+}
+
+.premium-variant-header {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr 1.5fr 1fr 1fr 0.5fr;
+    gap: 1rem;
+    padding: 0.5rem 1.25rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    letter-spacing: 0.05em;
+    border-bottom: 1px dashed hsl(var(--border) / 0.3);
+    margin-bottom: 1rem;
+}
+
+.variant-badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.variant-attr-badge {
+    background: hsl(var(--secondary) / 0.5);
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid hsl(var(--border) / 0.3);
+    color: hsl(var(--foreground));
+}
+
+.variant-attr-badge span {
+    color: hsl(var(--muted-foreground));
+    margin-right: 0.3rem;
+    font-weight: 600;
+}
+
+/* Product Type Selection Cards */
+.type-selection-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.type-selection-card {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 2rem;
+    border: 1px solid hsl(var(--border) / 0.5);
+    background: hsl(var(--card) / 0.4);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    width: fit-content;
+    flex-shrink: 0;
+}
+
+.type-selection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.type-selection-card:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    background: hsl(var(--card));
+}
+
+.type-selection-card:hover::before {
+    opacity: 1;
+}
+
+.type-selection-card.active {
+    background: hsl(var(--card));
+    border-color: hsl(var(--primary));
+    box-shadow: 0 4px 15px -4px hsl(var(--primary) / 0.15);
+}
+
+.type-selection-card.active::before {
+    opacity: 1;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, transparent 100%);
+}
+
+.type-selection-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: hsl(var(--secondary) / 0.5);
+    color: hsl(var(--muted-foreground));
+    transition: all 0.3s;
+    z-index: 1;
+}
+
+.type-selection-card.active .type-selection-icon {
+    background: hsl(var(--primary));
+    color: white;
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.3);
+}
+
+.type-selection-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    z-index: 1;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+}
+
+/* ─── Variant Builder (VB) Styles ─────────────────────────────────────────── */
+
+:root {
+    --vb-grid-cols: minmax(140px, 1.8fr) minmax(130px, 1.5fr) 1fr 1fr 1fr minmax(100px, 1.2fr) 1fr 1fr 40px;
+}
+
+.variant-builder-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.vb-step-card {
+    background: hsl(var(--card) / 0.3);
+    border: 1px solid hsl(var(--border) / 0.2);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.vb-step-header {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.vb-step-number {
+    width: 28px;
+    height: 28px;
+    background: hsl(var(--primary));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px hsl(var(--primary) / 0.3);
+}
+
+.vb-step-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: hsl(var(--foreground));
+}
+
+.vb-step-desc {
+    font-size: 0.8rem;
+    color: hsl(var(--muted-foreground));
+    margin-top: 0.2rem;
+}
+
+/* Attribute Selection */
+.attr-type-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--border) / 0.3);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.attr-type-toggle:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    background: hsl(var(--secondary) / 0.3);
+}
+
+.attr-type-toggle.active {
+    background: hsl(var(--primary));
+    color: white;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.2);
+}
+
+.attr-values-panel {
+    background: hsl(var(--background) / 0.5);
+    border: 1px solid hsl(var(--border) / 0.1);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    margin-top: 1rem;
+}
+
+.attr-values-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+}
+
+.attr-values-name {
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(var(--primary));
+}
+
+.attr-select-all-btn {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.attr-remove-btn {
+    background: hsl(var(--destructive) / 0.1);
+    color: hsl(var(--destructive));
+    border: 1px solid hsl(var(--destructive) / 0.2);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+}
+
+.attr-remove-btn:hover {
+    background: hsl(var(--destructive));
+    color: white;
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.attr-value-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--border) / 0.2);
+    border-radius: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.attr-value-chip:hover {
+    background: hsl(var(--secondary) / 0.5);
+}
+
+.attr-value-chip.selected {
+    background: hsl(var(--primary) / 0.08);
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary));
+}
+
+/* Generation Panel */
+.combo-preview {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+}
+
+.combo-count {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: hsl(var(--primary));
+    margin-right: 0.3rem;
+}
+
+.vb-generate-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.5rem;
+    background: hsl(var(--primary));
+    color: white;
+    border: none;
+    border-radius: 0.875rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 16px -4px hsl(var(--primary) / 0.4);
+}
+
+.vb-generate-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -6px hsl(var(--primary) / 0.5);
+}
+
+.vb-generate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Variant Matrix Table */
+.vb-table-container {
+    width: 100%;
+    overflow-x: auto;
+    position: relative;
+    border-radius: 1.25rem;
+    border: 1px solid hsl(var(--border) / 0.1);
+    background: hsl(var(--background));
+}
+
+.vb-table-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: hsl(var(--primary) / 0.03);
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+}
+
+.vb-table-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: hsl(var(--foreground));
+}
+
+.vb-table-subtitle {
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    margin-top: 0.1rem;
+}
+
+.vb-bulk-bar {
+    padding: 1rem 1.5rem;
+    background: hsl(var(--background));
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.vb-bulk-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+    white-space: nowrap;
+}
+
+.vb-bulk-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    flex: 1;
+}
+
+.vb-bulk-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.vb-bulk-field-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+}
+
+.vb-bulk-input {
+    padding: 0.5rem 0.875rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 0.75rem !important;
+    width: 110px !important;
+    background: hsl(var(--secondary) / 0.3) !important;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.vb-bulk-input:focus {
+    background: hsl(var(--background)) !important;
+    border-color: hsl(var(--primary)) !important;
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1) !important;
+}
+
+.vb-apply-btn {
+    padding: 0.6rem 1.25rem;
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-end;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.vb-apply-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.vb-col-header {
+    background: hsl(var(--secondary) / 0.15);
+    padding: 1rem 1.75rem;
+    font-size: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    letter-spacing: 0.1em;
+    display: grid;
+    grid-template-columns: var(--vb-grid-cols);
+    gap: 0;
+    align-items: center;
+    border-bottom: 2px solid hsl(var(--border) / 0.15);
+    min-width: fit-content;
+    white-space: nowrap;
+}
+
+.vb-col-header>div {
+    padding: 0 0.75rem;
+    border-right: 1px solid hsl(var(--border) / 0.1);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Align Headers for 13-column layout */
+.vb-col-header>div:nth-child(3), /* MRP */
+.vb-col-header>div:nth-child(5), /* Discount */
+.vb-col-header>div:nth-child(6), /* Sell Price */
+.vb-col-header>div:nth-child(7), /* Final Price */
+.vb-col-header>div:nth-child(8), /* Cost Price */
+.vb-col-header>div:nth-child(10), /* Stock */
+.vb-col-header>div:nth-child(11) { /* Min Stock */
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.vb-col-header>div:nth-child(4), /* Disc Type */
+.vb-col-header>div:nth-child(9), /* Tax */
+.vb-col-header>div:nth-child(12), /* Edit icon header */
+.vb-col-header>div:nth-child(13) { /* Delete icon header */
+    justify-content: center;
+    text-align: center;
+}
+
+.vb-col-header>div:last-child {
+    border-right: none;
+}
+
+.vb-variant-row {
+    display: grid;
+    grid-template-columns: var(--vb-grid-cols);
+    gap: 0;
+    align-items: stretch;
+    padding: 0 1.75rem;
+    border-bottom: 1px solid hsl(var(--border) / 0.08);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: fit-content;
+    white-space: nowrap;
+    cursor: pointer; /* Whole row is clickable */
+}
+
+.vb-variant-row:nth-child(odd) {
+    background: hsl(var(--background));
+}
+
+.vb-variant-row:nth-child(even) {
+    background: hsl(var(--secondary) / 0.15);
+}
+
+.vb-variant-row>div {
+    padding: 0.75rem;
+    border-right: 1px solid hsl(var(--border) / 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Align Row Cells for 13-column layout */
+.vb-variant-row>div:nth-child(3), /* MRP */
+.vb-variant-row>div:nth-child(5), /* Discount */
+.vb-variant-row>div:nth-child(6), /* Sell Price */
+.vb-variant-row>div:nth-child(7), /* Final Price */
+.vb-variant-row>div:nth-child(8), /* Cost Price */
+.vb-variant-row>div:nth-child(10), /* Stock */
+.vb-variant-row>div:nth-child(11) { /* Min Stock */
+    justify-content: flex-end;
+}
+
+.vb-variant-row>div:nth-child(4), /* Disc Type */
+.vb-variant-row>div:nth-child(9), /* Tax */
+.vb-variant-row>div:nth-child(12), /* Edit */
+.vb-variant-row>div:nth-child(13) { /* Delete */
+    justify-content: center;
+}
+
+.vb-variant-row>div:last-child {
+    border-right: none;
+}
+
+.vb-variant-row:hover {
+    background: hsl(var(--primary) / 0.08) !important;
+    z-index: 10;
+    box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.1);
+}
+
+.vb-badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.vb-attr-badge {
+    padding: 0.25rem 0.5rem;
+    background: hsl(var(--primary) / 0.05);
+    border: 1px solid hsl(var(--primary) / 0.1);
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: hsl(var(--primary));
+}
+
+.vb-badge-type {
+    color: hsl(var(--muted-foreground));
+    margin-right: 0.25rem;
+    font-weight: 600;
+}
+
+.vb-row-input {
+    padding: 0.5rem 0.65rem !important;
+    font-size: 0.825rem !important;
+    border-radius: 0.6rem !important;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    background: hsl(var(--background) / 0.4) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-weight: 600 !important;
+    width: 100%;
+    height: 34px !important;
+    box-sizing: border-box !important;
+}
+
+.vb-row-input:focus {
+    background: hsl(var(--background)) !important;
+    border-color: hsl(var(--primary)) !important;
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1) !important;
+    transform: scale(1.02);
+}
+
+.vb-row-input[type="number"] {
+    font-family: 'Inter', system-ui, sans-serif;
+    text-align: right;
+}
+
+.vb-icon-btn {
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--border) / 0.2);
+    padding: 0.4rem;
+    border-radius: 0.4rem;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.vb-icon-btn:hover {
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.3);
+    background: hsl(var(--primary) / 0.05);
+}
+
+.vb-delete-btn {
+    background: transparent;
+    border: none;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vb-delete-btn:hover {
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+/* Compact Toolbar Enhancements */
+.vb-compact-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: hsl(var(--primary) / 0.05);
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+}
+
+.vb-toolbar-status {
+    flex-shrink: 0;
+    padding-right: 1.5rem;
+    border-right: 1px dashed hsl(var(--border) / 0.2);
+}
+
+.vb-bulk-bar {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    flex: 1;
+}
+
+.vb-bulk-fields {
+    align-items: flex-end !important;
+    gap: 0.75rem !important;
+}
+
+.vb-bulk-input {
+    width: 90px !important;
+    height: 32px !important;
+    padding: 0 0.6rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 0.5rem !important;
+}
+
+.vb-apply-btn {
+    height: 32px;
+    padding: 0 1rem;
+    font-size: 0.7rem;
+    background: hsl(var(--primary));
+    box-shadow: 0 4px 10px hsl(var(--primary) / 0.2);
+}
+
+@media (max-width: 1200px) {
+    .vb-compact-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .vb-toolbar-status {
+        border-right: none;
+        padding-right: 0;
+    }
+}
+
+/* ─── Enterprise Compact List UI ─────────────────────────────────────────── */
+
+.compact-enterprise-row {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border-bottom: 1px solid hsl(var(--border) / 0.05);
+}
+
+.compact-enterprise-row:hover {
+    background: hsl(var(--primary) / 0.04) !important;
+}
+
+.compact-enterprise-row td {
+    padding: 0.6rem 1rem !important;
+    vertical-align: middle;
+}
+
+.status-line {
+    width: 3px;
+    height: 18px;
+    border-radius: 10px;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* Advanced Typography for Compact Views */
+.premium-table thead th {
+    background: hsl(var(--secondary) / 0.08);
+    padding: 0.75rem 1rem !important;
+    font-size: 0.65rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: hsl(var(--muted-foreground));
+    border-bottom: 1px solid hsl(var(--border) / 0.1) !important;
+}
+
+.compact-enterprise-row .font-bold {
+    font-size: 0.8rem;
+    letter-spacing: -0.01em;
+}
+
+.compact-enterprise-row .text-muted-foreground {
+    font-size: 0.65rem;
+}
+
+/* Compact Progress Indicators */
+.inventory-track-lite {
+    width: 60px;
+    height: 3px;
+    background: hsl(var(--secondary) / 0.2);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/* Animation for Smooth Transitions */
+.animate-scale-in {
+    animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- Variant Expandable Rows Styles --- */
+
+.variant-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 4px;
+    padding: 0.2rem;
+    cursor: pointer;
+    color: hsl(var(--muted-foreground));
+    transition: all 0.2s ease;
+    margin-left: 0.5rem;
+}
+
+.variant-expand-btn:hover {
+    background: hsl(var(--secondary) / 0.5);
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--border));
+}
+
+.variant-subrow-content {
+    background: hsl(var(--secondary) / 0.15);
+    padding: 1rem 1.5rem 1.5rem 4.5rem;
+    /* Indented past S.No */
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+    animation: fadeInDown 0.2s ease-out forwards;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.variant-matrix-subtable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--border) / 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.variant-matrix-subtable th {
+    background: hsl(var(--secondary) / 0.4);
+    padding: 0.6rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+    text-align: left;
+    border-bottom: 1px solid hsl(var(--border) / 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.variant-matrix-subtable td {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: hsl(var(--foreground));
+    border-bottom: 1px solid hsl(var(--border) / 0.1);
+}
+
+.variant-matrix-subtable tr:last-child td {
+    border-bottom: none;
+}
+
+.variant-matrix-subtable tr:hover td {
+    background-color: hsl(var(--secondary) / 0.2);
+}
+
+.textxs {
+    font-size: 0.7rem;
+}
+
+/* Mobile Responsiveness for Form Elements */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vb-step-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    /* Stack Variant Builder Rows on Mobile */
+    .premium-variant-row,
+    .premium-variant-header {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .premium-variant-header {
+        display: none;
+        /* Hide header on mobile, row labels handle it */
+    }
+
+    .premium-variant-row {
+        padding: 1rem;
+        position: relative;
+    }
+
+    /* Provide context assuming inputs are clear, or labels exist */
+    .action-footer {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .btn-premium-primary,
+    .btn-premium-outline {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Product Tab Navbar Mobile */
+    .product-tab-navbar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.25rem;
+        padding: 0.25rem;
+    }
+
+    .tab-nav-item {
+        padding: 0.6rem 0.25rem;
+        font-size: 0.7rem;
+        flex-direction: column;
+        gap: 0.25rem;
+        text-align: center;
+    }
+
+    .tab-nav-item svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Type Selection Wrap */
+    .type-selection-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .type-selection-card {
+        flex: 1;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    /* Variant Matrix Card Layout */
+    .vb-col-header {
+        display: none;
+    }
+
+    .vb-variant-row {
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 1rem;
+        border-radius: 1.25rem;
+        margin-bottom: 1rem;
+        background: hsl(var(--card));
+        border: 1px solid hsl(var(--border) / 0.5);
+    }
+
+    .vb-variant-row>div {
+        display: grid !important;
+        grid-template-columns: 120px 1fr;
+        padding: 0 !important;
+        border: none !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        align-items: center;
+    }
+
+    .vb-variant-row>div::before {
+        content: attr(data-label);
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: hsl(var(--muted-foreground));
+        opacity: 0.7;
+    }
+
+    .vb-row-input {
+        max-width: 100%;
+        text-align: left !important;
+    }
+
+    /* Step Card Mobile Padding */
+    .vb-step-card {
+        padding: 1rem;
+    }
+
+    .vb-step-header {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .vb-step-title {
+        font-size: 0.9rem;
+    }
+}
+
+/* Variant QR Thumbnail */
+.variant-qr-thumb {
+    width: 36px;
+    height: 36px;
+    background: white;
+    border: 1px solid hsl(var(--border) / 0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 2px;
+}
+
+.variant-qr-thumb:hover {
+    border-color: hsl(var(--primary));
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.variant-qr-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Custom Dropdowns for Variant Matrix */
+.vb-custom-select {
+    position: relative;
+    width: 100%;
+}
+
+.vb-custom-select select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100% !important;
+    background: transparent !important;
+    padding-right: 20px !important;
+    border: none !important;
+    outline: none !important;
+    cursor: pointer;
+    font-size: inherit;
+    color: inherit;
+    font-weight: inherit;
+}
+
+.vb-custom-select .vb-chevron {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.vb-variant-row .vb-row-input {
+    border: 1px solid transparent !important;
+    background: transparent !important;
+}
+
+.vb-variant-row .vb-row-input:hover,
+.vb-variant-row .vb-row-input:focus {
+    background: hsl(var(--secondary) / 0.1) !important;
+    border-color: hsl(var(--primary) / 0.2) !important;
+}

@@ -1,0 +1,143 @@
+.dexterdigi-loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.dexterdigi-loader-content {
+    background: hsl(var(--card));
+    padding: 2.5rem 4rem;
+    border-radius: 24px;
+    border: 1px solid hsl(var(--primary) / 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px hsl(var(--primary) / 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.basket-icon-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: hsl(var(--primary) / 0.1);
+    border-radius: 50%;
+}
+
+.basket-icon {
+    color: hsl(var(--primary));
+    z-index: 2;
+    animation: basketBounce 2s infinite ease-in-out;
+}
+
+.basket-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: hsl(var(--primary));
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: iconPulse 2s infinite ease-out;
+}
+
+.loader-text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.loader-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, hsl(var(--primary)), #e0c3fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+
+.loader-message {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.95rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.loading-bar-container {
+    width: 100%;
+    height: 4px;
+    background: hsl(var(--secondary));
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.loading-bar-progress {
+    height: 100%;
+    width: 40%;
+    background: hsl(var(--primary));
+    border-radius: 2px;
+    animation: loadingBarMove 1.5s infinite ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes basketBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes iconPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes loadingBarMove {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(250%);
+    }
+}

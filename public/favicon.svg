@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#065F46"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="64" height="64" rx="14" ry="14" fill="url(#g)"/>
+  <!-- VS text -->
+  <text x="32" y="34" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+    font-size="26" fill="white" text-anchor="middle" dominant-baseline="middle"
+    letter-spacing="-1">VS</text>
+  <!-- MART text -->
+  <text x="32" y="52" font-family="Arial, sans-serif" font-weight="700"
+    font-size="10" fill="rgba(255,255,255,0.9)" text-anchor="middle"
+    letter-spacing="2">MART</text>
+</svg>

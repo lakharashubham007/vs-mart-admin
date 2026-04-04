@@ -1,0 +1,183 @@
+/* Inheriting most styles from Banner.css but with Offer specific tweaks */
+
+.offer-page-container {
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.offer-glass-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.offer-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 1rem;
+    background: hsl(var(--secondary) / 0.5);
+    border-radius: 8px;
+    height: 44px;
+}
+
+.offer-search-wrapper input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.offer-table-wrapper {
+    background: hsl(var(--card));
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.offer-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.offer-table th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    background: hsl(var(--secondary) / 0.3);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.offer-row {
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+}
+
+.offer-row td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+}
+
+.offer-cell-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.offer-img-preview {
+    width: 120px;
+    aspect-ratio: 16 / 6;
+    border-radius: 6px;
+    overflow: hidden;
+    background: hsl(var(--secondary));
+    border: 1px solid hsl(var(--border) / 0.5);
+    flex-shrink: 0;
+}
+
+.offer-img-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.offer-title-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.offer-discount-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+/* Form Layout matching Banner */
+.offer-form-view {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.offer-form-flex {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+}
+
+.offer-inputs-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.offer-preview-column {
+    width: 450px;
+    position: sticky;
+    top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.offer-upload-zone {
+    border: 2px dashed hsl(var(--border) / 0.8);
+    border-radius: 16px;
+    width: 100%;
+    aspect-ratio: 16 / 6;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: hsl(var(--secondary) / 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.offer-upload-zone.has-image {
+    padding: 0;
+    border-style: solid;
+}
+
+.offer-input-fancy {
+    width: 100%;
+    height: 52px;
+    padding: 0 1.5rem;
+    background: hsl(var(--secondary) / 0.4);
+    border: 1.5px solid hsl(var(--border) / 0.8);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: hsl(var(--foreground));
+    transition: all 0.3s;
+}
+
+.offer-input-fancy:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    background: hsl(var(--card));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.15);
+}
+
+.discount-inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.offer-action-btns {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
