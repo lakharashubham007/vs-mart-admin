@@ -8,8 +8,6 @@ import Loader from '../../components/Loader';
 import QuickCreateModal from '../../components/QuickCreateModal';
 import './Category.css';
 
-import { BASE_IMAGE_URL } from '../../config/env';
-
 const ListCategory = () => {
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +18,8 @@ const ListCategory = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editSelectedItem, setEditSelectedItem] = useState(null);
     const navigate = useNavigate();
+
+    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     useEffect(() => {
         fetchCategories();
@@ -210,7 +210,7 @@ const ListCategory = () => {
                                         <div className="category-cell-name">
                                             <div className="category-img-box">
                                                 {cat.image ? (
-                                                    <img src={`${BASE_IMAGE_URL}/${cat.image}`} alt="" />
+                                                    <img src={`${API_BASE_URL}/${cat.image}`} alt="" />
                                                 ) : (
                                                     <LayoutGrid size={20} className="text-muted-foreground" />
                                                 )}

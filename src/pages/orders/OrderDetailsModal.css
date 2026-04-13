@@ -177,6 +177,18 @@
 .item-name { font-weight: 700; font-size: 0.875rem; }
 .item-meta { font-size: 0.72rem; color: hsl(var(--muted-foreground)); }
 
+.original-mrp {
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.final-price {
+    font-weight: 700;
+    color: hsl(var(--primary));
+}
+
 /* ── Price Summary ───────────────────────────────────────────────────── */
 .price-summary {
     background: hsl(var(--secondary) / 0.15);
@@ -232,6 +244,85 @@
 }
 
 /* ── Animations ──────────────────────────────────────────────────────── */
+/* Premium Loading Overlay */
+.updating-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1000;
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    border-radius: inherit;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.loader-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.premium-spinner {
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-top-color: hsl(var(--primary));
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.premium-spinner::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 3px solid transparent;
+    border-top-color: hsl(var(--primary) / 0.4);
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+}
+
+.loader-text {
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loader-subtext {
+    font-size: 0.85rem;
+    color: hsl(var(--muted-foreground));
+    margin-top: -1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.98); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 @keyframes overlayFadeIn {
     from { opacity: 0; backdrop-filter: blur(0px); }
     to   { opacity: 1; backdrop-filter: blur(8px); }

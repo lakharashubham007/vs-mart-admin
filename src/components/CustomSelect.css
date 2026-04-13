@@ -40,6 +40,14 @@
     box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
 }
 
+.custom-select-trigger.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: hsl(var(--secondary) / 0.3);
+    border-color: hsl(var(--border) / 0.3);
+    pointer-events: none;
+}
+
 .custom-select-trigger-content {
     flex: 1;
     display: flex;

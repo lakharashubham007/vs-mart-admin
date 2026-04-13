@@ -11,7 +11,6 @@ import Swal from 'sweetalert2';
 import productService from '../../services/productService';
 import Loader from '../../components/Loader';
 import CustomSelect from '../../components/CustomSelect';
-import { BASE_IMAGE_URL } from '../../config/env';
 import '../category/Category.css';
 import './Product.css';
 
@@ -139,9 +138,9 @@ const ListProducts = () => {
 
     const getPriceRange = (product) => {
         if (product.productType === 'Single') {
-            return `RS${product.pricing?.sellingPrice || 0}`;
+            return `RS${product.pricing?.finalSellingPrice || product.pricing?.sellingPrice || 0}`;
         } else {
-            const prices = (product.variants || []).map(v => v.pricing?.sellingPrice).filter(p => p !== undefined && !isNaN(p));
+            const prices = (product.variants || []).map(v => v.pricing?.finalSellingPrice || v.pricing?.sellingPrice).filter(p => p !== undefined && !isNaN(p));
             if (prices.length === 0) return 'N/A';
             const min = Math.min(...prices);
             const max = Math.max(...prices);
@@ -332,7 +331,7 @@ const ListProducts = () => {
                                                         title="View Image Gallery"
                                                     >
                                                         {product.images?.thumbnail ? (
-                                                            <img src={`${BASE_IMAGE_URL}/${product.images.thumbnail}`} alt="" />
+                                                            <img src={`http://localhost:5000/${product.images.thumbnail}`} alt="" />
                                                         ) : (
                                                             <Package size={20} className="text-muted-foreground" />
                                                         )}
@@ -392,8 +391,8 @@ const ListProducts = () => {
                                                             className="action-btn"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                setSelectedQrCode(product.qrCode ? `${BASE_IMAGE_URL}${product.qrCode}` : '');
-                                                                setSelectedBarcode(product.barcode ? `${BASE_IMAGE_URL}${product.barcode}` : '');
+                                                                setSelectedQrCode(product.qrCode ? `http://localhost:5000${product.qrCode}` : '');
+                                                                setSelectedBarcode(product.barcode ? `http://localhost:5000${product.barcode}` : '');
                                                                 setSelectedQrTitle(`${product.name}`);
                                                                 setModalType('QR');
                                                                 setQrModalOpen(true);
@@ -436,8 +435,8 @@ const ListProducts = () => {
                                                                                 className="variant-qr-thumb"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
-                                                                                    setSelectedQrCode(v.qrCode ? `${BASE_IMAGE_URL}${v.qrCode}` : '');
-                                                                                    setSelectedBarcode(v.barcode ? `${BASE_IMAGE_URL}${v.barcode}` : '');
+                                                                                    setSelectedQrCode(v.qrCode ? `http://localhost:5000${v.qrCode}` : '');
+                                                                                    setSelectedBarcode(v.barcode ? `http://localhost:5000${v.barcode}` : '');
                                                                                     const attrText = v.attributes?.map(attr => attr.valueName || attr.valueId?.name || attr.valueId?.valueName || attr.valueId?.value).join(' / ') || 'Variant';
                                                                                     setSelectedQrTitle(`${attrText}`);
                                                                                     setModalType('QR');
@@ -453,7 +452,7 @@ const ListProducts = () => {
                                                                         </td>
                                                                         <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>{v.sku}</td>
                                                                         <td style={{ textAlign: 'right' }}>
-                                                                            <span style={{ fontWeight: '600' }}>RS{v.pricing?.sellingPrice}</span> <span style={{ textDecoration: 'line-through', color: 'hsl(var(--muted-foreground) / 0.5)', fontSize: '0.75rem', marginLeft: '0.2rem' }}>RS{v.pricing?.mrp}</span>
+                                                                            <span style={{ fontWeight: '600' }}>RS{v.pricing?.finalSellingPrice || v.pricing?.sellingPrice}</span> <span style={{ textDecoration: 'line-through', color: 'hsl(var(--muted-foreground) / 0.5)', fontSize: '0.75rem', marginLeft: '0.2rem' }}>RS{v.pricing?.mrp}</span>
                                                                         </td>
                                                                         <td style={{ textAlign: 'right', paddingRight: '1.5rem' }}>
                                                                             <span className={`px-2 py-0.5 rounded textxs font-bold ${v.inventory?.quantity > (v.inventory?.minStock || 5) ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'}`}>
@@ -473,11 +472,29 @@ const ListProducts = () => {
                             }) : (
                                 <tr>
                                     <td colSpan="8" className="text-center py-24">
-                                        <div className="flex flex-col items-center gap-6 opacity-20">
-                                            <Package size={80} strokeWidth={1} />
+                                        <div className="flex flex-col items-center gap-6">
+                                            <div style={{ opacity: 0.15 }}>
+                                                <Package size={80} strokeWidth={1} />
+                                            </div>
                                             <div className="text-center">
-                                                <h3 className="text-2xl font-black">CATALOG EMPTY</h3>
-                                                <p className="text-sm">Initiate your first product to begin tracking.</p>
+                                                <h3 className="text-2xl font-black" style={{ letterSpacing: '0.1em', color: 'hsl(var(--foreground))' }}>
+                                                    {filters.categoryId ? 'NO PRODUCTS IN CATEGORY' : 
+                                                     filters.search ? 'NO MATCHING PRODUCTS' : 'CATALOG EMPTY'}
+                                                </h3>
+                                                <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))', marginTop: '4px' }}>
+                                                    {filters.categoryId ? 'We couldn\'t find any active listings in the selected category.' :
+                                                     filters.search ? `No results found for "${filters.search}". Try different keywords.` :
+                                                     'Initiate your first product to begin tracking your global assets.'}
+                                                </p>
+                                                {(filters.categoryId || filters.search || filters.brandId || filters.productType || filters.status) && (
+                                                    <button 
+                                                        className="secondary-button" 
+                                                        style={{ marginTop: '1.5rem' }}
+                                                        onClick={() => setFilters({ search: '', categoryId: '', brandId: '', productType: '', status: '' })}
+                                                    >
+                                                        Clear All Filters
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </td>
@@ -610,7 +627,7 @@ const ListProducts = () => {
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--foreground))' }}>Primary Thumbnail</span>
                                             </div>
                                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`http://localhost:5000/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         </div>
                                     )}
@@ -627,7 +644,7 @@ const ListProducts = () => {
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))' }}>Gallery Image {idx + 1}</span>
                                             </div>
                                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${img}`} alt={`Gallery ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`http://localhost:5000/${img}`} alt={`Gallery ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         </div>
                                     ))}
@@ -669,7 +686,7 @@ const ListProducts = () => {
                                                     filter: selectedDisplayImage === selectedProductForGallery.images.thumbnail ? 'none' : 'grayscale(40%)'
                                                 }}
                                             >
-                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail View" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`http://localhost:5000/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail View" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         )}
 
@@ -699,7 +716,7 @@ const ListProducts = () => {
                                                     filter: selectedDisplayImage === img ? 'none' : 'grayscale(40%)'
                                                 }}
                                             >
-                                                <img draggable="false" src={`${BASE_IMAGE_URL}/${img}`} alt={`Gallery View ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={`http://localhost:5000/${img}`} alt={`Gallery View ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         ))}
                                     </div>

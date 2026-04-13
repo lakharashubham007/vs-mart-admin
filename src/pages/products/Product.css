@@ -29,14 +29,42 @@
     margin: 0;
 }
 
-/* Card Structure - Role Level */
-.category-content-pane {
+/* Card Structure - Sync with Employee */
+.product-content-pane {
     background: hsl(var(--card) / 0.6);
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     padding: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.product-glass-card {
+    background: hsl(var(--card) / 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.6);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 1.25rem;
+}
+
+.product-btn-icon {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--background));
+    color: hsl(var(--muted-foreground));
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-btn-icon:hover {
+    background: hsl(var(--secondary));
+    border-color: hsl(var(--primary) / 0.4);
+    color: hsl(var(--foreground));
 }
 
 /* Glass Cards - Sync with Category */
@@ -602,7 +630,18 @@
 /* ─── Variant Builder (VB) Styles ─────────────────────────────────────────── */
 
 :root {
-    --vb-grid-cols: minmax(140px, 1.8fr) minmax(130px, 1.5fr) 1fr 1fr 1fr minmax(100px, 1.2fr) 1fr 1fr 40px;
+    --vb-grid-cols: minmax(150px, 1.2fr) minmax(130px, 1fr) minmax(70px, 0.8fr) minmax(55px, 0.75fr) minmax(65px, 0.8fr) minmax(80px, 1fr) minmax(90px, 1fr) minmax(90px, 1fr) minmax(110px, 1.1fr) minmax(75px, 0.8fr) minmax(70px, 0.8fr) 45px 45px;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.vb-row-input.read-only-input {
+    background: hsl(var(--secondary) / 0.1) !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+    border-color: transparent !important;
 }
 
 .variant-builder-section {
@@ -640,6 +679,33 @@
     font-weight: 800;
     flex-shrink: 0;
     box-shadow: 0 4px 10px hsl(var(--primary) / 0.3);
+}
+
+.vb-col-header div, .vb-variant-row div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.vb-col-header div.text-center, .vb-variant-row div.text-center {
+    justify-content: center;
+}
+
+/* Specific alignment for Variant and SKU to keep them tight */
+.vb-col-header div:nth-child(1), .vb-variant-row div:nth-child(1),
+.vb-col-header div:nth-child(2), .vb-variant-row div:nth-child(2) {
+    justify-content: flex-start !important;
+}
+
+.vb-col-header, .vb-variant-row {
+    display: grid;
+    grid-template-columns: var(--vb-grid-cols);
+    column-gap: 1.25rem; /* THIS PROVIDES THE EQUAL GAP */
+    width: 100%;
+    align-items: center;
 }
 
 .vb-step-title {
@@ -824,6 +890,22 @@
     border-bottom: 1px solid hsl(var(--border) / 0.1);
 }
 
+.vb-badge-type {
+    opacity: 0.6;
+    font-weight: 500;
+    margin-right: 2px;
+}
+
+.vb-small-select .custom-select-trigger {
+    padding: 2px 6px !important;
+    font-size: 0.7rem !important;
+    height: 28px !important;
+}
+
+.vb-small-select .custom-select-label {
+    font-size: 0.7rem !important;
+}
+
 .vb-table-title {
     font-size: 0.95rem;
     font-weight: 800;
@@ -915,7 +997,8 @@
 
 .vb-col-header {
     background: hsl(var(--secondary) / 0.15);
-    padding: 1rem 1.75rem;
+    padding: 0 1.75rem;
+    height: 44px;
     font-size: 0.75rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -932,7 +1015,6 @@
 
 .vb-col-header>div {
     padding: 0 0.75rem;
-    border-right: 1px solid hsl(var(--border) / 0.1);
     height: 100%;
     display: flex;
     align-items: center;
@@ -985,11 +1067,14 @@
 }
 
 .vb-variant-row>div {
-    padding: 0.75rem;
-    border-right: 1px solid hsl(var(--border) / 0.05);
+    padding: 0 0.75rem;
     display: flex;
+    min-height: 52px;
     align-items: center;
     justify-content: flex-start;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Align Row Cells for 13-column layout */
@@ -1510,4 +1595,21 @@
 .vb-variant-row .vb-row-input:focus {
     background: hsl(var(--secondary) / 0.1) !important;
     border-color: hsl(var(--primary) / 0.2) !important;
+}
+
+/* Compact Tax Dropdown */
+.vb-variant-row .custom-select-trigger {
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    height: 32px !important;
+    max-width: 130px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vb-variant-row .selected-text {
+    font-size: 0.7rem !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

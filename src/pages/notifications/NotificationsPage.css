@@ -230,6 +230,16 @@
     line-height: 1.4;
 }
 
+.notif-item-sender {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    color: hsl(var(--primary));
+    font-weight: 600;
+}
+
 .notif-dot {
     width: 7px; height: 7px;
     border-radius: 50%;

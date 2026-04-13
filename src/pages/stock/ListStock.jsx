@@ -33,7 +33,8 @@ const ListStock = () => {
             const data = await stockService.getStockInRecords({
                 ...filters,
                 page: pagination.page,
-                limit: pagination.limit
+                limit: pagination.limit,
+                aggregate: true // NEW: Request combined stock totals
             });
             setBatches(data.stockInRecords || []);
             setPagination(prev => ({
@@ -69,11 +70,11 @@ const ListStock = () => {
     };
 
     return (
-        <div className="stock-page-container fade-in">
-            <div className="stock-content-pane">
-                <header className="internal-page-header" style={{ padding: '0 0 1.5rem 0', borderBottom: '1px solid hsl(var(--border) / 0.1)' }}>
+        <div className="product-page-container fade-in">
+            <div className="product-content-pane">
+                <header className="internal-page-header" style={{ padding: '0 0 1.5rem 0' }}>
                     <div>
-                        <h1 style={{ fontSize: '1.5rem', marginBottom: '4px', fontWeight: 800 }}>Batch Repository</h1>
+                        <h1 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Batch Repository</h1>
                         <p style={{ margin: 0, color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>
                             Granular tracking of every incoming stock shipment and batch lifecycle.
                         </p>
@@ -90,224 +91,254 @@ const ListStock = () => {
                     </div>
                 </header>
 
-                <div className="stock-unified-card">
-                    {/* Integrated Filter Bar */}
-                    <div className="stock-card-filter-header">
-                        <div className="stock-search-box">
-                            <Search size={18} />
-                            <input
-                                type="text"
-                                placeholder="Search by Batch No (e.g. SUGAR-B1)..."
-                                className="stock-search-input"
-                                value={filters.search}
-                                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
-                            />
-                        </div>
-
-                        <div style={{ position: 'relative', marginLeft: 'auto' }}>
-                            <button
-                                className="secondary-button"
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem', background: 'hsl(var(--card))', height: '42px', minWidth: '110px' }}
-                                onClick={() => setIsRowsDropdownOpen(!isRowsDropdownOpen)}
-                            >
-                                <span style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>Rows:</span>
-                                <span style={{ fontWeight: '600' }}>{pagination.limit}</span>
-                                <ChevronDown size={14} className={isRowsDropdownOpen ? 'rotate-180' : ''} />
-                            </button>
-
-                            {isRowsDropdownOpen && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '100%',
-                                    right: 0,
-                                    marginTop: '0.5rem',
-                                    background: 'hsl(var(--card))',
-                                    border: '1px solid hsl(var(--border) / 0.5)',
-                                    borderRadius: '8px',
-                                    boxShadow: 'var(--shadow-premium)',
-                                    zIndex: 50,
-                                    minWidth: '120px',
-                                    overflow: 'hidden'
-                                }}>
-                                    {[10, 20, 50, 100].map(limit => (
-                                        <div
-                                            key={limit}
-                                            style={{
-                                                padding: '0.6rem 1rem',
-                                                cursor: 'pointer',
-                                                background: pagination.limit === limit ? 'hsl(var(--primary) / 0.1)' : 'transparent',
-                                                color: pagination.limit === limit ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
-                                                fontSize: '0.9rem',
-                                                fontWeight: pagination.limit === limit ? '600' : '400',
-                                            }}
-                                            onClick={() => {
-                                                setPagination(prev => ({ ...prev, limit, page: 1 }));
-                                                setIsRowsDropdownOpen(false);
-                                            }}
-                                        >
-                                            {limit} rows
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                <div className="modern-filter-container" style={{ marginBottom: '2rem' }}>
+                    <div className="modern-search-box">
+                        <Search size={20} />
+                        <input
+                            type="text"
+                            placeholder="Search by Batch No, Product Name..."
+                            className="modern-search-input"
+                            value={filters.search}
+                            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
+                        />
                     </div>
 
-                    {/* Integrated Table */}
-                    <div className="stock-table-wrapper">
-                        <table className="stock-table">
-                            <thead>
-                                <tr>
-                                    <th style={{ width: '60px', paddingLeft: '1.5rem' }}>#</th>
-                                    <th>Product / Variant</th>
-                                    <th>Batch Details</th>
-                                    <th>Remaining Inv</th>
-                                    <th>Batch Price</th>
-                                    <th>Status</th>
-                                    <th style={{ textAlign: 'right', paddingRight: '1.5rem' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {batches.length > 0 ? batches.map((batch, index) => {
-                                    const status = getStockStatus(batch.currentQuantity, batch.quantity);
-                                    const isVariant = !!batch.variantId;
+                    <div style={{ position: 'relative' }}>
+                        <button
+                            className="secondary-button"
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.65rem', 
+                                padding: '0.75rem 1.25rem', 
+                                background: 'white',
+                                border: '1px solid hsl(var(--border) / 0.4)',
+                                borderRadius: '12px',
+                                height: '48px', 
+                                minWidth: '130px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+                            }}
+                            onClick={() => setIsRowsDropdownOpen(!isRowsDropdownOpen)}
+                        >
+                            <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Rows:</span>
+                            <span style={{ fontWeight: '800', fontSize: '1rem' }}>{pagination.limit}</span>
+                            <ChevronDown size={14} className={isRowsDropdownOpen ? 'rotate-180' : ''} style={{ marginLeft: 'auto', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                        </button>
 
-                                    return (
-                                        <tr key={batch._id} className="stock-row">
-                                            <td style={{ color: 'hsl(var(--muted-foreground))', paddingLeft: '1.5rem' }}>
-                                                {(pagination.page - 1) * pagination.limit + index + 1}
-                                            </td>
-                                            <td>
-                                                <div className="category-cell-name">
-                                                    <div className="category-img-box" style={{ width: '48px', height: '48px', borderRadius: '12px' }}>
-                                                        {batch.productId?.images?.thumbnail ? (
-                                                            <img src={`${BASE_IMAGE_URL}/${batch.productId.images.thumbnail}`} alt="" />
-                                                        ) : (
-                                                            <Box size={20} className="text-muted-foreground" />
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{batch.productId?.name || 'Unknown Product'}</div>
-                                                        {isVariant && (
-                                                            <div style={{ fontSize: '0.75rem', color: 'hsl(var(--primary))', fontWeight: '600', marginTop: '2px' }}>
-                                                                {batch.variantId.attributes?.map(attr => attr.valueName || attr.valueId?.name).join(' / ')}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                    <code className="batch-tag">{batch.batchNo}</code>
-                                                    <span style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
-                                                        Added: {formatDate(batch.createdAt)}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                                    <div style={{ fontWeight: '800', fontSize: '1rem' }}>
-                                                        {batch.currentQuantity} <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))' }}>/ {batch.quantity}</span>
-                                                    </div>
-                                                    <span className="status-indicator" style={{
-                                                        backgroundColor: status.bg,
-                                                        color: status.color,
-                                                        width: 'fit-content',
-                                                    }}>
-                                                        {status.label}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <div style={{ fontWeight: '700', color: 'hsl(var(--foreground))' }}>RS{batch.pricing?.sellingPrice}</div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through' }}>
-                                                        MRP: RS{batch.pricing?.mrp}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.75rem' }}>
-                                                    {batch.currentQuantity === 0 ? (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'hsl(var(--destructive))', fontWeight: 700 }}>
-                                                            <X size={12} strokeWidth={3} />
-                                                            <span>Fully Depleted</span>
-                                                        </div>
+                        {isRowsDropdownOpen && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: 0,
+                                marginTop: '0.65rem',
+                                background: 'white',
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '14px',
+                                boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
+                                zIndex: 1000,
+                                minWidth: '150px',
+                                overflow: 'hidden',
+                                animation: 'fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                            }}>
+                                {[10, 20, 50, 100].map(limit => (
+                                    <div
+                                        key={limit}
+                                        style={{
+                                            padding: '0.85rem 1.25rem',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            background: pagination.limit === limit ? 'hsl(var(--primary) / 0.08)' : 'transparent',
+                                            color: pagination.limit === limit ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
+                                            fontSize: '0.9rem',
+                                            fontWeight: pagination.limit === limit ? '800' : '600',
+                                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                                        }}
+                                        className="rows-option"
+                                        onClick={() => {
+                                            setPagination(prev => ({ ...prev, limit, page: 1 }));
+                                            setIsRowsDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span>{limit} rows</span>
+                                        {pagination.limit === limit && <Check size={14} strokeWidth={3} />}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="stock-table-container">
+                    <table className="stock-premium-table">
+                        <thead className="stock-table-header">
+                            <tr>
+                                <th style={{ textAlign: 'center' }}>#</th>
+                                <th style={{ minWidth: '240px' }}>Product / Variant</th>
+                                <th>Sample Batch</th>
+                                <th>Total Inventory</th>
+                                <th style={{ textAlign: 'center' }}>Standard Pricing</th>
+                                <th style={{ textAlign: 'center' }}>Status</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {batches.length > 0 ? batches.map((batch, index) => {
+                                const status = getStockStatus(batch.currentQuantity, batch.quantity);
+                                const isVariant = !!batch.variantId;
+                                const invPercentage = (batch.currentQuantity / batch.quantity) * 100;
+
+                                return (
+                                    <tr key={batch._id} className="stock-table-row">
+                                        <td style={{ textAlign: 'center' }}>
+                                            {(pagination.page - 1) * pagination.limit + index + 1}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                <div className="stock-list-image-box">
+                                                    {batch.productId?.images?.thumbnail ? (
+                                                        <img 
+                                                            src={`${BASE_IMAGE_URL}/${batch.productId.images.thumbnail}`} 
+                                                            alt="" 
+                                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                        />
                                                     ) : (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'hsl(142 70% 45%)', fontWeight: 700 }}>
-                                                            <Check size={12} strokeWidth={3} />
-                                                            <span>In Stock</span>
+                                                        <Box size={22} style={{ opacity: 0.2 }} />
+                                                    )}
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                                    <div style={{ fontWeight: '800', color: 'hsl(var(--foreground))', fontSize: '1rem', letterSpacing: '-0.01em' }}>
+                                                        {batch.productId?.name || 'Unknown Product'}
+                                                    </div>
+                                                    {isVariant && (
+                                                        <div style={{ fontSize: '0.72rem', color: 'hsl(var(--primary))', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                                            {batch.variantId.attributes?.map(attr => attr.valueName || attr.valueId?.name).join(' • ')}
                                                         </div>
                                                     )}
                                                 </div>
-                                            </td>
-                                            <td style={{ paddingRight: '1.5rem' }}>
-                                                <div className="category-actions">
-                                                    <button
-                                                        className="action-btn"
-                                                        title="View Batch History"
-                                                        onClick={() => navigate(`/stock/history/${batch.productId?._id}?variantId=${batch.variantId?._id || ''}`)}
-                                                    >
-                                                        <History size={15} />
-                                                    </button>
-                                                    <button
-                                                        className="action-btn"
-                                                        title="Edit Batch"
-                                                        onClick={() => handleEditClick(batch._id)}
-                                                        style={{ color: 'hsl(var(--primary))' }}
-                                                    >
-                                                        <Edit2 size={15} />
-                                                    </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                <span className="batch-badge-premium">{batch.batchNo}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: 'hsl(var(--muted-foreground))', fontWeight: '600' }}>
+                                                    <Calendar size={13} style={{ opacity: 0.7 }} />
+                                                    <span>{formatDate(batch.createdAt)}</span>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                }) : (
-                                    <tr>
-                                        <td colSpan="7" className="text-center py-24">
-                                            {isLoading ? (
-                                                <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
-                                                    <Loader />
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column', minWidth: '130px', gap: '4px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontWeight: '900', fontSize: '1.05rem', color: status.color, letterSpacing: '-0.02em' }}>
+                                                        {batch.currentQuantity}
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', marginLeft: '4px', opacity: 0.5 }}>/ {batch.quantity}</span>
+                                                    </span>
+                                                    <span style={{ fontSize: '0.65rem', fontWeight: '900', color: status.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                        {status.label}
+                                                    </span>
+                                                </div>
+                                                <div className="inv-progress-container">
+                                                    <div 
+                                                        className="inv-progress-fill" 
+                                                        style={{ 
+                                                            width: `${Math.max(invPercentage, 4)}%`, 
+                                                            backgroundColor: status.color,
+                                                            boxShadow: `0 0 8px ${status.color}40`
+                                                        }} 
+                                                    />
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+                                                <div style={{ fontSize: '1.05rem', fontWeight: '900', color: 'hsl(var(--foreground))' }}>RS {batch.pricing?.finalSellingPrice}</div>
+                                                <div style={{ fontSize: '0.72rem', color: 'hsl(var(--muted-foreground))', textDecoration: 'line-through', fontWeight: '600', opacity: 0.6 }}>MRP: RS {batch.pricing?.mrp}</div>
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            {batch.currentQuantity === 0 ? (
+                                                <div className="status-capsule depleted">
+                                                    <div className="status-capsule-dot" />
+                                                    <span>Depleted</span>
                                                 </div>
                                             ) : (
-                                                <div style={{ padding: '4rem 0', color: 'hsl(var(--muted-foreground))', fontSize: '0.95rem' }}>
-                                                    No stock records found in the repository.
+                                                <div className="status-capsule in-stock">
+                                                    <div className="status-capsule-dot" />
+                                                    <span>In Stock</span>
                                                 </div>
                                             )}
                                         </td>
+                                        <td>
+                                            <div className="stock-actions">
+                                                <button 
+                                                    className="action-btn"
+                                                    onClick={() => navigate(`/stock/history/${batch._id}`)}
+                                                    title="View History"
+                                                >
+                                                    <History size={16} />
+                                                </button>
+                                                <button 
+                                                    className="action-btn edit"
+                                                    onClick={() => navigate(`/stock/edit/${batch._id}`)}
+                                                    title="Edit Batch"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Pagination Footer integrated into unified card */}
-                    {pagination.total > 0 && (
-                        <div className="stock-pagination">
-                            <div style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))', fontWeight: 500 }}>
-                                <span>Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries</span>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button
-                                    className="secondary-button"
-                                    disabled={pagination.page === 1}
-                                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                                    style={{ padding: '8px', minWidth: '40px' }}
-                                >
-                                    <ChevronLeft size={16} />
-                                </button>
-                                <button
-                                    className="secondary-button"
-                                    disabled={pagination.page >= pagination.pages}
-                                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                                    style={{ padding: '8px', minWidth: '40px' }}
-                                >
-                                    <ChevronRight size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                                );
+                            }) : (
+                                <tr>
+                                    <td colSpan="7" className="text-center py-40">
+                                        {isLoading ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                                                <Loader />
+                                                <span style={{ fontSize: '1rem', color: 'hsl(var(--muted-foreground))', fontWeight: '600', letterSpacing: '0.01em' }}>Curating stock inventory...</span>
+                                            </div>
+                                        ) : (
+                                            <div style={{ opacity: 0.6, padding: '4rem' }}>
+                                                <div style={{ background: 'hsl(var(--secondary) / 0.2)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyCenter: 'center', margin: '0 auto 1.5rem' }}>
+                                                    <Box size={40} style={{ opacity: 0.5 }} />
+                                                </div>
+                                                <p style={{ fontSize: '1.25rem', fontWeight: '900', color: 'hsl(var(--foreground))', letterSpacing: '-0.02em' }}>Repository Empty</p>
+                                                <p style={{ fontSize: '0.9rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.5rem' }}>No batch records were found for the current filter. Try a different search term.</p>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
+
+                {pagination.total > 0 && (
+                    <div className="pagination-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid hsl(var(--border) / 0.1)' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
+                            <span>Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                className="secondary-button"
+                                disabled={pagination.page === 1}
+                                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                                style={{ padding: '8px', minWidth: '40px' }}
+                            >
+                                <ChevronLeft size={16} />
+                            </button>
+                            <button
+                                className="secondary-button"
+                                disabled={pagination.page >= pagination.pages}
+                                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                                style={{ padding: '8px', minWidth: '40px' }}
+                            >
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

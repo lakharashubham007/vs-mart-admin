@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Search, ChevronDown, Check, X } from 'lucide-react';
 import './CustomSelect.css';
 
-const CustomSelect = ({ options, value, onChange, placeholder = "Select an option", label, size = "default", searchPlaceholder = "Search...", direction = "down" }) => {
+const CustomSelect = ({ options, value, onChange, placeholder = "Select an option", label, size = "default", searchPlaceholder = "Search...", direction = "down", disabled = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
@@ -68,8 +68,9 @@ const CustomSelect = ({ options, value, onChange, placeholder = "Select an optio
             {label && <label className="custom-select-label">{label}</label>}
 
             <div
-                className={`custom-select-trigger ${isOpen ? 'active' : ''} ${value ? 'has-value' : ''}`}
+                className={`custom-select-trigger ${isOpen ? 'active' : ''} ${value ? 'has-value' : ''} ${disabled ? 'disabled' : ''}`}
                 onClick={(e) => {
+                    if (disabled) return;
                     e.stopPropagation();
                     setIsOpen(!isOpen);
                 }}

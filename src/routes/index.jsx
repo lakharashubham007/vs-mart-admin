@@ -45,6 +45,11 @@ import TermsForm from "../pages/terms/TermsForm";
 import PrivacyList from "../pages/privacy/PrivacyList";
 import PrivacyForm from "../pages/privacy/PrivacyForm";
 import NotificationsPage from "../pages/notifications/NotificationsPage";
+import ListCustomer from "../pages/customer/ListCustomer";
+import DeliveryBoyList from "../pages/deliveryBoy/DeliveryBoyList";
+import AddDeliveryBoy from "../pages/deliveryBoy/AddDeliveryBoy";
+import EditDeliveryBoy from "../pages/deliveryBoy/EditDeliveryBoy";
+import DeliveryAssignmentList from "../pages/deliveryBoy/DeliveryAssignmentList";
 
 
 
@@ -127,6 +132,15 @@ const Markup = () => {
 
         // Notifications
         { url: "notifications", component: <NotificationsPage /> },
+
+        // Customers
+        { url: "customers", component: <ListCustomer /> },
+
+        // Delivery Boys
+        { url: "delivery-boy/list", component: <DeliveryBoyList /> },
+        { url: "delivery-boy/add", component: <AddDeliveryBoy /> },
+        { url: "delivery-boy/edit/:id", component: <EditDeliveryBoy /> },
+        { url: "delivery-boy/assignments", component: <DeliveryAssignmentList /> },
     ]
 
 

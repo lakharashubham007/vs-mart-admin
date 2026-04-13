@@ -2,41 +2,33 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
+import { BASE_IMAGE_URL } from '../config/env';
 
 const SocketContext = createContext(null);
 
-/* A simple short beep generated via Web Audio API — no file needed */
+/* Play notification sound */
 const playBeep = () => {
     try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        gain.gain.setValueAtTime(0.4, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.4);
+        const audio = new Audio('/notification.mp3');
+        audio.play().catch(e => console.warn('Audio play failed:', e));
     } catch (e) {
         console.warn('Audio beep failed:', e);
     }
 };
 
 export const SocketProvider = ({ children }) => {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const socketRef = useRef(null);
 
-    // Shared state that any component can subscribe to
-    const [newOrderEvent, setNewOrderEvent] = useState(null);       // latest new_order payload
-    const [newNotifEvent, setNewNotifEvent] = useState(null);       // latest new_notification payload
-    const [adminUnreadCount, setAdminUnreadCount] = useState(0);    // live unread badge count
+    // Shared state
+    const [newOrderEvent, setNewOrderEvent] = useState(null);
+    const [newNotifEvent, setNewNotifEvent] = useState(null);
+    const [adminUnreadCount, setAdminUnreadCount] = useState(0);
 
     const connect = useCallback(() => {
-        if (socketRef.current?.connected) return; // already connected
+        if (socketRef.current) return;
 
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}:5000`;
+        const socketUrl = BASE_IMAGE_URL;
         console.log('📡 [SocketContext] Connecting to', socketUrl);
 
         const socket = io(socketUrl, {
@@ -48,8 +40,18 @@ export const SocketProvider = ({ children }) => {
         });
 
         socket.on('connect', () => {
-            console.log('✅ [SocketContext] Connected, joining admin_room');
-            socket.emit('join_admin');
+            const adminId = user?._id || user?.id || localStorage.getItem('adminId');
+            const role = localStorage.getItem('role');
+            
+            if (adminId) {
+                console.log('🔑 [SocketContext] Emitting rooms for ID:', adminId);
+                // Only management roles should join admin_room
+                if (role === 'Super Admin' || role === 'Admin') {
+                    socket.emit('join_admin', adminId);
+                }
+                // Everyone joins their personal user room for targeted notifications
+                socket.emit('join_user', adminId);
+            }
         });
 
         socket.on('connect_error', (err) => {
@@ -68,24 +70,50 @@ export const SocketProvider = ({ children }) => {
                 duration: 6000,
                 icon: '🛒',
             });
-            setAdminUnreadCount(prev => prev + 1); // bump badge (no new_notification emitted for new orders)
+            setAdminUnreadCount(prev => prev + 1);
             setNewOrderEvent(order);
         });
 
-        /* ── Admin notification (order status changes / new order) ── */
+        /* ── Admin notification (order status changes) ── */
         socket.on('new_notification', (notif) => {
             console.log('🔔 [SocketContext] new_notification', notif);
             setAdminUnreadCount(prev => prev + 1);
             setNewNotifEvent(notif);
         });
+        
+        /* ── Targeted assignment for delivery boys ── */
+        socket.on('new_assignment', (data) => {
+            console.log('🚚 [SocketContext] new_assignmentReceived:', data);
+            playBeep();
+            const orderNum = data.assignment?.orderNumber || (data.assignment?.orderId || '').slice(-6).toUpperCase();
+            toast.success(`New Assignment! Order #VS${orderNum} has been assigned to you.`, {
+                duration: 8000,
+                icon: '🚚',
+            });
+            setAdminUnreadCount(prev => prev + 1);
+        });
 
         socketRef.current = socket;
-    }, []);
+    }, [user]); // Depend on user so connect can see it
 
     const disconnect = useCallback(() => {
         socketRef.current?.disconnect();
         socketRef.current = null;
     }, []);
+
+    // Effect to join rooms when user becomes available if not already joined
+    useEffect(() => {
+        if (socketRef.current?.connected && user) {
+            const adminId = user._id || user.id;
+            const role = localStorage.getItem('role');
+            console.log('🔄 [SocketContext] Profile sync for ID:', adminId);
+            
+            if (role === 'Super Admin' || role === 'Admin') {
+                socketRef.current.emit('join_admin', adminId);
+            }
+            socketRef.current.emit('join_user', adminId);
+        }
+    }, [user]);
 
     useEffect(() => {
         if (token) {
@@ -94,7 +122,7 @@ export const SocketProvider = ({ children }) => {
             disconnect();
         }
         return () => {
-            // Don't disconnect on re-render, only on unmount of whole provider
+            disconnect();
         };
     }, [token, connect]);
 

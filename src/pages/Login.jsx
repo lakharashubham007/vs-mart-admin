@@ -5,6 +5,7 @@ import { Mail, Lock, Loader2, ShoppingBag, Sparkles, Zap, ShoppingCart, Package,
 import './Login.css';
 
 const Login = () => {
+    const [loginType, setLoginType] = useState('staff'); // 'staff' or 'delivery'
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -33,7 +34,7 @@ const Login = () => {
         setError('');
         setIsLoading(true);
         try {
-            await login(email, password);
+            await login(email, password, loginType);
             navigate('/');
         } catch (err) {
             setError(err.message || 'Invalid email or password');
@@ -43,20 +44,33 @@ const Login = () => {
     };
 
     return (
-        <div className="login-page-wrapper">
+        <div className={`login-page-wrapper theme-${loginType}`}>
             {/* Advanced Background Layer */}
             <div className="ecommerce-visual-layer">
                 <div className="glow-orb orb-1"></div>
                 <div className="glow-orb orb-2"></div>
 
-                {/* Floating Ecommerce Icons Layer */}
+                {/* Floating Icons Layer - Dynamically switch based on loginType */}
                 <div className="floating-marketplace-icons">
-                    <div className="float-icon pos-1"><ShoppingCart size={40} /></div>
-                    <div className="float-icon pos-2"><Package size={32} /></div>
-                    <div className="float-icon pos-3"><Coffee size={28} /></div>
-                    <div className="float-icon pos-4"><Utensils size={36} /></div>
-                    <div className="float-icon pos-5"><Store size={44} /></div>
-                    <div className="float-icon pos-6"><ShoppingBag size={30} /></div>
+                    {loginType === 'staff' ? (
+                        <>
+                            <div className="float-icon pos-1"><ShoppingCart size={40} /></div>
+                            <div className="float-icon pos-2"><Package size={32} /></div>
+                            <div className="float-icon pos-3"><Coffee size={28} /></div>
+                            <div className="float-icon pos-4"><Utensils size={36} /></div>
+                            <div className="float-icon pos-5"><Store size={44} /></div>
+                            <div className="float-icon pos-6"><ShoppingBag size={30} /></div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="float-icon pos-1"><Zap size={40} /></div>
+                            <div className="float-icon pos-2"><Package size={32} /></div>
+                            <div className="float-icon pos-3"><Sparkles size={28} /></div>
+                            <div className="float-icon pos-4"><Zap size={36} /></div>
+                            <div className="float-icon pos-5"><Package size={44} /></div>
+                            <div className="float-icon pos-6"><Sparkles size={30} /></div>
+                        </>
+                    )}
                 </div>
 
                 <div className="water-rain">
@@ -92,17 +106,36 @@ const Login = () => {
 
             <div className="login-container">
                 <div className="login-card glass-premium">
+                    <div className="login-type-tabs">
+                        <button 
+                            className={`tab-btn ${loginType === 'staff' ? 'active' : ''}`}
+                            onClick={() => { setLoginType('staff'); setError(''); }}
+                        >
+                            Staff Login
+                        </button>
+                        <button 
+                            className={`tab-btn ${loginType === 'delivery' ? 'active' : ''}`}
+                            onClick={() => { setLoginType('delivery'); setError(''); }}
+                        >
+                            Delivery Partner
+                        </button>
+                    </div>
+
                     <div className="login-header">
                         <div className="ecommerce-brand">
                             <div className="brand-icon-wrapper">
-                                <ShoppingBag size={32} />
+                                {loginType === 'staff' ? <ShoppingBag size={32} /> : <Package size={32} />}
                                 <div className="sparkle-overlay"><Sparkles size={16} /></div>
                             </div>
                             <div className="brand-glow"></div>
                         </div>
-                        <h1 className="premium-title">VS MART Admin</h1>
+                        <h1 className="premium-title">
+                            {loginType === 'staff' ? 'VS MART Admin' : 'Delivery Portal'}
+                        </h1>
                         <p className="powered-by-text" style={{ fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', marginTop: '-0.3rem', letterSpacing: '1px', textAlign: 'center' }}>POWERED BY DEXTERDIGI.COM</p>
-                        <p className="premium-subtitle" style={{ marginTop: '0.5rem' }}>Manage your luxury retail empire</p>
+                        <p className="premium-subtitle" style={{ marginTop: '0.5rem' }}>
+                            {loginType === 'staff' ? 'Manage your luxury retail empire' : 'Deliver happiness to customers'}
+                        </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="login-form">
@@ -114,14 +147,14 @@ const Login = () => {
                         )}
 
                         <div className="premium-field-group">
-                            <label>Administrator Email</label>
+                            <label>{loginType === 'staff' ? 'Administrator Email' : 'Partner Email'}</label>
                             <div className="premium-input-container">
                                 <Mail size={18} className="field-icon" />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="admin@dexterdigi.com"
+                                    placeholder={loginType === 'staff' ? "admin@vs-mart.com" : "partner@vs-mart.com"}
                                     required
                                 />
                             </div>
@@ -150,12 +183,12 @@ const Login = () => {
                             <button type="button" className="forgot-key-btn">Reset Access?</button>
                         </div>
 
-                        <button type="submit" className="ecommerce-login-btn" disabled={isLoading}>
+                        <button type="submit" className={`ecommerce-login-btn action-${loginType}`} disabled={isLoading}>
                             {isLoading ? (
                                 <Loader2 className="animate-spin" size={20} />
                             ) : (
                                 <>
-                                    <span>Enter Marketplace</span>
+                                    <span>{loginType === 'staff' ? 'Enter Marketplace' : 'Start Delivering'}</span>
                                     <Zap size={18} fill="currentColor" />
                                 </>
                             )}

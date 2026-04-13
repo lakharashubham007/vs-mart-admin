@@ -1,11 +1,15 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { 
     ShoppingCart, Banknote, Users, Package, RefreshCw, Star, Box, PackagePlus, Truck, 
     ChevronDown, CheckCircle2, AlertTriangle, AlertCircle, BarChart3, TrendingUp, 
-    ArrowUpRight, Clock, CheckCircle, XCircle, PackageCheck 
+    ArrowUpRight, Clock, CheckCircle, XCircle, PackageCheck, Map as MapIcon 
 } from 'lucide-react';
 import analyticsService from '../services/analyticsService';
 import { BASE_IMAGE_URL } from '../config/env';
+import { useAuth } from '../context/AuthContext';
+import OptimizedImage from '../components/OptimizedImage';
+import DeliveryMapModal from '../components/DeliveryMapModal';
+import DeliveryDashboard from './DeliveryDashboard';
 import './Dashboard.css';
 
 const getImageUrl = (path) => {
@@ -24,7 +28,7 @@ const fmtNum = (n) => {
 };
 
 const Sk = ({ h = 16, w = '100%', r = 8 }) => (
-    <div className="vg-skeleton" style={{ height: h, width: w, borderRadius: r }} />
+    <div className="sk" style={{ height: h, width: w, borderRadius: r }} />
 );
 
 export default function Dashboard() {
@@ -41,6 +45,22 @@ export default function Dashboard() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [hoverBar, setHoverBar] = useState(null);
     const menuRef = useRef();
+
+    const { user } = useAuth();
+    const [showMap, setShowMap] = useState(false);
+    
+    // Robust check for delivery partner role/type
+    const isDeliveryPartner = useMemo(() => {
+        const role = (user?.role || localStorage.getItem('role') || '').toLowerCase();
+        const loginType = localStorage.getItem('loginType');
+        
+        return (
+            role === 'delivery_boy' || 
+            role === 'deliveryboy' || 
+            role === 'delivery' || 
+            loginType === 'delivery'
+        );
+    }, [user]);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -99,6 +119,11 @@ export default function Dashboard() {
 
     const handleSelectSpan = (span) => { setChartSpan(span); setIsMenuOpen(false); };
 
+    // If it's a delivery partner, show the new premium dashboard
+    if (isDeliveryPartner) {
+        return <DeliveryDashboard />;
+    }
+
     const totalOrders = summary?.orders?.total || 0;
     const totalSales = summary?.revenue?.total || 0;
     const totalUsers = summary?.users?.total || 0;
@@ -119,10 +144,19 @@ export default function Dashboard() {
                     <h1 className="vg-title">Administrative Dashboard</h1>
                     <p className="vg-subtitle">Real-time performance monitoring and analytics</p>
                 </div>
-                <button className={`vg-refresh ${refreshing ? 'spin' : ''}`} onClick={() => fetchAll(true)} disabled={refreshing}>
-                    <RefreshCw size={14} /> Refresh Data
-                </button>
+                <div className="vg-header-actions" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    {isDeliveryPartner && (
+                        <button className="vg-map-btn" onClick={() => setShowMap(true)}>
+                            <MapIcon size={14} /> Pickup Map
+                        </button>
+                    )}
+                    <button className={`vg-refresh ${refreshing ? 'spin' : ''}`} onClick={() => fetchAll(true)} disabled={refreshing}>
+                        <RefreshCw size={14} /> Refresh Data
+                    </button>
+                </div>
             </div>
+
+            {showMap && <DeliveryMapModal onClose={() => setShowMap(false)} />}
 
             {/* Row 1: Top Metrics */}
             <div className="vg-top-metrics">
@@ -138,7 +172,7 @@ export default function Dashboard() {
                                 <p className="vg-m-label">{m.label}</p>
                                 <h2 className="vg-m-value">{m.val}</h2>
                             </div>
-                            <div className={`vg-icon-box ${m.color}`} style={{ color: m.text === 'white' ? 'white' : 'inherit' }}>
+                            <div className={`vg-icon-box ${m.color}`} style={{ color: m.text === 'white' ? '#fff' : 'hsl(var(--primary))' }}>
                                 {m.icon}
                             </div>
                         </div>
@@ -216,7 +250,7 @@ export default function Dashboard() {
                 <div className="vg-card vg-stock-area">
                     <div className="vg-card-header">
                         <div><h3>Inventory Health</h3><p>Live distribution analysis</p></div>
-                        <Package size={18} style={{ color: 'hsl(var(--primary))' }} />
+                        <Package size={18} color="hsl(var(--primary))" />
                     </div>
                     {!stockDyn ? <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}><Sk h={50} /><Sk h={50} /><Sk h={50} /><Sk h={50} /></div> : (
                         <div className="dyn-stock-grid">
@@ -257,7 +291,7 @@ export default function Dashboard() {
                                             <tr key={o._id || i}>
                                                 <td>
                                                     <div className="table-product">
-                                                        <img src={pImg} alt="product" className="p-thumb shadow-sm" />
+                                                        <OptimizedImage src={getImageUrl(o.items?.[0]?.image)} alt={pName} className="p-thumb shadow-sm" />
                                                         <div><div className="p-name">{pName}</div><div className="p-id">ORDER #{o.orderId || o._id?.substring(0, 8)}</div></div>
                                                     </div>
                                                 </td>
@@ -285,24 +319,27 @@ export default function Dashboard() {
                 <div className="vg-card vg-best-sellers">
                     <div className="vg-card-header">
                         <div><h3>Best Performance</h3><p>Elite selling inventory</p></div>
-                        <TrendingUp size={18} style={{ color: 'hsl(var(--primary))' }} />
+                        <TrendingUp size={18} color="hsl(var(--primary))" />
                     </div>
                     <div className="bs-list">
                         {loading ? [1, 2, 3, 4, 5].map(k => <Sk key={k} h={64} r={12} />) : (
-                            bestSellers.map((p, i) => (
-                                <div key={p._id || i} className="bs-item-card">
-                                    <div className="bs-img-box">
-                                        <img src={getImageUrl(p.image)} alt={p.name} className="bs-thumb" />
-                                        <div className="bs-rank-badge">{i + 1}</div>
-                                    </div>
+                            bestSellers.map((p, i) => {
+                                const pImg = getImageUrl(p.image) || 'https://pub-8078970e704e427f99990b797825a072.r2.dev/placeholder-product.png';
+                                return (
+                                    <div key={p._id || i} className="bs-item-card">
+                                        <div className="bs-img-box">
+                                            <OptimizedImage src={getImageUrl(p.image)} alt={p.name} className="bs-thumb" />
+                                            <div className="bs-rank-badge">{i + 1}</div>
+                                        </div>
                                     <div className="bs-content">
                                         <div className="bs-header"><h4>{p.name}</h4><span className="bs-qty">{fmtNum(p.totalQty)} sold</span></div>
                                         <div className="bs-progress-bg">
                                             <div className="bs-progress-fill" style={{ width: `${(p.totalQty / topSellerQty) * 100}%` }} />
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                    </div>
+                                );
+                            })
                         )}
                     </div>
                 </div>

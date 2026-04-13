@@ -1,0 +1,104 @@
+/* Customer Repository - Specific Styling */
+
+.customer-avatar-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: hsl(var(--primary) / 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--primary));
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.category-row:hover .customer-avatar-box {
+    background: hsl(var(--primary));
+    color: white;
+    transform: scale(1.05);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: hsl(142 70% 45% / 0.1);
+    color: hsl(142 70% 45%);
+    border: 1px solid hsl(142 70% 45% / 0.2);
+}
+
+.status-badge.inactive {
+    background: hsl(48 96% 89% / 0.4);
+    color: hsl(38 92% 50%);
+    border: 1px solid hsl(38 92% 50% / 0.2);
+}
+
+.empty-table-cell {
+    text-align: center;
+    padding: 4rem 2rem !important;
+    color: hsl(var(--muted-foreground));
+    font-style: italic;
+    background: hsl(var(--muted) / 0.05);
+}
+
+/* Modal Enhancements */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon svg {
+    position: absolute;
+    left: 1rem;
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+}
+
+.input-with-icon .quick-modal-input {
+    padding-left: 2.75rem;
+}
+
+.rows-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0.5rem;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    z-index: 50;
+    min-width: 120px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.dropdown-item {
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: hsl(var(--accent));
+}
+
+.dropdown-item.selected {
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+    font-weight: 600;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

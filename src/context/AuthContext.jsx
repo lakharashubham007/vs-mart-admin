@@ -24,11 +24,14 @@ export const AuthProvider = ({ children }) => {
         initAuth();
     }, [token]);
 
-    const login = async (email, password) => {
-        const data = await authService.login(email, password);
+    const login = async (email, password, type = 'staff') => {
+        const data = await authService.login(email, password, type);
         setToken(data.token);
         setUser(data.user);
         localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.user.role || '');
+        localStorage.setItem('adminId', data.user._id || data.user.id || '');
+        localStorage.setItem('loginType', type);
         return data;
     };
 
@@ -36,6 +39,8 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         setUser(null);
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('adminId');
     };
 
     return (

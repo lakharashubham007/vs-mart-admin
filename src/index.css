@@ -144,3 +144,20 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* --- Google Maps Marker Recovery Fix --- */
+.gm-style img {
+  max-width: none !important;
+  max-height: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+/* Ensure InfoWindow content still respects boundaries */
+.gm-style-iw-d img {
+  max-width: 100% !important;
+}
+
+.gm-style img {
+  max-width: none !important;
+}

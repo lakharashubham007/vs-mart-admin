@@ -1,7 +1,8 @@
 import apiClient from './apiClient';
 
-export const login = async (email, password) => {
-    return apiClient('/public/login', {
+export const login = async (email, password, type = 'staff') => {
+    const endpoint = type === 'delivery' ? '/public/delivery-login' : '/public/login';
+    return apiClient(endpoint, {
         method: 'POST',
         body: { email, password }
     });

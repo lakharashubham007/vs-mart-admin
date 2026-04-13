@@ -1,39 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { BASE_IMAGE_URL } from '../../config/env';
 import {
     X,
+    Printer,
+    Clock,
     User,
-    MapPin,
     Phone,
-    CreditCard,
-    ShoppingBag,
+    MapPin,
     Truck,
-    Calendar,
-    ChevronRight,
-    ChevronLeft,
     Package,
     CheckCircle2,
-    XCircle,
-    Clock,
-    Copy,
-    ExternalLink
+    ShoppingBag,
+    Calendar,
+    CreditCard,
+    ExternalLink,
+    Banknote,
+    ChevronRight,
+    XCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import orderService from '../../services/orderService';
 import Loader from '../../components/Loader';
+import DeliveryBoySelectionModal from '../../components/DeliveryBoySelectionModal';
+import { BASE_IMAGE_URL } from '../../config/env';
 import './OrderDetailsModal.css';
 
 // Safe rupee symbol constant — avoids file encoding issues with ₹
 const RS = 'RS';
 
-// Linear order pipeline â€” status can only move one step at a time
+// Linear order pipeline — status can only move one step at a time
 const ORDER_PIPELINE = ['Placed', 'Confirmed', 'Processing', 'OutForDelivery', 'Delivered'];
 
 const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
+    const [showSelectionModal, setShowSelectionModal] = useState(false);
+    const [showCODPrompt, setShowCODPrompt] = useState(false);
+    const [pendingStatus, setPendingStatus] = useState(null);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -51,19 +55,47 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
     }, [orderId, onClose]);
 
     const handleStatusChange = async (newStatus) => {
+        // Intercept OutForDelivery to show boy selection
+        if (newStatus?.toLowerCase() === 'outfordelivery') {
+            setShowSelectionModal(true);
+            return;
+        }
+
+        // COD Confirmation Guard - Open custom modal instead of window.confirm
+        if (newStatus?.toLowerCase() === 'delivered' && order.paymentMethod === 'COD') {
+            setPendingStatus(newStatus);
+            setShowCODPrompt(true);
+            return;
+        }
+
+        performStatusUpdate(newStatus);
+    };
+
+    const performStatusUpdate = async (status) => {
+        const previousStatus = order.orderStatus;
+        setOrder(prev => ({ ...prev, orderStatus: status }));
         setUpdating(true);
+        
         try {
-            await orderService.updateOrderStatus(orderId, newStatus);
-            toast.success(`Order marked as ${newStatus}`);
-            onUpdate();
-            // Refetch details to show latest status in modal
+            await orderService.updateOrderStatus(orderId, status);
+            toast.success(`Order marked as ${status}`);
+            
             const res = await orderService.getOrderDetails(orderId);
             setOrder(res.order || res);
+            
+            onUpdate();
         } catch (error) {
-            toast.error(error.message);
+            setOrder(prev => ({ ...prev, orderStatus: previousStatus }));
+            toast.error(error.message || 'Failed to update status');
         } finally {
             setUpdating(false);
         }
+    };
+
+    const onAssignmentComplete = async () => {
+        onUpdate();
+        const res = await orderService.getOrderDetails(orderId);
+        setOrder(res.order || res);
     };
 
     if (loading) return <div className="modal-overlay"><Loader /></div>;
@@ -74,8 +106,8 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
     const isCancelled = currentStatus === 'Cancelled';
     const isDelivered = currentStatus === 'Delivered';
 
-    // Orders only move FORWARD — no going back
-    const nextStatus = !isCancelled && !isDelivered && currentIndex < ORDER_PIPELINE.length - 1
+    const outForDeliveryIndex = ORDER_PIPELINE.indexOf('OutForDelivery');
+    const nextStatus = !isCancelled && !isDelivered && currentIndex < outForDeliveryIndex
         ? ORDER_PIPELINE[currentIndex + 1]
         : null;
     const canCancel = !isCancelled && !isDelivered;
@@ -109,8 +141,16 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                 </header>
 
                 <div className="modal-content">
+                    {updating && (
+                        <div className="updating-overlay">
+                            <div className="loader-container">
+                                <div className="premium-spinner"></div>
+                            </div>
+                            <div className="loader-text">Processing Request...</div>
+                            <div className="loader-subtext">Updating order status and notifying team</div>
+                        </div>
+                    )}
                     <div className="order-grid">
-                        {/* Customer Info */}
                         <div className="section-card">
                             <div className="section-head">
                                 <User size={18} />
@@ -130,7 +170,6 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                             </div>
                         </div>
 
-                        {/* Shipping Address */}
                         <div className="section-card">
                             <div className="section-head">
                                 <MapPin size={18} />
@@ -138,17 +177,49 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                             </div>
                             <div style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>
                                 <div style={{ fontWeight: '700' }}>{order.shippingAddress?.receiverName}</div>
-                                <div>{order.shippingAddress?.flatNo}, {order.shippingAddress?.area}</div>
-                                <div>{order.shippingAddress?.landmark ? `${order.shippingAddress.landmark}, ` : ''}{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}</div>
+                                {order.shippingAddress?.addressDetails ? (
+                                    <div style={{ wordBreak: 'break-word', marginTop: '4px' }}>
+                                        {order.shippingAddress.addressDetails}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div>{order.shippingAddress?.flatNo}{order.shippingAddress?.flatNo && ','} {order.shippingAddress?.area}</div>
+                                        <div>{order.shippingAddress?.landmark ? `${order.shippingAddress.landmark}, ` : ''}{order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.pincode ? `- ${order.shippingAddress.pincode}` : ''}</div>
+                                    </>
+                                )}
                                 <div style={{ marginTop: '0.5rem', color: 'hsl(var(--primary))', fontWeight: '600' }}>
                                     Type: {order.shippingAddress?.addressType}
                                 </div>
+                                {order.shippingAddress?.coordinates?.latitude && order.shippingAddress?.coordinates?.longitude && (
+                                    <div style={{ marginTop: '0.75rem' }}>
+                                        <a
+                                            href={`https://www.google.com/maps/search/?api=1&query=${order.shippingAddress.coordinates.latitude},${order.shippingAddress.coordinates.longitude}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                padding: '6px 12px',
+                                                fontSize: '0.8rem',
+                                                textDecoration: 'none',
+                                                color: 'hsl(var(--primary))',
+                                                border: '1px solid hsl(var(--primary) / 0.3)',
+                                                borderRadius: '6px',
+                                                background: 'hsl(var(--primary) / 0.05)',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            <ExternalLink size={14} />
+                                            Open in Google Maps
+                                        </a>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     <div className="order-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                        {/* Payment Info */}
                         <div className="section-card">
                             <div className="section-head">
                                 <CreditCard size={18} />
@@ -160,7 +231,10 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                             </div>
                             <div className="info-row">
                                 <span className="info-label">Status</span>
-                                <span className="info-value" style={{ color: order.paymentStatus === 'Completed' ? '#166534' : '#B45309' }}>
+                                <span className="info-value" style={{ 
+                                    color: (order.paymentStatus === 'Completed' || order.paymentStatus === 'PAID') ? '#166534' : '#B45309',
+                                    fontWeight: '700'
+                                }}>
                                     {order.paymentStatus}
                                 </span>
                             </div>
@@ -170,20 +244,59 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                             </div>
                         </div>
 
-                        {/* Order Timeline */}
                         <div className="section-card">
-                            <div className="section-head">
-                                <Clock size={18} />
-                                Order Placement
-                            </div>
-                            <div style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
-                                This order was placed on {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString()}.
-                                It is currently in the <strong>{order.orderStatus}</strong> stage.
-                            </div>
+                            {order.deliveryBoyId ? (
+                                <>
+                                    <div className="section-head">
+                                        <Truck size={18} />
+                                        Delivery Personnel
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                                        <div style={{ 
+                                            width: '44px', height: '44px', borderRadius: '12px', background: 'hsl(var(--primary) / 0.1)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--primary))',
+                                            overflow: 'hidden', border: '1px solid hsl(var(--primary) / 0.2)'
+                                        }}>
+                                            {order.deliveryBoyId.profileImage ? (
+                                                <img 
+                                                    src={`${BASE_IMAGE_URL}/${order.deliveryBoyId.profileImage}`} 
+                                                    alt="Boy" 
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            ) : (
+                                                <User size={24} />
+                                            )}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontWeight: '800', fontSize: '0.95rem', color: 'hsl(var(--foreground))' }}>
+                                                {typeof order.deliveryBoyId === 'object' 
+                                                    ? `${order.deliveryBoyId.firstName} ${order.deliveryBoyId.lastName || ''}` 
+                                                    : 'Assigned Courier'}
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                {order.deliveryBoyId.mobile ? (
+                                                    <a href={`tel:${order.deliveryBoyId.mobile}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: '600' }}>
+                                                        {order.deliveryBoyId.mobile}
+                                                    </a>
+                                                ) : 'No Contact Info'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="section-head">
+                                        <Clock size={18} />
+                                        Order Placement
+                                    </div>
+                                    <div style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
+                                        This order was placed on {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString()}.
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    {/* Order Items */}
                     <div className="items-section">
                         <div className="section-head" style={{ marginBottom: '1.5rem' }}>
                             <ShoppingBag size={18} />
@@ -203,47 +316,27 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                                     <tr key={idx}>
                                         <td>
                                             <div className="item-info">
-                                                {item.image || item.productId?.images?.thumbnail ? (
-                                                    <img
-                                                        src={item.image
-                                                            ? (item.image.startsWith('http') ? item.image : `${BASE_IMAGE_URL}/${item.image}`)
-                                                            : (item.productId?.images?.thumbnail?.startsWith('http') ? item.productId.images.thumbnail : `${BASE_IMAGE_URL}/${item.productId.images.thumbnail}`)
-                                                        }
-                                                        alt={item.name}
-                                                        className="item-img"
-                                                        onError={(e) => {
-                                                            e.target.onerror = null;
-                                                            e.target.style.display = 'none';
-                                                            const placeholder = e.target.parentElement.querySelector('.item-img-placeholder');
-                                                            if (placeholder) placeholder.style.display = 'flex';
-                                                        }}
-                                                    />
-                                                ) : null}
-                                                <div
-                                                    className="item-img-placeholder"
-                                                    style={{
-                                                        display: item.image ? 'none' : 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        background: 'hsl(var(--secondary) / 0.3)',
-                                                        borderRadius: '8px',
-                                                        width: '48px',
-                                                        height: '48px',
-                                                        color: 'hsl(var(--muted-foreground))'
-                                                    }}
-                                                >
-                                                    <Package size={20} />
-                                                </div>
                                                 <div>
                                                     <div className="item-name">{item.name}</div>
                                                     <div className="item-meta">{item.unit}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{RS}{item.price?.toFixed(2)}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                {item.mrp && item.mrp > (item.finalSellingPrice || item.price) && (
+                                                    <span className="original-mrp">
+                                                        {RS}{item.mrp.toFixed(2)}
+                                                    </span>
+                                                )}
+                                                <span className="final-price">
+                                                    {RS}{(item.finalSellingPrice || item.price)?.toFixed(2)}
+                                                </span>
+                                            </div>
+                                        </td>
                                         <td>x{item.quantity}</td>
                                         <td style={{ textAlign: 'right', fontWeight: '700' }}>
-                                            {RS}{(item.price * item.quantity).toFixed(2)}
+                                            {RS}{((item.finalSellingPrice || item.price) * item.quantity).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))}
@@ -251,7 +344,6 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                         </table>
                     </div>
 
-                    {/* Price Summary */}
                     <div className="price-summary">
                         <div className="summary-row">
                             <span className="info-label">Subtotal</span>
@@ -261,12 +353,6 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                             <span className="info-label">Delivery Fee</span>
                             <span className="info-value">{RS}{order.deliveryCharge?.toFixed(2)}</span>
                         </div>
-                        {order.tax > 0 && (
-                            <div className="summary-row">
-                                <span className="info-label">Tax</span>
-                                <span className="info-value">{RS}{order.tax?.toFixed(2)}</span>
-                            </div>
-                        )}
                         <div className="summary-row total">
                             <span>Total Amount</span>
                             <span>{RS}{order.finalAmount?.toFixed(2)}</span>
@@ -277,48 +363,49 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                 <footer className="modal-footer">
                     <div className="status-manager" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                         <label style={{ fontWeight: '600', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Update Status:</label>
-
-
-                        {/* Current status chip */}
                         <span className={`status-badge ${currentStatus?.toLowerCase()}`} style={{ margin: '0 4px' }}>
                             {getStatusIcon(currentStatus)}
                             {currentStatus}
                         </span>
-
-                        {/* Step-forward button â€” only if next step exists */}
                         {nextStatus && (
                             <button
                                 className="primary-button"
                                 onClick={() => handleStatusChange(nextStatus)}
                                 disabled={updating}
-                                title={`Advance to ${nextStatus}`}
                                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                             >
-                                {nextStatus}
+                                {nextStatus.replace(/([A-Z])/g, ' $1').trim()}
                                 <ChevronRight size={15} />
                             </button>
                         )}
-
-                        {/* Cancel â€” shown unless already cancelled or delivered */}
                         {canCancel && (
-                            <button
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '6px',
-                                    marginLeft: 'auto', background: 'transparent',
-                                    border: '1px solid hsl(var(--destructive) / 0.5)', color: '#dc2626',
-                                    borderRadius: '8px', padding: '6px 14px', cursor: 'pointer', fontWeight: '600'
-                                }}
-                                onClick={() => handleStatusChange('Cancelled')}
-                                disabled={updating}
-                            >
-                                <XCircle size={15} />
-                                Cancel Order
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
+                                <button
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        background: 'transparent',
+                                        border: '1px solid #f59e0b', color: '#d97706',
+                                        borderRadius: '8px', padding: '6px 14px', cursor: 'pointer', fontWeight: '600'
+                                    }}
+                                    onClick={() => handleStatusChange('OutOfStock')}
+                                    disabled={updating}
+                                >
+                                    Out Of Stock
+                                </button>
+                                <button
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        background: 'transparent',
+                                        border: '1px solid hsl(var(--destructive) / 0.5)', color: '#dc2626',
+                                        borderRadius: '8px', padding: '6px 14px', cursor: 'pointer', fontWeight: '600'
+                                    }}
+                                    onClick={() => handleStatusChange('Cancelled')}
+                                    disabled={updating}
+                                >
+                                    Cancel Order
+                                </button>
+                            </div>
                         )}
-
-                        {/* Terminal states */}
-                        {isCancelled && <span style={{ color: '#dc2626', fontWeight: '700', fontSize: '0.85rem' }}>This order has been cancelled.</span>}
-                        {isDelivered && <span style={{ color: '#166534', fontWeight: '700', fontSize: '0.85rem' }}>Order successfully delivered.</span>}
                     </div>
                     <div>
                         <button className="primary-button" onClick={onClose}>
@@ -327,6 +414,63 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                     </div>
                 </footer>
             </div>
+
+            <DeliveryBoySelectionModal 
+                isOpen={showSelectionModal}
+                orderId={orderId}
+                onClose={() => setShowSelectionModal(false)}
+                onSelect={onAssignmentComplete}
+            />
+
+            {showCODPrompt && (
+                <div className="fixed-overlay fade-in" style={{ zIndex: 100000 }}>
+                    <div className="cod-confirmation-card glass shadow-xl scale-in" style={{ background: 'hsl(var(--card))' }}>
+                        <div className="cod-modal-header">
+                            <div className="cod-icon-wrapper">
+                                <Banknote size={32} color="hsl(var(--primary))" />
+                            </div>
+                            <button className="close-modal-btn" onClick={() => setShowCODPrompt(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="cod-modal-body" style={{ textAlign: 'center' }}>
+                            <h2 className="cod-modal-title">Payment Collection</h2>
+                            <p className="cod-modal-subtitle">
+                                This is a <strong>Cash on Delivery</strong> order. Please confirm that you have collected the cash from the customer.
+                            </p>
+                            
+                            <div className="amount-collection-box" style={{ marginInline: 'auto' }}>
+                                <span className="amount-label">COLLECT CASH</span>
+                                <div className="amount-value">
+                                    <span className="currency-symbol">RS</span>
+                                    {order.finalAmount?.toFixed(2)}
+                                </div>
+                                <div className="order-ref">Order #{order.orderId}</div>
+                            </div>
+                        </div>
+
+                        <div className="cod-modal-footer">
+                            <button 
+                                className="cancel-modal-btn" 
+                                onClick={() => setShowCODPrompt(false)}
+                            >
+                                Not yet
+                            </button>
+                            <button 
+                                className="confirm-collection-btn"
+                                onClick={() => {
+                                    setShowCODPrompt(false);
+                                    performStatusUpdate(pendingStatus);
+                                }}
+                            >
+                                <CheckCircle2 size={18} />
+                                Collected & Delivered
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 

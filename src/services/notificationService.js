@@ -20,6 +20,29 @@ const notificationService = {
     markAllAsRead: async () => {
         return await apiClient('/private/notifications/read-all', { method: 'PATCH' });
     },
+
+    /**
+     * Send a push notification from the admin panel.
+     * @param {object} payload - { title, message, userIds?, topic? }
+     *   - userIds: string[] — send to specific users (omit for broadcast to all)
+     *   - topic: string — send to FCM topic (e.g. "all_users", "offers")
+     */
+    sendPushNotification: async (payload) => {
+        return await apiClient('/private/push-notifications/send', {
+            method: 'POST',
+            body: payload,
+        });
+    },
+
+    /** Get push notification send history (admin-sent broadcasts) */
+    getPushHistory: async () => {
+        return await apiClient('/private/push-notifications/history');
+    },
+
+    /** Fetch specific recipients for a history record */
+    getHistoryRecipients: async (historyId) => {
+        return await apiClient(`/private/push-notifications/history/${historyId}/recipients`);
+    },
 };
 
 export default notificationService;

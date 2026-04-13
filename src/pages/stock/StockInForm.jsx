@@ -189,7 +189,10 @@ const StockInForm = () => {
         e.preventDefault();
 
         if (!formData.productId) return toast.error('Please select a product');
-        // Only require variant when product is explicitly a Variant-type
+        
+        // Final protection: if product is Single, variantId MUST be null
+        const isSingle = selectedProduct?.productType === 'Single';
+        
         if (selectedProduct?.productType === 'Variant' && !formData.variantId) {
             return toast.error('Please select a variant for this product');
         }
@@ -199,6 +202,8 @@ const StockInForm = () => {
         try {
             const payload = {
                 ...formData,
+                productId: formData.productId,
+                variantId: isSingle ? null : formData.variantId, // Explicitly enforce null for Single
                 quantity: Number(formData.quantity),
                 pricing: {
                     mrp: Number(formData.mrp),
@@ -211,11 +216,6 @@ const StockInForm = () => {
                 }
             };
 
-            // Ensure variantId is null for Single products
-            if (selectedProduct?.productType === 'Single') {
-                payload.variantId = null;
-            }
-
             if (isEditMode) {
                 await stockService.updateStockIn(batchId, payload);
                 toast.success('Batch updated successfully!');
@@ -225,7 +225,9 @@ const StockInForm = () => {
             }
             navigate('/stock');
         } catch (error) {
-            toast.error(error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'add'} stock`);
+            console.error('Submission error:', error);
+            const errorMessage = error.response?.data?.message || error.message || `Failed to ${isEditMode ? 'update' : 'add'} stock`;
+            toast.error(errorMessage);
         } finally {
             setIsSaving(false);
         }

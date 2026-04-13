@@ -40,8 +40,7 @@ const ListOrders = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Shared socket from context
-    const { newOrderEvent, clearNewOrderEvent } = useSocket();
-
+    const { newOrderEvent, clearNewOrderEvent, newNotifEvent } = useSocket();
 
     const statusTabs = [
         { id: 'All', label: 'All Orders', icon: <ShoppingBag size={16} /> },
@@ -90,15 +89,12 @@ const ListOrders = () => {
         clearNewOrderEvent();
     }, [newOrderEvent, currentPage, activeTab, clearNewOrderEvent]);
 
-    const handleUpdateStatus = async (orderId, newStatus) => {
-        try {
-            await orderService.updateOrderStatus(orderId, newStatus);
-            toast.success('Order status updated');
-            fetchOrders();
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
+    // React to order status updates (via newNotifEvent)
+    useEffect(() => {
+        if (!newNotifEvent) return;
+        // Re-fetch to get updated statuses if an order status changed
+        fetchOrders();
+    }, [newNotifEvent, fetchOrders]);
 
     const handleViewDetails = (id) => {
         setSelectedOrderId(id);
@@ -190,7 +186,12 @@ const ListOrders = () => {
                                         </span>
                                     </td>
                                     <td>
-                                        <div className="amount-text">RS{order.finalAmount?.toFixed(2)}</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <div className="amount-text">RS{order.finalAmount?.toFixed(2)}</div>
+                                            <span className={`payment-badge ${(order.paymentStatus === 'PAID' || order.paymentStatus === 'Completed') ? 'paid' : 'pending'}`}>
+                                                {order.paymentMethod === 'Online' ? 'PAID' : order.paymentMethod}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td>
                                         <span className={`status-badge ${order.orderStatus?.toLowerCase()}`}>

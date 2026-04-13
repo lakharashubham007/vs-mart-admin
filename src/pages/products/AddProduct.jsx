@@ -38,6 +38,7 @@ const AddProduct = () => {
         pricing: {
             mrp: '',
             sellingPrice: '',
+            finalSellingPrice: '',
             costPrice: '',
             taxId: '',
             discountType: 'Fixed',
@@ -132,7 +133,7 @@ const AddProduct = () => {
                         newPricing.finalSellingPrice = Math.round(Math.max(0, mrp - discount));
                     }
                 } else {
-                    newPricing.finalSellingPrice = newPricing.sellingPrice || 0;
+                    newPricing.finalSellingPrice = newPricing.sellingPrice;
                 }
             }
             // If Final Selling Price is manually changed, reverse-calculate the Discount
@@ -172,16 +173,46 @@ const AddProduct = () => {
     const handleThumbnailChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Logic limit: 5MB
+            if (file.size > 5 * 1024 * 1024) {
+                return toast.error('Thumbnail exceeds 5MB limit');
+            }
             setImages(prev => ({ ...prev, thumbnail: file }));
             setPreviews(prev => ({ ...prev, thumbnail: URL.createObjectURL(file) }));
         }
     };
 
+    const removeThumbnail = (e) => {
+        e.stopPropagation();
+        setImages(prev => ({ ...prev, thumbnail: null }));
+        setPreviews(prev => ({ ...prev, thumbnail: '' }));
+        // Reset the input field so same file can be selected again
+        const input = document.getElementById('thumbInput');
+        if (input) input.value = '';
+    };
+
     const handleGalleryChange = (e) => {
         const files = Array.from(e.target.files);
-        setImages(prev => ({ ...prev, gallery: [...prev.gallery, ...files] }));
-        const newPreviews = files.map(f => URL.createObjectURL(f));
-        setPreviews(prev => ({ ...prev, gallery: [...prev.gallery, ...newPreviews] }));
+        const validFiles = [];
+        let skipped = 0;
+
+        files.forEach(file => {
+            if (file.size <= 5 * 1024 * 1024) {
+                validFiles.push(file);
+            } else {
+                skipped++;
+            }
+        });
+
+        if (skipped > 0) {
+            toast.error(`${skipped} images skipped (exceed 5MB limit)`);
+        }
+
+        if (validFiles.length > 0) {
+            setImages(prev => ({ ...prev, gallery: [...prev.gallery, ...validFiles] }));
+            const newPreviews = validFiles.map(f => URL.createObjectURL(f));
+            setPreviews(prev => ({ ...prev, gallery: [...prev.gallery, ...newPreviews] }));
+        }
     };
 
     const removeGalleryImage = (index) => {
@@ -189,7 +220,7 @@ const AddProduct = () => {
         setPreviews(prev => ({ ...prev, gallery: prev.gallery.filter((_, i) => i !== index) }));
     };
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Variant Builder Logic Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€â”€ Variant Builder Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const toggleAttribute = async (attrId) => {
         const alreadySelected = selectedAttributes.some(a => a._id === attrId);
@@ -317,7 +348,7 @@ const AddProduct = () => {
                         updatedVar.finalSellingPrice = Math.round(Math.max(0, mrp - discount));
                     }
                 } else {
-                    updatedVar.finalSellingPrice = updatedVar.price || 0;
+                    updatedVar.finalSellingPrice = updatedVar.price;
                 }
             } else if (field === 'finalSellingPrice') {
                 const fsp = parseFloat(updatedVar.finalSellingPrice) || 0;
@@ -378,7 +409,7 @@ const AddProduct = () => {
                         next.finalSellingPrice = Math.round(Math.max(0, mrp - discount));
                     }
                 } else {
-                    next.finalSellingPrice = next.price || 0;
+                    next.finalSellingPrice = next.price;
                 }
             } else if (name === 'finalSellingPrice') {
                 const fsp = parseFloat(next.finalSellingPrice) || 0;
@@ -407,7 +438,7 @@ const AddProduct = () => {
         }
     };
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Submit Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const handleSubmit = async () => {
         if (!formData.name || !formData.categoryId) return toast.error('Product Name and Category are required');
@@ -447,58 +478,47 @@ const AddProduct = () => {
         }
     };
 
-    // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Render Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    // â”€â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const comboCount = getComboCount();
 
     return (
         <div className="product-page-container fade-in">
             <div className="product-content-pane">
-                <header className="internal-page-header" style={{ padding: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', color: 'hsl(var(--foreground))' }}>
-                                    <ArrowLeft size={18} />
-                                </button>
-                                <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'hsl(var(--primary))' }}>
-                                    Catalog / New Product
-                                </span>
-                            </div>
-                            <h1 style={{ fontSize: '1.6rem', fontWeight: '800', margin: '0 0 4px 0', color: 'hsl(var(--foreground))' }}>
-                                {formData.name || 'Create New Product'}
-                            </h1>
-                            <p style={{ margin: 0, color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>
-                                Define standard or variant-based products for the catalog.
-                            </p>
+                <header className="product-header">
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                            <button className="product-btn-icon" onClick={() => navigate(-1)} title="Back to list">
+                                <ArrowLeft size={16} />
+                            </button>
+                            <h1>{formData.name || 'Create New Product'}</h1>
                         </div>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--secondary) / 0.5)', padding: '0.4rem 0.8rem', borderRadius: '20px' }}>
-                            Phase {activeTab} / 3
-                        </span>
+                        <p>Define standard or variant-based products for the catalog.</p>
                     </div>
-
-                    <div className="product-tab-navbar">
-                        {[
-                            { id: 1, label: 'General Info', icon: <Package size={16} /> },
-                            { id: 2, label: 'Pricing & Stock', icon: <DollarSign size={16} /> },
-                            { id: 3, label: 'Media', icon: <ImageIcon size={16} /> },
-                        ].map(tab => (
-                            <div key={tab.id} className={`tab-nav-item ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
-                                {tab.icon}
-                                <span>{tab.label}</span>
-                            </div>
-                        ))}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+                        <div className="product-tab-navbar">
+                            {[
+                                { id: 1, label: 'General Info', icon: <Package size={16} /> },
+                                { id: 2, label: 'Pricing & Stock', icon: <DollarSign size={16} /> },
+                                { id: 3, label: 'Media', icon: <ImageIcon size={16} /> },
+                            ].map(tab => (
+                                <div key={tab.id} className={`tab-nav-item ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+                                    {tab.icon}
+                                    <span>{tab.label}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </header>
 
-                <div className="product-glass-card" style={{ padding: '2rem', overflow: 'visible' }}>
+                <div className="product-glass-card">
                     <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid hsl(var(--border)/0.2)', paddingBottom: '1rem' }}>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'hsl(var(--primary))', margin: 0 }}>
                             {['1. General Information', '2. Pricing & Initial Stock', '3. Media Assets'][activeTab - 1]}
                         </h3>
                     </div>
 
-                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ Tab 1: General Info Ã¢â€â‚¬Ã¢â€â‚¬ */}
+                    {/* â”€â”€ Tab 1: General Info â”€â”€ */}
                     {activeTab === 1 && (
                         <div className="animate-in fade-in">
                             <div className="product-grid">
@@ -579,7 +599,7 @@ const AddProduct = () => {
                         </div>
                     )}
 
-                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ Tab 2: Pricing & Stock Ã¢â€â‚¬Ã¢â€â‚¬ */}
+                    {/* â”€â”€ Tab 2: Pricing & Stock â”€â”€ */}
                     {activeTab === 2 && (
                         <div className="animate-in fade-in">
                             {/* Product Type Toggle */}
@@ -596,7 +616,7 @@ const AddProduct = () => {
                                 </label>
                             </div>
 
-                            {/* Ã¢â€â‚¬Ã¢â€â‚¬ Single Product Pricing (Initial Batch) Ã¢â€â‚¬Ã¢â€â‚¬ */}
+                            {/* â”€â”€ Single Product Pricing (Initial Batch) â”€â”€ */}
                             {formData.productType === 'Single' && (
                                 <div className="product-grid">
                                     <div style={{ gridColumn: '1 / -1', padding: '0.8rem', background: 'hsl(var(--primary) / 0.05)', borderRadius: '8px', borderLeft: '4px solid hsl(var(--primary))', marginBottom: '1rem' }}>
@@ -628,18 +648,18 @@ const AddProduct = () => {
                                         />
                                     </div>
                                     <div className="product-field-group">
-                                        <label className="product-label">MRP (Ã¢â€šÂ¹)</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="mrp" className="product-input" value={formData.pricing.mrp} onChange={handlePricingChange} placeholder="0.00" />
+                                        <label className="product-label">MRP (â‚¹)</label>
+                                        <input type="number" min="0" onWheel={(e) => e.currentTarget.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="mrp" className="product-input" value={formData.pricing.mrp} onChange={handlePricingChange} placeholder="0.00" />
                                     </div>
                                     <div className="product-field-group">
-                                        <label className="product-label">Standard Selling Price (Ã¢â€šÂ¹) *</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="sellingPrice" className="product-input" value={formData.pricing.sellingPrice} onChange={handlePricingChange} placeholder="0.00" />
+                                        <label className="product-label">Standard Selling Price (â‚¹) *</label>
+                                        <input type="number" min="0" onWheel={(e) => e.currentTarget.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="sellingPrice" className="product-input" value={formData.pricing.sellingPrice} onChange={handlePricingChange} placeholder="0.00" />
                                     </div>
                                     <div className="product-field-group">
                                         <label className="product-label">Discount Type</label>
                                         <CustomSelect
                                             options={[
-                                                { value: 'Fixed', label: 'Fixed Amount (Ã¢â€šÂ¹)' },
+                                                { value: 'Fixed', label: 'Fixed Amount (â‚¹)' },
                                                 { value: 'Percentage', label: 'Percentage (%)' }
                                             ]}
                                             value={formData.pricing.discountType || 'Fixed'}
@@ -649,19 +669,19 @@ const AddProduct = () => {
                                     </div>
                                     <div className="product-field-group">
                                         <label className="product-label">Discount Value</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="discountValue" className="product-input" value={formData.pricing.discountValue} onChange={handlePricingChange} placeholder="0" />
+                                        <input type="number" min="0" onWheel={(e) => e.currentTarget.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="discountValue" className="product-input" value={formData.pricing.discountValue} onChange={handlePricingChange} placeholder="0" />
                                     </div>
                                     <div className="product-field-group">
-                                        <label className="product-label">Final Selling Price (Ã¢â€šÂ¹)</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="finalSellingPrice" className="product-input" style={{ fontWeight: 800, fontSize: '1.1rem', color: 'hsl(var(--primary))', background: 'hsl(var(--secondary)/0.3)' }} value={formData.pricing.finalSellingPrice} onChange={handlePricingChange} placeholder="0.00" />
+                                        <label className="product-label">Final Selling Price (â‚¹)</label>
+                                        <input type="number" min="0" onWheel={(e) => e.currentTarget.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="finalSellingPrice" className="product-input" style={{ fontWeight: 800, fontSize: '1.1rem', color: 'hsl(var(--primary))', background: 'hsl(var(--secondary)/0.3)' }} value={formData.pricing.finalSellingPrice} onChange={handlePricingChange} placeholder="0.00" />
                                     </div>
                                     <div className="product-field-group">
-                                        <label className="product-label">Cost Price (Ã¢â€šÂ¹)</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="costPrice" className="product-input" value={formData.pricing.costPrice} onChange={handlePricingChange} placeholder="0.00" />
+                                        <label className="product-label">Cost Price (â‚¹)</label>
+                                        <input type="number" min="0" onWheel={(e) => e.currentTarget.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="costPrice" className="product-input" value={formData.pricing.costPrice} onChange={handlePricingChange} placeholder="0.00" />
                                     </div>
                                     <div className="product-field-group">
                                         <label className="product-label">Initial Stock Quantity *</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="quantity" className="product-input" style={{ fontWeight: 700, borderColor: 'hsl(var(--primary) / 0.3)' }} value={formData.pricing.quantity} onChange={handlePricingChange} placeholder="0" />
+                                        <input type="number" min="0" onWheel={(e) => e.currentTarget.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="quantity" className="product-input" style={{ fontWeight: 700, borderColor: 'hsl(var(--primary) / 0.3)' }} value={formData.pricing.quantity} onChange={handlePricingChange} placeholder="0" />
                                     </div>
                                     <div className="product-field-group">
                                         <label className="product-label">Min Stock Alert</label>
@@ -670,7 +690,7 @@ const AddProduct = () => {
                                 </div>
                             )}
 
-                            {/* Ã¢â€â‚¬Ã¢â€â‚¬ Variant Matrix Builder Ã¢â€â‚¬Ã¢â€â‚¬ */}
+                            {/* â”€â”€ Variant Matrix Builder â”€â”€ */}
                             {formData.productType === 'Variant' && (
                                 <div className="variant-builder-section">
 
@@ -794,399 +814,325 @@ const AddProduct = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="vb-col-header" style={{ gridTemplateColumns: 'minmax(150px, 1.5fr) minmax(130px, 1fr) 0.8fr 0.7fr 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr 0.8fr 0.8fr 40px 40px' }}>
+                                                <div className="vb-col-header">
                                                     <div>VARIANT</div>
                                                     <div>SKU</div>
-                                                    <div>MRP</div>
-                                                    <div>TYPE</div>
-                                                    <div>DISC.</div>
-                                                    <div>SELL PRICE</div>
-                                                    <div>FINAL PRICE</div>
-                                                    <div>COST PRICE</div>
-                                                    <div>TAX</div>
-                                                    <div>STOCK</div>
-                                                    <div>MIN.</div>
-                                                    <div>EDIT</div>
-                                                    <div>DEL</div>
+                                                    <div className="text-center">STOCK</div>
+                                                    <div className="text-center">MIN</div>
+                                                    <div className="text-center">MRP</div>
+                                                    <div className="text-center">PRICE</div>
+                                                    <div className="text-center">TAX</div>
+                                                    <div className="text-center">ACTIONS</div>
                                                 </div>
-                                            </div>
 
-                                            {/* Body Card */}
-                                            <div className="vb-step-card" style={{ padding: 0, overflow: 'hidden' }}>
-                                                <div style={{ paddingBottom: '1rem' }}>
+                                                <div className="vb-table-body" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                                     {formData.variants.map((v, idx) => (
-                                                        <div key={idx} className="vb-variant-row" style={{ gridTemplateColumns: 'minmax(150px, 1.5fr) minmax(130px, 1fr) 0.8fr 0.7fr 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr 0.8fr 0.8fr 40px 40px' }} onClick={() => { setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }}>
-                                                            <div data-label="Combination">
-                                                                <div className="vb-badge-group">
-                                                                    {v.variantValues.map((val, vi) => (
-                                                                        <span key={vi} className="vb-attr-badge">
-                                                                            <span className="vb-badge-type">{val.typeName}:</span> {val.valueName}
-                                                                        </span>
+                                                        <div key={idx} className="vb-variant-row">
+                                                            <div>
+                                                                <div className="variant-badge-group">
+                                                                    {v.variantValues.map((vv, i) => (
+                                                                        <div key={i} className="variant-attr-badge" title={vv.typeName}>
+                                                                            {vv.colorCode && (
+                                                                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: vv.colorCode, marginRight: 4, border: '1px solid rgba(0,0,0,0.1)' }} />
+                                                                            )}
+                                                                            {vv.valueName}
+                                                                        </div>
                                                                     ))}
                                                                 </div>
                                                             </div>
-                                                            <div data-label="SKU">
-                                                                <div style={{ display: 'flex', gap: '0.3rem', width: '100%', alignItems: 'center' }}>
-                                                                    <input type='text' className="vb-row-input" style={{ fontSize: '0.75rem', fontFamily: 'monospace' }} placeholder="AUTO" value={v.sku} onChange={(e) => updateVariantRow(idx, 'sku', e.target.value)} onClick={(e) => e.stopPropagation()} />
-                                                                    <button className="vb-icon-btn" style={{ padding: 4 }} onClick={(e) => { e.stopPropagation(); generateSKUAction('variant', idx); }}><RefreshCw size={10} /></button>
+                                                            <div>
+                                                                <div style={{ display: 'flex', gap: '4px', width: '100%' }}>
+                                                                    <input className="vb-row-input" style={{ flex: 1, textTransform: 'uppercase', fontSize: '0.7rem' }} value={v.sku} onChange={(e) => updateVariantRow(idx, 'sku', e.target.value)} placeholder="SKU" />
+                                                                    <button className="vb-icon-btn small" onClick={() => generateSKUAction('variant', idx)}><RefreshCw size={12} /></button>
                                                                 </div>
                                                             </div>
-                                                            <div data-label="MRP">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.mrp} onChange={(e) => updateVariantRow(idx, 'mrp', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
+                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.quantity} onChange={(e) => updateVariantRow(idx, 'quantity', e.target.value)} placeholder="0" /></div>
+                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.minStock} onChange={(e) => updateVariantRow(idx, 'minStock', e.target.value)} placeholder="0" /></div>
+                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.mrp} onChange={(e) => updateVariantRow(idx, 'mrp', e.target.value)} placeholder="0" /></div>
+                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.price} onChange={(e) => updateVariantRow(idx, 'price', e.target.value)} placeholder="0" /></div>
+                                                            <div>
+                                                                <select className="vb-row-select" value={v.taxId} onChange={(e) => updateVariantRow(idx, 'taxId', e.target.value)}>
+                                                                    <option value="">No Tax</option>
+                                                                    {masters.taxes.map(t => <option key={t._id} value={t._id}>{t.rate}%</option>)}
+                                                                </select>
                                                             </div>
-                                                            <div data-label="Type">
-                                                                <CustomSelect
-                                                                    size="small"
-                                                                    options={[
-                                                                        { value: 'Percentage', label: '%' },
-                                                                        { value: 'Fixed', label: 'RS' }
-                                                                    ]}
-                                                                    value={v.discountType}
-                                                                    onChange={(val) => updateVariantRow(idx, 'discountType', val)}
-                                                                />
-                                                            </div>
-                                                            <div data-label="Discount">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.discountValue || 0} onChange={(e) => updateVariantRow(idx, 'discountValue', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Selling Price">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" style={{ color: 'hsl(var(--primary))', fontWeight: '700' }} value={v.price} onChange={(e) => updateVariantRow(idx, 'price', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Final Price">
-                                                                <input type='number' min='0' className="vb-row-input" style={{ color: 'hsl(var(--primary))', background: 'hsl(var(--primary)/0.05)', fontWeight: 800 }} value={v.finalSellingPrice} readOnly onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Cost Price">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.costPrice} onChange={(e) => updateVariantRow(idx, 'costPrice', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0.00" />
-                                                            </div>
-                                                            <div data-label="Tax">
-                                                                <CustomSelect
-                                                                    size="small"
-                                                                    options={[{ value: '', label: 'Exempt' }, ...masters.taxes.filter(t => t && t.name).map(tx => ({ value: tx._id, label: tx.name }))]}
-                                                                    value={v.taxId}
-                                                                    onChange={(val) => updateVariantRow(idx, 'taxId', val)}
-                                                                />
-                                                            </div>
-                                                            <div data-label="Stock">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.quantity} onChange={(e) => updateVariantRow(idx, 'quantity', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Min. Stock">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.minStock} onChange={(e) => updateVariantRow(idx, 'minStock', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Edit">
-                                                                <button className="vb-icon-btn" onClick={(e) => { e.stopPropagation(); setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }}><Edit2 size={13} /></button>
-                                                            </div>
-                                                            <div data-label="Delete">
-                                                                <button className="vb-delete-btn" onClick={(e) => { e.stopPropagation(); deleteVariantRow(idx); }}><Trash2 size={14} /></button>
+                                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                                <button className="vb-action-btn edit" onClick={() => { setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }} title="Advanced Edit"><Edit2 size={12} /></button>
+                                                                <button className="vb-action-btn delete" onClick={() => deleteVariantRow(idx)} title="Remove Variant"><Trash2 size={12} /></button>
                                                             </div>
                                                         </div>
                                                     ))}
                                                 </div>
                                             </div>
-                                                </div>
-                                            )}
                                         </div>
                                     )}
                                 </div>
                             )}
-                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ Tab 3: Visuals Ã¢â€â‚¬Ã¢â€â‚¬ */}
+                        </div>
+                    )}
+
+                    {/* â”€â”€ Tab 3: Media â”€â”€ */}
                     {activeTab === 3 && (
                         <div className="animate-in fade-in">
                             <div className="product-grid">
-                                <div className="product-field-group">
-                                    <label className="product-label">Thumbnail Image *</label>
-                                    <div className="image-upload-zone" style={{ height: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+                                {/* Thumbnail */}
+                                <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
+                                    <label className="product-label">Standard Thumbnail *</label>
+                                    <div className="image-upload-zone" onClick={() => document.getElementById('thumbInput').click()} style={{ height: '240px', cursor: 'pointer', border: '2px dashed hsl(var(--border)/0.4)', borderRadius: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--card)/0.2)', position: 'relative', overflow: 'hidden' }}>
                                         {previews.thumbnail ? (
-                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--secondary)/0.1)', position: 'relative' }}>
-                                                <img src={previews.thumbnail} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                                                <button style={{ position: 'absolute', top: 12, right: 12, padding: '8px 12px', background: 'hsl(var(--destructive))', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)', zIndex: 10, transition: 'all 0.2s' }}
-                                                    onClick={() => { setImages(p => ({ ...p, thumbnail: null })); setPreviews(p => ({ ...p, thumbnail: '' })); }}
-                                                    onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                                                    onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-                                                    <X size={14} strokeWidth={3} /> Remove
+                                            <>
+                                                <img src={previews.thumbnail} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: '0.3s' }} className="hover-overlay">
+                                                    <Edit2 color="white" size={32} />
+                                                </div>
+                                                <button
+                                                    onClick={removeThumbnail}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: 10,
+                                                        right: 10,
+                                                        background: 'rgba(239, 68, 68, 0.9)',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '50%',
+                                                        width: 32,
+                                                        height: 32,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        cursor: 'pointer',
+                                                        zIndex: 20,
+                                                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                                                    }}
+                                                    title="Remove Thumbnail"
+                                                >
+                                                    <X size={18} />
                                                 </button>
-                                            </div>
+                                            </>
                                         ) : (
                                             <>
-                                                <div style={{ width: 48, height: 48, background: 'hsl(var(--primary)/0.1)', color: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '0.75rem', marginBottom: '0.5rem' }}><Plus size={24} /></div>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', opacity: 0.4, letterSpacing: '0.1em' }}>Main Product Image</span>
-                                                <input type="file" accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} onChange={handleThumbnailChange} />
+                                                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'hsl(var(--primary)/0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                                                    <ImageIcon size={32} color="hsl(var(--primary))" />
+                                                </div>
+                                                <p style={{ fontWeight: 700, margin: 0 }}>Click to upload thumbnail</p>
+                                                <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', textAlign: 'center' }}>
+                                                    Recommended: 2-3MB (Max 5MB) <br />
+                                                    800x800px (PNG/JPG)
+                                                </p>
                                             </>
                                         )}
+                                        <input id="thumbInput" type="file" hidden accept="image/*" onChange={handleThumbnailChange} />
                                     </div>
                                 </div>
 
-                                <div className="product-field-group">
-                                    <label className="product-label">Gallery Images</label>
-                                    <div className="image-upload-zone" style={{ height: 220, padding: '0.75rem', border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', overflowY: 'auto' }}>
-                                        {previews.gallery.map((src, i) => (
-                                            <div key={i} style={{ width: 80, height: 80, borderRadius: '0.75rem', overflow: 'hidden', position: 'relative', border: '1px solid hsl(var(--border)/0.2)' }}>
-                                                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                <button style={{ position: 'absolute', top: 4, right: 4, padding: '4px', background: 'hsl(var(--destructive))', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', display: 'flex', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', zIndex: 10 }} onClick={() => removeGalleryImage(i)}>
-                                                    <X size={10} strokeWidth={3} />
+                                {/* Gallery */}
+                                <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
+                                    <label className="product-label">Additional Gallery Images</label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
+                                        {previews.gallery.map((url, idx) => (
+                                            <div key={idx} style={{ position: 'relative', aspectRatio: '1/1', border: '1px solid hsl(var(--border)/0.4)', borderRadius: '0.75rem', overflow: 'hidden', background: 'white' }}>
+                                                <img src={url} alt="Gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <button onClick={() => removeGalleryImage(idx)} style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}>
+                                                    <X size={14} />
                                                 </button>
                                             </div>
                                         ))}
-                                        <div style={{ width: 80, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--primary)/0.05)', border: '1px solid hsl(var(--primary)/0.1)', borderRadius: '0.75rem', position: 'relative', cursor: 'pointer' }}>
-                                            <Plus size={20} style={{ color: 'hsl(var(--primary)/0.4)' }} />
-                                            <input type="file" multiple accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} onChange={handleGalleryChange} />
-                                        </div>
+                                        <button onClick={() => document.getElementById('galleryInput').click()} style={{ aspectRatio: '1/1', border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '0.75rem', background: 'hsl(var(--secondary)/0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: '0.3s' }}>
+                                            <Plus size={24} color="hsl(var(--muted-foreground))" />
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'hsl(var(--muted-foreground))', marginTop: 4 }}>Add Images</span>
+                                            <span style={{ fontSize: '0.6rem', color: 'hsl(var(--muted-foreground))' }}>Max 5MB each</span>
+                                        </button>
                                     </div>
+                                    <input id="galleryInput" type="file" hidden multiple accept="image/*" onChange={handleGalleryChange} />
                                 </div>
                             </div>
                         </div>
                     )}
-                </div>
 
-                <div className="action-footer" style={{ borderBottomLeftRadius: '20px', borderBottomRightRadius: '20px' }}>
-                    <button className="btn-premium-outline" onClick={() => navigate(-1)}>Exit Studio</button>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        {activeTab > 1 && <button className="btn-premium-outline" onClick={() => setActiveTab(activeTab - 1)}>Ã¢â€ Â Previous</button>}
-                        {activeTab < 3 ? (
-                            <button className="btn-premium-primary" onClick={() => setActiveTab(activeTab + 1)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                Next <ChevronRight size={18} />
-                            </button>
-                        ) : (
-                            <button className="btn-premium-primary" onClick={handleSubmit} disabled={isLoading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Save size={16} /> {isLoading ? 'Processing...' : 'Create Product'}
-                            </button>
-                        )}
+                    {/* â”€â”€ Navigation Footer â”€â”€ */}
+                    <div className="employee-form-footer">
+                        <button type="button" className="secondary-button" onClick={() => navigate(-1)} style={{ padding: '0.75rem 1.5rem' }}>Cancel</button>
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            {activeTab > 1 && (
+                                <button type="button" className="secondary-button" onClick={() => setActiveTab(activeTab - 1)} style={{ padding: '0.75rem 1.5rem' }}>
+                                    Previous
+                                </button>
+                            )}
+                            {activeTab < 3 ? (
+                                <button type="button" className="primary-button" onClick={() => setActiveTab(activeTab + 1)} style={{ padding: '0.75rem 2.5rem' }}>
+                                    Next Phase <ChevronRight size={18} />
+                                </button>
+                            ) : (
+                                <button type="button" className="primary-button" onClick={handleSubmit} disabled={isLoading} style={{ padding: '0.75rem 2.5rem' }}>
+                                    <Save size={18} /> {isLoading ? 'Saving...' : 'Drop in Catalog'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {isLoading && <Loader />}
+            {/* Modals for Quick Creation */}
+            {isCatModalOpen && (
+                <QuickCreateModal
+                    type="Category"
+                    onClose={() => setIsCatModalOpen(false)}
+                    onSuccess={(newCat) => {
+                        setMasters(prev => ({ ...prev, categories: [...prev.categories, newCat] }));
+                        setFormData(prev => ({ ...prev, categoryId: newCat._id }));
+                    }}
+                />
+            )}
+            {isSubCatModalOpen && (
+                <QuickCreateModal
+                    type="Sub Category"
+                    categoryId={formData.categoryId}
+                    onClose={() => setIsSubCatModalOpen(false)}
+                    onSuccess={(newSub) => {
+                        setMasters(prev => ({ ...prev, allSubCategories: [...prev.allSubCategories, newSub], subCategories: [...prev.subCategories, newSub] }));
+                        setFormData(prev => ({ ...prev, subCategoryId: newSub._id }));
+                    }}
+                />
+            )}
+            {isBrandModalOpen && (
+                <QuickCreateModal
+                    type="Brand"
+                    onClose={() => setIsBrandModalOpen(false)}
+                    onSuccess={(newBrand) => {
+                        setMasters(prev => ({ ...prev, brands: [...prev.brands, newBrand] }));
+                        setFormData(prev => ({ ...prev, brandId: newBrand._id }));
+                    }}
+                />
+            )}
+            {isUnitModalOpen && (
+                <QuickCreateModal
+                    type="Unit"
+                    onClose={() => setIsUnitModalOpen(false)}
+                    onSuccess={(newUnit) => {
+                        setMasters(prev => ({ ...prev, units: [...prev.units, newUnit] }));
+                        setFormData(prev => ({ ...prev, unitId: newUnit._id }));
+                    }}
+                />
+            )}
+            {isTaxModalOpen && (
+                <QuickCreateModal
+                    type="Tax"
+                    onClose={() => setIsTaxModalOpen(false)}
+                    onSuccess={(newTax) => {
+                        setMasters(prev => ({ ...prev, taxes: [...prev.taxes, newTax] }));
+                        setFormData(prev => ({ ...prev, pricing: { ...prev.pricing, taxId: newTax._id } }));
+                    }}
+                />
+            )}
+            {isAttrModalOpen && (
+                <QuickCreateModal
+                    type="Variant Attribute"
+                    onClose={() => setIsAttrModalOpen(false)}
+                    onSuccess={(newAttr) => {
+                        setMasters(prev => ({ ...prev, variantAttributes: [...prev.variantAttributes, { ...newAttr, values: [] }] }));
+                    }}
+                />
+            )}
+            {isValueModalOpen && activeAttrForValue && (
+                <QuickCreateModal
+                    type="Variant Value"
+                    variantTypeId={activeAttrForValue._id}
+                    onClose={() => { setIsValueModalOpen(false); setActiveAttrForValue(null); }}
+                    onSuccess={(newVal) => {
+                        setSelectedAttributes(prev => prev.map(a => a._id === activeAttrForValue._id ? { ...a, values: [...a.values, newVal] } : a));
+                        setSelectedValuesPerAttr(prev => ({ ...prev, [activeAttrForValue._id]: { ...prev[activeAttrForValue._id], [newVal._id]: true } }));
+                    }}
+                />
+            )}
 
-            <QuickCreateModal
-                isOpen={isCatModalOpen}
-                onClose={() => setIsCatModalOpen(false)}
-                type="Category"
-                masters={{ categories: masters.categories }}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, categories: [...prev.categories, created] }));
-                        setFormData(prev => ({ ...prev, categoryId: created._id, subCategoryId: '' }));
-                    }
-                    setIsCatModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isSubCatModalOpen}
-                onClose={() => setIsSubCatModalOpen(false)}
-                type="Subcategory"
-                masters={{ categories: masters.categories }}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => {
-                            const newAll = [...prev.allSubCategories, created];
-                            const newFiltered = formData.categoryId
-                                ? newAll.filter(s => (s.categoryId?._id || s.categoryId) === formData.categoryId)
-                                : prev.subCategories;
-                            return { ...prev, allSubCategories: newAll, subCategories: newFiltered };
-                        });
-                        setFormData(prev => ({ ...prev, subCategoryId: created._id }));
-                    }
-                    setIsSubCatModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isBrandModalOpen}
-                onClose={() => setIsBrandModalOpen(false)}
-                type="Brand"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, brands: [...prev.brands, created] }));
-                        setFormData(prev => ({ ...prev, brandId: created._id }));
-                    }
-                    setIsBrandModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isUnitModalOpen}
-                onClose={() => setIsUnitModalOpen(false)}
-                type="Unit"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, units: [...prev.units, created] }));
-                        setFormData(prev => ({ ...prev, unitId: created._id }));
-                    }
-                    setIsUnitModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isTaxModalOpen}
-                onClose={() => setIsTaxModalOpen(false)}
-                type="Tax"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, taxes: [...prev.taxes, created] }));
-                        setFormData(prev => ({ ...prev, pricing: { ...prev.pricing, taxId: created._id } }));
-                    }
-                    setIsTaxModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isAttrModalOpen}
-                onClose={() => setIsAttrModalOpen(false)}
-                type="Attribute"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, variantAttributes: [...prev.variantAttributes, created] }));
-                        // The user requested that we do NOT auto-select the new attribute automatically
-                        // toggleAttribute(created._id); 
-                    }
-                    setIsAttrModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isValueModalOpen}
-                onClose={() => { setIsValueModalOpen(false); setActiveAttrForValue(null); }}
-                type="Value"
-                masters={{ variantTypeId: activeAttrForValue?._id, inputType: activeAttrForValue?.inputType }}
-                editItem={null}
-                onSuccess={(created, result) => {
-                    const fullList = result?.variantValues || (created ? [created] : []);
-                    if (activeAttrForValue) {
-                        setMasters(prev => {
-                            const updatedAttrs = prev.variantAttributes.map(a => {
-                                if (a._id === activeAttrForValue._id) {
-                                    return { ...a, values: fullList };
-                                }
-                                return a;
-                            });
-                            return { ...prev, variantAttributes: updatedAttrs };
-                        });
-
-                        // Also update the selectedAttributes state which drives the immediate UI rendering
-                        setSelectedAttributes(prev => prev.map(a => {
-                            if (a._id === activeAttrForValue._id) {
-                                return { ...a, values: fullList };
-                            }
-                            return a;
-                        }));
-
-                        // Auto-toggle the newly created value if it was a single creation
-                        if (created?._id) {
-                            toggleValue(activeAttrForValue._id, created._id);
-                        }
-                    }
-                    setIsValueModalOpen(false);
-                }}
-            />
-            {
-                editingVariantData && editingVariantIndex !== null && createPortal(
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => { setEditingVariantData(null); setEditingVariantIndex(null); }}>
-                        <div className="quick-modal-container animate-in zoom-in" onClick={e => e.stopPropagation()} style={{ width: '650px', maxWidth: '95%', position: 'relative', margin: 0, maxHeight: '95vh', overflowY: 'auto' }}>
-                            <div className="quick-modal-gradient-bar" />
-                            <div className="quick-modal-content">
-                                <div className="quick-modal-header">
-                                    <div>
-                                        <h3 className="quick-modal-title">
-                                            <Zap size={20} style={{ color: 'hsl(var(--primary))' }} />
-                                            Edit Variant Data
-                                        </h3>
-                                        <p className="quick-modal-subtitle">Update pricing and stock for this specific variant</p>
-                                    </div>
-                                    <button onClick={() => { setEditingVariantData(null); setEditingVariantIndex(null); }} className="quick-modal-close-btn" title="Close Modal">
-                                        <X size={20} />
-                                    </button>
+            {/* Variant Edit Modal (Portal) */}
+            {editingVariantIndex !== null && editingVariantData && createPortal(
+                <div className="variant-edit-modal-overlay">
+                    <div className="variant-edit-modal">
+                        <div className="modal-header">
+                            <div>
+                                <h3>Edit Variant Combination</h3>
+                                <div className="modal-subtitle">
+                                    {editingVariantData.variantValues.map((vv, i) => (
+                                        <span key={vv.valueId} className="modal-badge">
+                                            {vv.typeName}: <strong>{vv.valueName}</strong>
+                                        </span>
+                                    ))}
                                 </div>
+                            </div>
+                            <button className="modal-close" onClick={() => { setEditingVariantIndex(null); setEditingVariantData(null); }}><X size={20} /></button>
+                        </div>
 
-                                <div className="quick-modal-form" style={{ marginTop: '1.5rem' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">SKU</label>
-                                            <div style={{ display: 'flex', gap: '0.4rem' }}>
-                                                <input type="text" className="quick-modal-input" name="sku" value={editingVariantData.sku} onChange={handleVariantEditChange} placeholder="AUTO" style={{ fontFamily: 'monospace', textTransform: 'uppercase' }} />
-                                                <button className="btn-premium-outline" style={{ padding: '0 0.75rem' }} onClick={() => generateSKUAction('variant', editingVariantIndex)} title="Regenerate">
-                                                    <RefreshCw size={13} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Cost Price</label>
-                                            <input type="number" min="0" onWheel={(e) => e.target.blur()} className="quick-modal-input" name="costPrice" value={editingVariantData.costPrice} onChange={handleVariantEditChange} placeholder="0.00" />
-                                        </div>
-
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">MRP</label>
-                                            <input type="number" min="0" onWheel={(e) => e.target.blur()} className="quick-modal-input" name="mrp" value={editingVariantData.mrp} onChange={handleVariantEditChange} placeholder="0.00" />
-                                        </div>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Selling Price</label>
-                                            <input type="number" min="0" onWheel={(e) => e.target.blur()} className="quick-modal-input" name="price" value={editingVariantData.price} onChange={handleVariantEditChange} placeholder="0.00" />
-                                        </div>
-
-                                        <div className="quick-modal-form-group" style={{ gridColumn: '1 / -1' }}>
-                                            <label className="quick-modal-label">Discount Configuration</label>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem' }}>
-                                                <CustomSelect
-                                                    options={[{ value: 'Percentage', label: 'Percentage (%)' }, { value: 'Fixed', label: 'Fixed Amount (Ã¢â€šÂ¹)' }]}
-                                                    value={editingVariantData.discountType}
-                                                    onChange={(val) => handleVariantEditChange({ target: { name: 'discountType', value: val } })}
-                                                    placeholder="Type"
-                                                />
-                                                <input type="number" min="0" onWheel={(e) => e.target.blur()} className="quick-modal-input" name="discountValue" value={editingVariantData.discountValue} onChange={handleVariantEditChange} placeholder="0" />
-                                            </div>
-                                        </div>
-
-                                        <div className="quick-modal-form-group" style={{ gridColumn: '1 / -1' }}>
-                                            <label className="quick-modal-label" style={{ color: 'hsl(var(--primary))' }}>Final Selling Price</label>
-                                            <input type="number" min="0" onWheel={(e) => e.target.blur()} className="quick-modal-input" style={{ fontWeight: 800, fontSize: '1.2rem', background: 'hsl(var(--primary)/0.05)', borderColor: 'hsl(var(--primary)/0.3)', color: 'hsl(var(--primary))', height: '3rem' }} name="finalSellingPrice" value={editingVariantData.finalSellingPrice} onChange={handleVariantEditChange} placeholder="0.00" />
-                                        </div>
-
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Stock Quantity</label>
-                                            <input type="number" min="0" onWheel={(e) => e.target.blur()} className="quick-modal-input" name="quantity" value={editingVariantData.quantity} onChange={handleVariantEditChange} placeholder="0" />
-                                        </div>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Min Stock Level</label>
-                                            <input type="number" min="0" onWheel={(e) => e.target.blur()} className="quick-modal-input" name="minStock" value={editingVariantData.minStock} onChange={handleVariantEditChange} placeholder="0" />
-                                        </div>
-
-                                        <div className="quick-modal-form-group" style={{ gridColumn: '1 / -1' }}>
-                                            <label className="quick-modal-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span>Tax Configuration</span>
-                                                <button type="button" className="add-new-chip-btn" onClick={() => setIsTaxModalOpen(true)}>
-                                                    <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                                    Add New
-                                                </button>
-                                            </label>
-                                            <CustomSelect
-                                                direction="up"
-                                                options={[{ value: '', label: 'No Tax' }, ...masters.taxes.filter(t => t && t.name).map(t => ({ value: t._id, label: `${t.name} (${t.rate || 0}%)` }))]}
-                                                value={editingVariantData.taxId}
-                                                onChange={(val) => handleVariantEditChange({ target: { name: 'taxId', value: val } })}
-                                                placeholder="Select Tax"
-                                            />
-                                        </div>
+                        <div className="modal-body">
+                            <div className="product-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem' }}>
+                                <div className="product-field-group">
+                                    <label className="product-label">SKU</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <input name="sku" className="product-input" style={{ flex: 1, textTransform: 'uppercase', fontSize: '0.85rem' }} value={editingVariantData.sku} onChange={handleVariantEditChange} />
+                                        <button className="vb-icon-btn" onClick={() => generateSKUAction('variant', editingVariantIndex)}><RefreshCw size={15} /></button>
                                     </div>
-
-                                    <div className="quick-modal-form-actions" style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border)/0.2)' }}>
-                                        <button type="button" className="quick-modal-submit-btn" style={{ width: '100%' }} onClick={handleSaveVariantRow}>
-                                            Save Variant Data
-                                        </button>
-                                    </div>
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Tax Config</label>
+                                    <CustomSelect
+                                        options={[{ value: '', label: 'None' }, ...masters.taxes.map(t => ({ value: t._id, label: `${t.name} (${t.rate}%)` }))]}
+                                        value={editingVariantData.taxId}
+                                        onChange={(val) => handleVariantEditChange({ target: { name: 'taxId', value: val } })}
+                                    />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">MRP (RS)</label>
+                                    <input type="number" min="0" onWheel={(e) => e.target.blur()} name="mrp" className="product-input" value={editingVariantData.mrp} onChange={handleVariantEditChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Selling Price (RS)</label>
+                                    <input type="number" min="0" onWheel={(e) => e.target.blur()} name="price" className="product-input" value={editingVariantData.price} onChange={handleVariantEditChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Discount Type</label>
+                                    <CustomSelect
+                                        options={[
+                                            { value: 'Fixed', label: 'Fixed amount (RS)' },
+                                            { value: 'Percentage', label: 'Percentage (%)' }
+                                        ]}
+                                        value={editingVariantData.discountType || 'Fixed'}
+                                        onChange={(val) => handleVariantEditChange({ target: { name: 'discountType', value: val } })}
+                                    />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Discount Value</label>
+                                    <input type="number" min="0" onWheel={(e) => e.target.blur()} name="discountValue" className="product-input" value={editingVariantData.discountValue} onChange={handleVariantEditChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Final Price</label>
+                                    <input type="number" className="product-input" style={{ fontWeight: 800, background: 'hsl(var(--secondary)/0.3)' }} value={editingVariantData.finalSellingPrice} readOnly />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Cost Price</label>
+                                    <input type="number" min="0" onWheel={(e) => e.target.blur()} name="costPrice" className="product-input" value={editingVariantData.costPrice} onChange={handleVariantEditChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Stock Quantity</label>
+                                    <input type="number" min="0" onWheel={(e) => e.target.blur()} name="quantity" className="product-input" style={{ borderColor: 'hsl(var(--primary)/0.3)', fontWeight: 700 }} value={editingVariantData.quantity} onChange={handleVariantEditChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Min Stock</label>
+                                    <input type="number" min="0" onWheel={(e) => e.target.blur()} name="minStock" className="product-input" value={editingVariantData.minStock} onChange={handleVariantEditChange} />
                                 </div>
                             </div>
                         </div>
-                    </div>, document.body
-                )
-            }</div>
+
+                        <div className="modal-footer">
+                            <button className="secondary-button" onClick={() => { setEditingVariantIndex(null); setEditingVariantData(null); }}>Discard</button>
+                            <button className="primary-button" onClick={handleSaveVariantRow}>Apply Changes</button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {isLoading && <Loader />}
+        </div>
     );
 };
 

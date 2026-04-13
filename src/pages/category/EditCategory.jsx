@@ -6,8 +6,6 @@ import productService from '../../services/productService';
 import Loader from '../../components/Loader';
 import './Category.css';
 
-import { BASE_IMAGE_URL } from '../../config/env';
-
 const EditCategory = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -35,6 +33,7 @@ const EditCategory = () => {
         addons: []
     });
 
+    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     useEffect(() => {
         fetchData();
@@ -65,7 +64,7 @@ const EditCategory = () => {
             });
 
             if (cat.image) {
-                setExistingImageUrl(`${BASE_IMAGE_URL}/public/category-image/${cat._id}`);
+                setExistingImageUrl(`${API_BASE_URL}/public/category-image/${cat._id}`);
             }
 
             setParentCategories(allCatsRes.categories || []);

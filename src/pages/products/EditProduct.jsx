@@ -11,7 +11,6 @@ import productService from '../../services/productService';
 import Loader from '../../components/Loader';
 import CustomSelect from '../../components/CustomSelect';
 import QuickCreateModal from '../../components/QuickCreateModal';
-import { BASE_IMAGE_URL } from '../../config/env';
 import './Product.css';
 
 const EditProduct = () => {
@@ -44,6 +43,7 @@ const EditProduct = () => {
             taxId: '',
             discountType: 'Fixed',
             discountValue: 0,
+            finalSellingPrice: 0,
             quantity: '',
             sku: '',
             minStock: 0
@@ -123,6 +123,7 @@ const EditProduct = () => {
                         taxId: p.pricing?.taxId?._id || p.pricing?.taxId || '',
                         discountType: p.pricing?.discountType || 'Fixed',
                         discountValue: p.pricing?.discountValue || 0,
+                        finalSellingPrice: p.pricing?.finalSellingPrice || p.pricing?.sellingPrice || '',
                         quantity: p.pricing?.quantity !== undefined ? p.pricing.quantity : (p.inventory?.quantity || ''),
                         sku: p.pricing?.sku || '',
                         minStock: p.pricing?.minStock !== undefined ? p.pricing.minStock : (p.inventory?.minStock || 0)
@@ -184,9 +185,9 @@ const EditProduct = () => {
 
                 if (p.images) {
                     setPreviews({
-                        thumbnail: p.images.thumbnail ? `${BASE_IMAGE_URL}/${p.images.thumbnail}` : '',
-                        gallery: p.images.gallery ? p.images.gallery.map(g => `${BASE_IMAGE_URL}/${g}`) : [],
-                        qrCode: p.qrCode ? `${BASE_IMAGE_URL}${p.qrCode}` : ''
+                        thumbnail: p.images.thumbnail ? `http://localhost:5000/${p.images.thumbnail}` : '',
+                        gallery: p.images.gallery ? p.images.gallery.map(g => `http://localhost:5000/${g}`) : [],
+                        qrCode: p.qrCode ? `http://localhost:5000${p.qrCode}` : ''
                     });
                 }
             } catch (error) {
@@ -224,7 +225,7 @@ const EditProduct = () => {
                         newPricing.finalSellingPrice = Math.round(Math.max(0, mrp - discount));
                     }
                 } else {
-                    newPricing.finalSellingPrice = newPricing.sellingPrice || 0;
+                    newPricing.finalSellingPrice = newPricing.sellingPrice;
                 }
             }
             // If Final Selling Price is manually changed, reverse-calculate the Discount
@@ -264,16 +265,46 @@ const EditProduct = () => {
     const handleThumbnailChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Logic limit: 5MB
+            if (file.size > 5 * 1024 * 1024) {
+                return toast.error('Thumbnail exceeds 5MB limit');
+            }
             setImages(prev => ({ ...prev, thumbnail: file }));
             setPreviews(prev => ({ ...prev, thumbnail: URL.createObjectURL(file) }));
         }
     };
 
+    const removeThumbnail = (e) => {
+        e.stopPropagation();
+        setImages(prev => ({ ...prev, thumbnail: null }));
+        setPreviews(prev => ({ ...prev, thumbnail: '' }));
+        // Reset the input field so same file can be selected again
+        const input = document.getElementById('thumbInput');
+        if (input) input.value = '';
+    };
+
     const handleGalleryChange = (e) => {
         const files = Array.from(e.target.files);
-        setImages(prev => ({ ...prev, gallery: [...prev.gallery, ...files] }));
-        const newPreviews = files.map(f => URL.createObjectURL(f));
-        setPreviews(prev => ({ ...prev, gallery: [...prev.gallery, ...newPreviews] }));
+        const validFiles = [];
+        let skipped = 0;
+
+        files.forEach(file => {
+            if (file.size <= 5 * 1024 * 1024) {
+                validFiles.push(file);
+            } else {
+                skipped++;
+            }
+        });
+
+        if (skipped > 0) {
+            toast.error(`${skipped} images skipped (exceed 5MB limit)`);
+        }
+
+        if (validFiles.length > 0) {
+            setImages(prev => ({ ...prev, gallery: [...prev.gallery, ...validFiles] }));
+            const newPreviews = validFiles.map(f => URL.createObjectURL(f));
+            setPreviews(prev => ({ ...prev, gallery: [...prev.gallery, ...newPreviews] }));
+        }
     };
 
     const removeGalleryImage = (index) => {
@@ -333,6 +364,8 @@ const EditProduct = () => {
         }
         return count;
     };
+
+    const comboCount = getComboCount();
 
     const generateMatrix = () => {
         const count = getComboCount();
@@ -409,7 +442,7 @@ const EditProduct = () => {
                         updatedVar.finalSellingPrice = Math.round(Math.max(0, mrp - discount));
                     }
                 } else {
-                    updatedVar.finalSellingPrice = updatedVar.price || 0;
+                    updatedVar.finalSellingPrice = updatedVar.price;
                 }
             } else if (field === 'finalSellingPrice') {
                 const fsp = parseFloat(updatedVar.finalSellingPrice) || 0;
@@ -447,7 +480,7 @@ const EditProduct = () => {
                         next.finalSellingPrice = Math.round(Math.max(0, mrp - discount));
                     }
                 } else {
-                    next.finalSellingPrice = next.price || 0;
+                    next.finalSellingPrice = next.price;
                 }
             } else if (name === 'finalSellingPrice') {
                 const fsp = parseFloat(next.finalSellingPrice) || 0;
@@ -528,47 +561,32 @@ const EditProduct = () => {
             if (images.thumbnail) data.append('image', images.thumbnail);
             images.gallery.forEach(img => data.append('images', img));
             console.log(data);
-            const res = await productService.updateProduct(id, data); // Changed to updateProduct
+            const res = await productService.updateProduct(id, data);
             console.log(res);
-            toast.success('Product updated successfully!'); // Changed message
+            toast.success('Product updated successfully!');
             navigate('/products/list-products');
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to update product'); // Changed message
+            toast.error(error.response?.data?.message || 'Failed to update product');
         } finally {
             setIsLoading(false);
         }
     };
 
-    // ─── Render ────────────────────────────────────────────────────────────────
-
-    const comboCount = getComboCount();
-
     return (
-        <div className="product-page-container fade-in">
-            <div className="product-content-pane">
-                <header className="internal-page-header" style={{ padding: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', color: 'hsl(var(--foreground))' }}>
-                                    <ArrowLeft size={18} />
-                                </button>
-                                <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'hsl(var(--primary))' }}>
-                                    Catalog / {id ? 'Edit Product' : 'New Product'}
-                                </span>
-                            </div>
-                            <h1 style={{ fontSize: '1.6rem', fontWeight: '800', margin: '0 0 4px 0', color: 'hsl(var(--foreground))' }}>
-                                {id ? `Edit Product: ${formData.name || id}` : 'Create New Product'}
-                            </h1>
-                            <p style={{ margin: 0, color: 'hsl(var(--muted-foreground))', fontSize: '0.9rem' }}>
-                                Define standard or variant-based products for the catalog.
-                            </p>
-                        </div>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--secondary) / 0.5)', padding: '0.4rem 0.8rem', borderRadius: '20px' }}>
-                            Phase {activeTab} / 3
-                        </span>
-                    </div>
+        <div className="product-page-container">
+            {isLoading && <Loader />}
 
+            <header className="product-header">
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <button className="product-btn-icon" onClick={() => navigate(-1)} title="Back to list">
+                            <ArrowLeft size={16} />
+                        </button>
+                        <h1>{id ? `Edit Product studio` : 'Create New Product'}</h1>
+                    </div>
+                    <p>Define standard or variant-based products for the catalog.</p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
                     <div className="product-tab-navbar">
                         {[
                             { id: 1, label: 'General Info', icon: <Package size={16} /> },
@@ -581,805 +599,345 @@ const EditProduct = () => {
                             </div>
                         ))}
                     </div>
-                </header>
+                </div>
+            </header>
 
-                <div className="product-glass-card" style={{ padding: '2rem', overflow: 'visible' }}>
-                    <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid hsl(var(--border)/0.2)', paddingBottom: '1rem' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'hsl(var(--primary))', margin: 0 }}>
-                            {['1. General Information', '2. Pricing & Stock Summary', '3. Media Assets'][activeTab - 1]}
-                        </h3>
-                    </div>
-
-                    {/* ── Tab 1: General Info ── */}
-                    {activeTab === 1 && (
-                        <div className="animate-in fade-in">
-                            <div className="product-grid">
-                                <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
-                                    <label className="product-label">Product Name *</label>
-                                    <input name="name" className="product-input" style={{ fontSize: '1.1rem', fontWeight: 800 }} placeholder="Enter product name..." value={formData.name} onChange={handleInputChange} autoFocus />
-                                </div>
-                                <div className="product-field-group">
-                                    <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>Category *</span>
-                                        <button
-                                            type="button"
-                                            className="add-new-chip-btn"
-                                            onClick={() => setIsCatModalOpen(true)}
-                                        >
-                                            <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                            Add New
-                                        </button>
-                                    </label>
-                                    <CustomSelect
-                                        options={[{ value: '', label: 'None' }, ...masters.categories.map(c => ({ value: c._id, label: c.name }))]}
-                                        value={formData.categoryId}
-                                        onChange={(val) => {
-                                            setFormData(prev => ({ ...prev, categoryId: val, subCategoryId: '' }));
-                                            const filtered = val ? masters.allSubCategories.filter(s => s.categoryId?._id === val || s.categoryId === val) : [];
-                                            setMasters(prev => ({ ...prev, subCategories: filtered }));
-                                        }}
-                                        placeholder="Select Category"
-                                    />
-                                </div>
-                                <div className="product-field-group">
-                                    <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>Sub-Classification</span>
-                                        <button
-                                            type="button"
-                                            className="add-new-chip-btn"
-                                            onClick={() => setIsSubCatModalOpen(true)}
-                                            disabled={!formData.categoryId}
-                                            style={{ opacity: !formData.categoryId ? 0.4 : 1, cursor: !formData.categoryId ? 'not-allowed' : 'pointer' }}
-                                        >
-                                            <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                            Add New
-                                        </button>
-                                    </label>
-                                    <CustomSelect
-                                        options={[{ value: '', label: 'None' }, ...masters.subCategories.map(s => ({ value: s._id, label: s.name }))]}
-                                        value={formData.subCategoryId}
-                                        onChange={(val) => setFormData(prev => ({ ...prev, subCategoryId: val }))}
-                                        placeholder={formData.categoryId ? 'Select Sub Category' : 'Awaiting Category...'}
-                                        disabled={!formData.categoryId || masters.subCategories.length === 0}
-                                    />
-                                </div>
-                                <div className="product-field-group">
-                                    <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>Brand</span>
-                                        <button type="button" className="add-new-chip-btn" onClick={() => setIsBrandModalOpen(true)}>
-                                            <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                            Add New
-                                        </button>
-                                    </label>
-                                    <CustomSelect options={[{ value: '', label: 'None' }, ...masters.brands.map(b => ({ value: b._id, label: b.name }))]} value={formData.brandId} onChange={(val) => setFormData(prev => ({ ...prev, brandId: val }))} placeholder="Select Brand" />
-                                </div>
-                                <div className="product-field-group">
-                                    <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>Base Unit</span>
-                                        <button type="button" className="add-new-chip-btn" onClick={() => setIsUnitModalOpen(true)}>
-                                            <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                            Add New
-                                        </button>
-                                    </label>
-                                    <CustomSelect options={[{ value: '', label: 'None' }, ...masters.units.map(u => ({ value: u._id, label: u.name }))]} value={formData.unitId} onChange={(val) => setFormData(prev => ({ ...prev, unitId: val }))} placeholder="Select Unit" />
-                                </div>
-                                <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
-                                    <label className="product-label">Description</label>
-                                    <textarea name="description" className="product-input product-textarea" placeholder="Product description, specifications..." value={formData.description} onChange={handleInputChange} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ── Tab 2: Pricing & Stock ── */}
-                    {activeTab === 2 && (
-                        <div className="animate-in fade-in">
-                            {/* Product Type Toggle */}
-                            <div className="type-selection-wrapper">
-                                <label className={`type-selection-card ${formData.productType === 'Single' ? 'active' : ''}`}>
-                                    <input type="radio" name="productType" value="Single" checked={formData.productType === 'Single'} onChange={handleInputChange} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                                    <div className="type-selection-icon"><Package size={14} strokeWidth={2.5} /></div>
-                                    <div className="type-selection-title">Standard Single</div>
-                                </label>
-                                <label className={`type-selection-card ${formData.productType === 'Variant' ? 'active' : ''}`}>
-                                    <input type="radio" name="productType" value="Variant" checked={formData.productType === 'Variant'} onChange={handleInputChange} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                                    <div className="type-selection-icon"><Layers size={14} strokeWidth={2.5} /></div>
-                                    <div className="type-selection-title">Variant Matrix</div>
-                                </label>
-                            </div>
-
-                            {/* ── Single Product Pricing Dashboard ── */}
-                            {formData.productType === 'Single' && (
-                                <div className="product-grid">
-                                    <div style={{ gridColumn: '1 / -1', padding: '1rem', background: 'hsl(var(--secondary) / 0.5)', borderRadius: '12px', border: '1px solid hsl(var(--border))', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div>
-                                            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'hsl(var(--foreground))' }}>
-                                                <Layers size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
-                                                Inventory is now Batch-Managed
-                                            </p>
-                                            <p style={{ margin: '4px 0 0 24px', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
-                                                Pricing and quantity are derived from active batches. Update them in Stock Management.
-                                            </p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="vb-generate-btn"
-                                            style={{ margin: 0, padding: '0.5rem 1rem', fontSize: '0.75rem' }}
-                                            onClick={() => navigate('/stock')}
-                                        >
-                                            <Zap size={14} /> Go to Stock Management
-                                        </button>
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">SKU</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <input name="sku" className="product-input" style={{ fontFamily: 'monospace', textTransform: 'uppercase', fontSize: '0.85rem' }} placeholder="AUTO-SKU" value={formData.pricing.sku} onChange={handlePricingChange} />
-                                            <button className="vb-icon-btn" onClick={() => generateSKUAction('product')} title="Generate SKU"><RefreshCw size={15} /></button>
-                                        </div>
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span>Tax Configuration</span>
-                                            <button type="button" className="add-new-chip-btn" onClick={() => setIsTaxModalOpen(true)} style={{ opacity: 0.5, pointerEvents: 'none' }}>
-                                                <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                                Add New
-                                            </button>
-                                        </label>
-                                        <div style={{ position: 'relative', opacity: 0.7, pointerEvents: 'none' }}>
-                                            <CustomSelect
-                                                options={[{ value: '', label: 'None' }, ...masters.taxes.filter(t => t && t.name).map(t => ({ value: t._id, label: `${t.name} (${t.rate || 0}%)` }))]}
-                                                value={formData.pricing.taxId}
-                                                onChange={(val) => handlePricingChange({ target: { name: 'taxId', value: val } })}
-                                                placeholder="Exempt / No Tax"
-                                            />
-                                            <div style={{ position: 'absolute', right: '2.5rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.5 }}>
-                                                <Lock size={14} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">MRP (RS)</label>
-                                        <div style={{ position: 'relative' }}>
-                                            <input type="number" min="0" disabled onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="mrp" className="product-input" style={{ opacity: 0.7, background: 'hsl(var(--secondary)/0.1)', cursor: 'not-allowed', paddingRight: '2.5rem' }} value={formData.pricing.mrp} onChange={handlePricingChange} placeholder="0.00" />
-                                            <div style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.5 }}>
-                                                <Lock size={14} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">MRP (RS)</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="mrp" className="product-input" value={formData.pricing.mrp} onChange={handlePricingChange} placeholder="0.00" />
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">Standard Selling Price (RS) *</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="sellingPrice" className="product-input" value={formData.pricing.sellingPrice} onChange={handlePricingChange} placeholder="0.00" />
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">Discount Type</label>
-                                        <CustomSelect
-                                            options={[
-                                                { value: 'Fixed', label: 'Fixed Amount (RS)' },
-                                                { value: 'Percentage', label: 'Percentage (%)' }
-                                            ]}
-                                            value={formData.pricing.discountType || 'Fixed'}
-                                            onChange={(val) => handlePricingChange({ target: { name: 'discountType', value: val } })}
-                                            placeholder="Select Type"
-                                        />
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">Discount Value</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="discountValue" className="product-input" value={formData.pricing.discountValue} onChange={handlePricingChange} placeholder="0" />
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">Final Selling Price (RS)</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="finalSellingPrice" className="product-input" style={{ fontWeight: 800, fontSize: '1.1rem', color: 'hsl(var(--primary))', background: 'hsl(var(--primary)/0.05)' }} value={formData.pricing.finalSellingPrice} onChange={handlePricingChange} placeholder="0.00" />
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">Cost Price (RS)</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="costPrice" className="product-input" value={formData.pricing.costPrice} onChange={handlePricingChange} placeholder="0.00" />
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">Current Total Stock (Aggregated)</label>
-                                        <input type="number" readOnly name="quantity" className="product-input" style={{ fontWeight: 700, background: 'hsl(var(--secondary)/0.3)', cursor: 'not-allowed' }} value={formData.pricing.quantity} placeholder="0" />
-                                    </div>
-                                    <div className="product-field-group">
-                                        <label className="product-label">Min Stock Alert</label>
-                                        <input type="number" min="0" onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} name="minStock" className="product-input" value={formData.pricing.minStock} onChange={handlePricingChange} placeholder="0" />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ── Variant Matrix Builder ── */}
-                            {formData.productType === 'Variant' && (
-                                <div className="variant-builder-section">
-
-                                    {/* Step 1: Attribute + Value Selection */}
-                                    <div className="vb-step-card">
-                                        <div className="vb-step-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                <div className="vb-step-number">1</div>
-                                                <div>
-                                                    <div className="vb-step-title">{formData.variants.length > 0 ? 'Add More Variations' : 'Select Variant Attributes'}</div>
-                                                    <div className="vb-step-desc">{formData.variants.length > 0 ? 'Pick additional combinations to add to the existing list' : 'Specify attributes and view CURRENT consolidated pricing/stock for each variant'}</div>
-                                                </div>
-                                            </div>
-                                            <button type="button" className="add-new-chip-btn" onClick={() => setIsAttrModalOpen(true)}>
-                                                <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                                Add New
-                                            </button>
-                                        </div>
-
-                                        {/* Attribute Type Toggles */}
-                                        {masters.variantAttributes.length === 0 ? (
-                                            <div style={{ padding: '1.5rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))', fontSize: '0.85rem', border: '1px dashed hsl(var(--border)/0.4)', borderRadius: '0.75rem' }}>
-                                                No variant attributes found. Create some in the Variants settings first.
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: selectedAttributes.length > 0 ? '1.25rem' : '0' }}>
-                                                {masters.variantAttributes.map(attr => {
-                                                    const isSelected = selectedAttributes.some(a => a._id === attr._id);
-                                                    return (
-                                                        <button key={attr._id} type="button" onClick={() => toggleAttribute(attr._id)} className={`attr-type-toggle ${isSelected ? 'active' : ''}`}>
-                                                            {isSelected ? <CheckCircle size={13} /> : <Plus size={13} />}
-                                                            {attr.name}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-
-                                        {/* Value Selection per Attribute */}
-                                        {selectedAttributes.map(attr => {
-                                            const vals = selectedValuesPerAttr[attr._id] || {};
-                                            const selectedCount = Object.values(vals).filter(Boolean).length;
-                                            const allSelected = attr.values.length > 0 && selectedCount === attr.values.length;
-                                            return (
-                                                <div key={attr._id} className="attr-values-panel">
-                                                    <div className="attr-values-header">
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                            <span className="attr-values-name">{attr.name}</span>
-                                                            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--secondary)/0.5)', padding: '0.15rem 0.5rem', borderRadius: '999px' }}>
-                                                                {selectedCount} / {attr.values.length} selected
-                                                            </span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                                                            <button className="attr-select-all-btn" onClick={() => toggleAllValues(attr._id, !allSelected)}>
-                                                                {allSelected ? 'Deselect All' : 'Select All'}
-                                                            </button>
-                                                            <button className="attr-remove-btn" onClick={() => toggleAttribute(attr._id)} title="Remove attribute">
-                                                                <X size={13} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
-                                                    {attr.values.length === 0 ? (
-                                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                            <div style={{ fontSize: '0.78rem', color: 'hsl(var(--muted-foreground))', fontStyle: 'italic' }}>No values found for this attribute.</div>
-                                                            <button type="button" className="add-new-chip-btn" onClick={() => { setActiveAttrForValue(attr); setIsValueModalOpen(true); }} style={{ padding: '0.2rem 0.6rem', fontSize: '0.7rem' }}>
-                                                                <Plus size={10} strokeWidth={3.5} /> Add New
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
-                                                            {attr.values.map(val => {
-                                                                const isChecked = !!vals[val._id];
-                                                                return (
-                                                                    <button key={val._id} type="button" onClick={() => toggleValue(attr._id, val._id)} className={`attr-value-chip ${isChecked ? 'selected' : ''}`}>
-                                                                        {attr.inputType === 'Color Picker' && (
-                                                                            <span style={{ display: 'inline-block', width: 11, height: 11, borderRadius: '50%', background: val.colorCode || '#ccc', border: '1px solid rgba(0,0,0,0.15)', flexShrink: 0 }} />
-                                                                        )}
-                                                                        {val.name}
-                                                                        {isChecked && <CheckCircle size={11} />}
-                                                                    </button>
-                                                                );
-                                                            })}
-                                                            <button type="button" className="add-new-chip-btn" onClick={() => { setActiveAttrForValue(attr); setIsValueModalOpen(true); }} style={{ padding: '0.2rem 0.6rem', fontSize: '0.7rem' }}>
-                                                                <Plus size={10} strokeWidth={3.5} /> Add New
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-
-                                        {/* Combo Count + Generate Button */}
-                                        {selectedAttributes.length > 0 && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed hsl(var(--border)/0.3)' }}>
-                                                <div className="combo-preview">
-                                                    {comboCount > 0 ? (
-                                                        <><span className="combo-count">{comboCount}</span> variant combination{comboCount !== 1 ? 's' : ''} will be generated</>
-                                                    ) : (
-                                                        <span style={{ color: 'hsl(var(--muted-foreground))' }}>Select values above to preview combinations</span>
-                                                    )}
-                                                </div>
-                                                <button onClick={generateMatrix} className="vb-generate-btn" disabled={comboCount === 0}>
-                                                    <Layers size={15} />
-                                                    {formData.variants.length > 0 ? 'Add New Combinations' : 'Generate Variant Matrix'}
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Step 2: Variant Table */}
-                                    {formData.variants.length > 0 && (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {/* Header Card */}
-                                            <div className="vb-step-card" style={{ padding: 0, overflow: 'hidden' }}>
-                                                <div className="vb-compact-toolbar">
-                                                    <div className="vb-toolbar-status">
-                                                        <div className="vb-table-title">
-                                                            <span style={{ color: 'hsl(var(--primary))', marginRight: '0.4rem' }}>{formData.variants.length}</span> Variant Matrix
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="vb-col-header" style={{ gridTemplateColumns: 'minmax(150px, 1.5fr) minmax(130px, 1fr) 0.8fr 0.7fr 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr 0.8fr 0.8fr 40px 40px' }}>
-                                                    <div>VARIANT</div>
-                                                    <div>SKU</div>
-                                                    <div>MRP</div>
-                                                    <div>TYPE</div>
-                                                    <div>DISC.</div>
-                                                    <div>SELL PRICE</div>
-                                                    <div>FINAL PRICE</div>
-                                                    <div>COST PRICE</div>
-                                                    <div>TAX</div>
-                                                    <div>STOCK</div>
-                                                    <div>MIN.</div>
-                                                    <div>EDIT</div>
-                                                    <div>DEL</div>
-                                                </div>
-                                            </div>
-
-                                            {/* Body Card */}
-                                            <div className="vb-step-card" style={{ padding: 0, overflow: 'hidden' }}>
-                                                <div style={{ paddingBottom: '1rem' }}>
-                                                    {formData.variants.map((v, idx) => (
-                                                        <div key={idx} className="vb-variant-row" style={{ gridTemplateColumns: 'minmax(150px, 1.5fr) minmax(130px, 1fr) 0.8fr 0.7fr 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr 0.8fr 0.8fr 40px 40px' }} onClick={() => { setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }}>
-                                                            <div data-label="Combination">
-                                                                <div className="vb-badge-group">
-                                                                    {v.variantValues.map((val, vi) => (
-                                                                        <span key={vi} className="vb-attr-badge">
-                                                                            <span className="vb-badge-type">{val.typeName}:</span> {val.valueName}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                            <div data-label="SKU">
-                                                                <div style={{ display: 'flex', gap: '0.3rem', width: '100%', alignItems: 'center' }}>
-                                                                    <input type='text' className="vb-row-input" style={{ fontSize: '0.75rem', fontFamily: 'monospace' }} placeholder="AUTO" value={v.sku} onChange={(e) => updateVariantRow(idx, 'sku', e.target.value)} onClick={(e) => e.stopPropagation()} />
-                                                                    {!v._id && <button className="vb-icon-btn" style={{ padding: 4 }} onClick={(e) => { e.stopPropagation(); generateSKUAction('variant', idx); }}><RefreshCw size={10} /></button>}
-                                                                </div>
-                                                            </div>
-                                                            <div data-label="MRP">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.mrp} onChange={(e) => updateVariantRow(idx, 'mrp', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Type">
-                                                                <CustomSelect
-                                                                    size="small"
-                                                                    options={[
-                                                                        { value: 'Percentage', label: '%' },
-                                                                        { value: 'Fixed', label: 'RS' }
-                                                                    ]}
-                                                                    value={v.discountType}
-                                                                    onChange={(val) => updateVariantRow(idx, 'discountType', val)}
-                                                                />
-                                                            </div>
-                                                            <div data-label="Discount">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.discountValue || 0} onChange={(e) => updateVariantRow(idx, 'discountValue', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Selling Price">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" style={{ color: 'hsl(var(--primary))', fontWeight: '700' }} value={v.price} onChange={(e) => updateVariantRow(idx, 'price', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Final Price">
-                                                                <input type='number' min='0' className="vb-row-input" style={{ color: 'hsl(var(--primary))', background: 'hsl(var(--primary)/0.05)', fontWeight: 800 }} value={v.finalSellingPrice} readOnly onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Cost Price">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.costPrice} onChange={(e) => updateVariantRow(idx, 'costPrice', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0.00" />
-                                                            </div>
-                                                            <div data-label="Tax">
-                                                                <CustomSelect
-                                                                    size="small"
-                                                                    options={[{ value: '', label: 'Exempt' }, ...masters.taxes.filter(t => t && t.name).map(tx => ({ value: tx._id, label: tx.name }))]}
-                                                                    value={v.taxId}
-                                                                    onChange={(val) => updateVariantRow(idx, 'taxId', val)}
-                                                                />
-                                                            </div>
-                                                            <div data-label="Stock">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.quantity} onChange={(e) => updateVariantRow(idx, 'quantity', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Min. Stock">
-                                                                <input type='number' min='0' onWheel={(e) => e.target.blur()} onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }} className="vb-row-input" value={v.minStock} onChange={(e) => updateVariantRow(idx, 'minStock', e.target.value)} onClick={(e) => e.stopPropagation()} placeholder="0" />
-                                                            </div>
-                                                            <div data-label="Edit">
-                                                                <button className="vb-icon-btn" onClick={(e) => { e.stopPropagation(); setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }}><Edit2 size={13} /></button>
-                                                            </div>
-                                                            <div data-label="Delete">
-                                                                <button className="vb-delete-btn" onClick={(e) => { e.stopPropagation(); deleteVariantRow(idx); }} disabled={!!v._id}><Trash2 size={14} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* ── Tab 3: Visuals ── */}
-                    {activeTab === 3 && (
-                        <div className="animate-in fade-in">
-                            <div className="product-grid">
-                                <div className="product-field-group">
-                                    <label className="product-label">Thumbnail Image *</label>
-                                    <div className="image-upload-zone" style={{ height: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '1.5rem', position: 'relative', overflow: 'hidden' }}>
-                                        {previews.thumbnail ? (
-                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--secondary)/0.1)', position: 'relative' }}>
-                                                <img src={previews.thumbnail} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                                                <button style={{ position: 'absolute', top: 12, right: 12, padding: '8px 12px', background: 'hsl(var(--destructive))', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)', zIndex: 10, transition: 'all 0.2s' }}
-                                                    onClick={() => { setImages(p => ({ ...p, thumbnail: null })); setPreviews(p => ({ ...p, thumbnail: '' })); }}
-                                                    onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                                                    onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-                                                    <X size={14} strokeWidth={3} /> Remove
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <div style={{ width: 48, height: 48, background: 'hsl(var(--primary)/0.1)', color: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '0.75rem', marginBottom: '0.5rem' }}><Plus size={24} /></div>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', opacity: 0.4, letterSpacing: '0.1em' }}>Main Product Image</span>
-                                                <input type="file" accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} onChange={handleThumbnailChange} />
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="product-field-group">
-                                    <label className="product-label">Gallery Images</label>
-                                    <div className="image-upload-zone" style={{ height: 220, padding: '0.75rem', border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', overflowY: 'auto' }}>
-                                        {previews.gallery.map((src, i) => (
-                                            <div key={i} style={{ width: 80, height: 80, borderRadius: '0.75rem', overflow: 'hidden', position: 'relative', border: '1px solid hsl(var(--border)/0.2)' }}>
-                                                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                <button style={{ position: 'absolute', top: 4, right: 4, padding: '4px', background: 'hsl(var(--destructive))', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', display: 'flex', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', zIndex: 10 }} onClick={() => removeGalleryImage(i)}>
-                                                    <X size={10} strokeWidth={3} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        <div style={{ width: 80, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--primary)/0.05)', border: '1px solid hsl(var(--primary)/0.1)', borderRadius: '0.75rem', position: 'relative', cursor: 'pointer' }}>
-                                            <Plus size={20} style={{ color: 'hsl(var(--primary)/0.4)' }} />
-                                            <input type="file" multiple accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} onChange={handleGalleryChange} />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
-                                    <label className="product-label">Product QR Code</label>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '2rem',
-                                        background: 'hsl(var(--card)/0.4)',
-                                        padding: '1.5rem',
-                                        borderRadius: '1.5rem',
-                                        border: '1px solid hsl(var(--border)/0.2)'
-                                    }}>
-                                        <div style={{
-                                            width: 120,
-                                            height: 120,
-                                            background: 'white',
-                                            borderRadius: '1rem',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            border: '1px solid hsl(var(--border)/0.3)',
-                                            overflow: 'hidden',
-                                            padding: '8px'
-                                        }}>
-                                            {previews.qrCode ? (
-                                                <img src={previews.qrCode} alt="QR Code" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                            ) : (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'hsl(var(--muted-foreground))', opacity: 0.3 }}>
-                                                    <QrCode size={32} strokeWidth={1} />
-                                                    <span style={{ fontSize: '0.6rem', marginTop: '4px' }}>Missing</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', fontWeight: 800 }}>Automatic QR Generation</h4>
-                                            <p style={{ margin: 0, fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', lineHeight: 1.5 }}>
-                                                {previews.qrCode
-                                                    ? "This QR code is active and links directly to this product in the mobile app. It will regenerate if the product name/slug changes."
-                                                    : "A unique QR code will be automatically generated and assigned once you update this product."}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+            <div className="product-glass-card">
+                <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid hsl(var(--border)/0.2)', paddingBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'hsl(var(--primary))', margin: 0 }}>
+                        {['1. General Information', '2. Pricing & Stock Summary', '3. Media Assets'][activeTab - 1]}
+                    </h3>
                 </div>
 
-                <div className="action-footer" style={{ borderBottomLeftRadius: '20px', borderBottomRightRadius: '20px' }}>
-                    <button className="btn-premium-outline" onClick={() => navigate(-1)}>Exit Studio</button>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        {activeTab > 1 && <button className="btn-premium-outline" onClick={() => setActiveTab(activeTab - 1)}>← Previous</button>}
+                {/* ── Tab 1: General Info ── */}
+                {activeTab === 1 && (
+                    <div className="animate-in fade-in">
+                        <div className="product-grid">
+                            <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
+                                <label className="product-label">Product Name *</label>
+                                <input name="name" className="product-input" style={{ fontSize: '1.1rem', fontWeight: 800 }} placeholder="Enter product name..." value={formData.name} onChange={handleInputChange} autoFocus />
+                            </div>
+                            <div className="product-field-group">
+                                <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>Category *</span>
+                                    <button type="button" className="add-new-chip-btn" onClick={() => setIsCatModalOpen(true)}>
+                                        <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
+                                        Add New
+                                    </button>
+                                </label>
+                                <CustomSelect
+                                    options={[{ value: '', label: 'None' }, ...masters.categories.map(c => ({ value: c._id, label: c.name }))]}
+                                    value={formData.categoryId}
+                                    onChange={(val) => {
+                                        setFormData(prev => ({ ...prev, categoryId: val, subCategoryId: '' }));
+                                        const filtered = val ? masters.allSubCategories.filter(s => (s.categoryId?._id || s.categoryId) === val) : [];
+                                        setMasters(prev => ({ ...prev, subCategories: filtered }));
+                                    }}
+                                    placeholder="Select Category"
+                                />
+                            </div>
+                            <div className="product-field-group">
+                                <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>Sub-Classification</span>
+                                    <button type="button" className="add-new-chip-btn" onClick={() => setIsSubCatModalOpen(true)} disabled={!formData.categoryId} style={{ opacity: !formData.categoryId ? 0.4 : 1 }}>
+                                        <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
+                                        Add New
+                                    </button>
+                                </label>
+                                <CustomSelect
+                                    options={[{ value: '', label: 'None' }, ...masters.subCategories.map(s => ({ value: s._id, label: s.name }))]}
+                                    value={formData.subCategoryId}
+                                    onChange={(val) => setFormData(prev => ({ ...prev, subCategoryId: val }))}
+                                    placeholder={formData.categoryId ? 'Select Sub Category' : 'Awaiting Category...'}
+                                    disabled={!formData.categoryId || masters.subCategories.length === 0}
+                                />
+                            </div>
+                            <div className="product-field-group">
+                                <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>Brand</span>
+                                    <button type="button" className="add-new-chip-btn" onClick={() => setIsBrandModalOpen(true)}>
+                                        <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
+                                        Add New
+                                    </button>
+                                </label>
+                                <CustomSelect options={[{ value: '', label: 'None' }, ...masters.brands.map(b => ({ value: b._id, label: b.name }))]} value={formData.brandId} onChange={(val) => setFormData(prev => ({ ...prev, brandId: val }))} placeholder="Select Brand" />
+                            </div>
+                            <div className="product-field-group">
+                                <label className="product-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>Base Unit</span>
+                                    <button type="button" className="add-new-chip-btn" onClick={() => setIsUnitModalOpen(true)}>
+                                        <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
+                                        Add New
+                                    </button>
+                                </label>
+                                <CustomSelect options={[{ value: '', label: 'None' }, ...masters.units.map(u => ({ value: u._id, label: u.name }))]} value={formData.unitId} onChange={(val) => setFormData(prev => ({ ...prev, unitId: val }))} placeholder="Select Unit" />
+                            </div>
+                            <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
+                                <label className="product-label">Description</label>
+                                <textarea name="description" className="product-input product-textarea" placeholder="Product description, specifications..." value={formData.description} onChange={handleInputChange} />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Tab 2: Pricing & Stock ── */}
+                {activeTab === 2 && (
+                    <div className="animate-in fade-in">
+                        <div className="type-selection-wrapper">
+                            <label className={`type-selection-card ${formData.productType === 'Single' ? 'active' : ''}`}>
+                                <input type="radio" name="productType" value="Single" checked={formData.productType === 'Single'} onChange={handleInputChange} />
+                                <div className="type-selection-icon"><Package size={14} strokeWidth={2.5} /></div>
+                                <div className="type-selection-title">Standard Single</div>
+                            </label>
+                            <label className={`type-selection-card ${formData.productType === 'Variant' ? 'active' : ''}`}>
+                                <input type="radio" name="productType" value="Variant" checked={formData.productType === 'Variant'} onChange={handleInputChange} />
+                                <div className="type-selection-icon"><Layers size={14} strokeWidth={2.5} /></div>
+                                <div className="type-selection-title">Variant Matrix</div>
+                            </label>
+                        </div>
+
+                        {formData.productType === 'Single' && (
+                            <div className="product-grid">
+                                <div style={{ gridColumn: '1 / -1', padding: '1rem', background: 'hsl(var(--secondary) / 0.5)', borderRadius: '12px', border: '1px solid hsl(var(--border))', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'hsl(var(--foreground))' }}>
+                                            <Layers size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+                                            Inventory is Batch-Managed
+                                        </p>
+                                        <p style={{ margin: '4px 0 0 24px', fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>
+                                            Update pricing and quantities in Stock Management for active batches.
+                                        </p>
+                                    </div>
+                                    <button type="button" className="vb-generate-btn" style={{ margin: 0 }} onClick={() => navigate('/stock')}>
+                                        <Zap size={14} /> Go to Stock
+                                    </button>
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">SKU</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <input name="sku" className="product-input" value={formData.pricing.sku} onChange={handlePricingChange} placeholder="AUTO" />
+                                        <button className="vb-icon-btn" onClick={() => generateSKUAction('product')}><RefreshCw size={15} /></button>
+                                    </div>
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Tax</label>
+                                    <CustomSelect
+                                        options={[{ value: '', label: 'None' }, ...masters.taxes.map(t => ({ value: t._id, label: `${t.name} (${t.rate}%)` }))]}
+                                        value={formData.pricing.taxId}
+                                        onChange={(val) => handlePricingChange({ target: { name: 'taxId', value: val } })}
+                                    />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">MRP (RS) *</label>
+                                    <input type="number" name="mrp" className="product-input" value={formData.pricing.mrp} onChange={handlePricingChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Selling Price (RS) *</label>
+                                    <input type="number" name="sellingPrice" className="product-input" value={formData.pricing.sellingPrice} onChange={handlePricingChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Discount Type</label>
+                                    <CustomSelect options={[{ value: 'Fixed', label: 'Fixed' }, { value: 'Percentage', label: '%' }]} value={formData.pricing.discountType} onChange={(val) => handlePricingChange({ target: { name: 'discountType', value: val } })} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Discount Value</label>
+                                    <input type="number" name="discountValue" className="product-input" value={formData.pricing.discountValue} onChange={handlePricingChange} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Final Selling Price</label>
+                                    <input type="number" readOnly className="product-input" style={{ fontWeight: 800, color: 'hsl(var(--primary))', background: 'hsl(var(--primary)/0.05)' }} value={formData.pricing.finalSellingPrice} />
+                                </div>
+                                <div className="product-field-group">
+                                    <label className="product-label">Min Stock Alert</label>
+                                    <input type="number" name="minStock" className="product-input" value={formData.pricing.minStock} onChange={handlePricingChange} />
+                                </div>
+                            </div>
+                        )}
+
+                        {formData.productType === 'Variant' && (
+                            <div className="variant-builder-section">
+                                <div className="vb-step-card">
+                                    <div className="vb-step-header">
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                            <div className="vb-step-number">1</div>
+                                            <div className="vb-step-title">Select Attributes</div>
+                                        </div>
+                                        <button type="button" className="add-new-chip-btn" onClick={() => setIsAttrModalOpen(true)}>
+                                            <Plus size={10} /> Add New
+                                        </button>
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
+                                        {masters.variantAttributes.map(attr => (
+                                            <button key={attr._id} type="button" onClick={() => toggleAttribute(attr._id)} className={`attr-type-toggle ${selectedAttributes.some(a => a._id === attr._id) ? 'active' : ''}`}>
+                                                {attr.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {selectedAttributes.map(attr => (
+                                        <div key={attr._id} className="attr-values-panel" style={{ marginTop: '1rem' }}>
+                                            <div className="attr-values-header">
+                                                <span>{attr.name}</span>
+                                                <button onClick={() => toggleAllValues(attr._id, !Object.values(selectedValuesPerAttr[attr._id] || {}).every(Boolean))}>Toggle All</button>
+                                            </div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                {attr.values.map(val => (
+                                                    <button key={val._id} type="button" onClick={() => toggleValue(attr._id, val._id)} className={`attr-value-chip ${selectedValuesPerAttr[attr._id]?.[val._id] ? 'selected' : ''}`}>
+                                                        {val.name}
+                                                    </button>
+                                                ))}
+                                                <button type="button" className="add-new-chip-btn" onClick={() => { setActiveAttrForValue(attr); setIsValueModalOpen(true); }}>
+                                                    <Plus size={10} /> Add Value
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                                        <button onClick={generateMatrix} className="vb-generate-btn" disabled={comboCount === 0}>
+                                            Generate {comboCount} Variants
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {formData.variants.length > 0 && (
+                                    <div className="vb-step-card" style={{ marginTop: '1rem', padding: 0, overflow: 'hidden' }}>
+                                        <div className="vb-col-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1fr 0.5fr 0.5fr', padding: '1rem', background: 'hsl(var(--secondary)/0.5)', fontWeight: 700, fontSize: '0.75rem' }}>
+                                            <div>VARIANT</div>
+                                            <div>SKU</div>
+                                            <div>MRP</div>
+                                            <div>PRICE</div>
+                                            <div>DISC.</div>
+                                            <div>FINAL</div>
+                                            <div>COST</div>
+                                            <div>STOCK</div>
+                                            <div>EDIT</div>
+                                            <div>DEL</div>
+                                        </div>
+                                        {formData.variants.map((v, idx) => (
+                                            <div key={idx} className="vb-variant-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1fr 0.5fr 0.5fr', padding: '0.8rem 1rem', borderTop: '1px solid hsl(var(--border)/0.2)', fontSize: '0.85rem', alignItems: 'center' }}>
+                                                <div className="vb-badge-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                    {v.variantValues.map((val, vi) => (
+                                                        <span key={vi} style={{ background: 'hsl(var(--primary)/0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.65rem' }}>{val.valueName}</span>
+                                                    ))}
+                                                </div>
+                                                <input className="vb-row-input" value={v.sku} onChange={(e) => updateVariantRow(idx, 'sku', e.target.value)} />
+                                                <input type="number" className="vb-row-input" value={v.mrp} onChange={(e) => updateVariantRow(idx, 'mrp', e.target.value)} />
+                                                <input type="number" className="vb-row-input" value={v.price} onChange={(e) => updateVariantRow(idx, 'price', e.target.value)} />
+                                                <input type="number" className="vb-row-input" value={v.discountValue} onChange={(e) => updateVariantRow(idx, 'discountValue', e.target.value)} />
+                                                <div style={{ fontWeight: 800, color: 'hsl(var(--primary))' }}>{v.finalSellingPrice}</div>
+                                                <input type="number" className="vb-row-input" value={v.costPrice} onChange={(e) => updateVariantRow(idx, 'costPrice', e.target.value)} />
+                                                <input type="number" className="vb-row-input" value={v.quantity} onChange={(e) => updateVariantRow(idx, 'quantity', e.target.value)} />
+                                                <button onClick={() => { setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }}><Edit2 size={13} /></button>
+                                                <button onClick={() => deleteVariantRow(idx)} disabled={!!v._id}><Trash2 size={13} /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Tab 3: Visuals ── */}
+                {activeTab === 3 && (
+                    <div className="animate-in fade-in">
+                        <div className="product-grid">
+                            <div className="product-field-group">
+                                <label className="product-label">Thumbnail</label>
+                                <div className="image-upload-zone" style={{ height: 200, border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '1rem', position: 'relative', overflow: 'hidden' }}>
+                                    {previews.thumbnail ? (
+                                        <>
+                                            <img src={previews.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                            <button
+                                                onClick={removeThumbnail}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 10,
+                                                    right: 10,
+                                                    background: 'rgba(239, 68, 68, 0.9)',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '50%',
+                                                    width: 32,
+                                                    height: 32,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer',
+                                                    zIndex: 20,
+                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                                                }}
+                                                title="Remove Thumbnail"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                            <p style={{ margin: 0, fontSize: '0.8rem' }}>Click to upload</p>
+                                            <p style={{ fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', textAlign: 'center' }}>
+                                                Recommended: 2-3MB <br />
+                                                Max: 5MB
+                                            </p>
+                                        </div>
+                                    )}
+                                    <input id="thumbInput" type="file" accept="image/*" onChange={handleThumbnailChange} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} />
+                                </div>
+                            </div>
+                            <div className="product-field-group">
+                                <label className="product-label">Gallery</label>
+                                <div className="image-upload-zone" style={{ height: 200, border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', padding: '0.5rem' }}>
+                                    {previews.gallery.map((src, i) => (
+                                        <div key={i} style={{ width: 60, height: 60, position: 'relative' }}>
+                                            <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <button onClick={() => removeGalleryImage(i)} style={{ position: 'absolute', top: 0, right: 0 }}>X</button>
+                                        </div>
+                                    ))}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 60, height: 60, border: '1px dashed hsl(var(--border))', borderRadius: '4px', position: 'relative' }}>
+                                        <Plus size={16} />
+                                        <span style={{ fontSize: '0.5rem', textAlign: 'center' }}>Max 5MB</span>
+                                        <input type="file" multiple accept="image/*" onChange={handleGalleryChange} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="action-footer" style={{ borderTop: '1px solid hsl(var(--border)/0.2)', padding: '1.25rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <button className="btn-premium-outline" onClick={() => navigate(-1)}>Cancel</button>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        {activeTab > 1 && <button className="btn-premium-outline" onClick={() => setActiveTab(activeTab - 1)}>Back</button>}
                         {activeTab < 3 ? (
-                            <button className="btn-premium-primary" onClick={() => setActiveTab(activeTab + 1)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                Next <ChevronRight size={18} />
-                            </button>
+                            <button className="btn-premium-primary" onClick={() => setActiveTab(activeTab + 1)}>Next</button>
                         ) : (
-                            <button className="btn-premium-primary" onClick={handleSubmit} disabled={isLoading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Save size={16} /> {isLoading ? 'Saving...' : 'Update Product'}
+                            <button className="btn-premium-primary" onClick={handleSubmit} disabled={isLoading}>
+                                {isLoading ? 'Updating...' : 'Update Product'}
                             </button>
                         )}
                     </div>
                 </div>
             </div>
 
-            {isLoading && <Loader />}
+            <QuickCreateModal isOpen={isCatModalOpen} onClose={() => setIsCatModalOpen(false)} type="Category" masters={{ categories: masters.categories }} onSuccess={(created) => { if (created?._id) { setMasters(p => ({ ...p, categories: [...p.categories, created] })); setFormData(p => ({ ...p, categoryId: created._id })); } setIsCatModalOpen(false); }} />
+            <QuickCreateModal isOpen={isSubCatModalOpen} onClose={() => setIsSubCatModalOpen(false)} type="Subcategory" masters={{ categories: masters.categories }} onSuccess={(created) => { if (created?._id) { setMasters(p => ({ ...p, allSubCategories: [...p.allSubCategories, created] })); setFormData(p => ({ ...p, subCategoryId: created._id })); } setIsSubCatModalOpen(false); }} />
+            <QuickCreateModal isOpen={isBrandModalOpen} onClose={() => setIsBrandModalOpen(false)} type="Brand" masters={{}} onSuccess={(created) => { if (created?._id) { setMasters(p => ({ ...p, brands: [...p.brands, created] })); setFormData(p => ({ ...p, brandId: created._id })); } setIsBrandModalOpen(false); }} />
+            <QuickCreateModal isOpen={isUnitModalOpen} onClose={() => setIsUnitModalOpen(false)} type="Unit" masters={{}} onSuccess={(created) => { if (created?._id) { setMasters(p => ({ ...p, units: [...p.units, created] })); setFormData(p => ({ ...p, unitId: created._id })); } setIsUnitModalOpen(false); }} />
+            <QuickCreateModal isOpen={isTaxModalOpen} onClose={() => setIsTaxModalOpen(false)} type="Tax" masters={{}} onSuccess={(created) => { if (created?._id) { setMasters(p => ({ ...p, taxes: [...p.taxes, created] })); setFormData(p => ({ ...p, pricing: { ...p.pricing, taxId: created._id } })); } setIsTaxModalOpen(false); }} />
+            <QuickCreateModal isOpen={isAttrModalOpen} onClose={() => setIsAttrModalOpen(false)} type="Attribute" masters={{}} onSuccess={(created) => { if (created?._id) setMasters(p => ({ ...p, variantAttributes: [...p.variantAttributes, created] })); setIsAttrModalOpen(false); }} />
+            <QuickCreateModal isOpen={isValueModalOpen} onClose={() => setIsValueModalOpen(false)} type="Value" masters={{ variantTypeId: activeAttrForValue?._id }} onSuccess={(created, result) => { if (activeAttrForValue) { const list = result?.variantValues || (created ? [created] : []); setMasters(p => ({ ...p, variantAttributes: p.variantAttributes.map(a => a._id === activeAttrForValue._id ? { ...a, values: list } : a) })); } setIsValueModalOpen(false); }} />
 
-            <QuickCreateModal
-                isOpen={isCatModalOpen}
-                onClose={() => setIsCatModalOpen(false)}
-                type="Category"
-                masters={{ categories: masters.categories }}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, categories: [...prev.categories, created] }));
-                        setFormData(prev => ({ ...prev, categoryId: created._id, subCategoryId: '' }));
-                    }
-                    setIsCatModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isSubCatModalOpen}
-                onClose={() => setIsSubCatModalOpen(false)}
-                type="Subcategory"
-                masters={{ categories: masters.categories }}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => {
-                            const newAll = [...prev.allSubCategories, created];
-                            const newFiltered = formData.categoryId
-                                ? newAll.filter(s => (s.categoryId?._id || s.categoryId) === formData.categoryId)
-                                : prev.subCategories;
-                            return { ...prev, allSubCategories: newAll, subCategories: newFiltered };
-                        });
-                        setFormData(prev => ({ ...prev, subCategoryId: created._id }));
-                    }
-                    setIsSubCatModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isBrandModalOpen}
-                onClose={() => setIsBrandModalOpen(false)}
-                type="Brand"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, brands: [...prev.brands, created] }));
-                        setFormData(prev => ({ ...prev, brandId: created._id }));
-                    }
-                    setIsBrandModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isUnitModalOpen}
-                onClose={() => setIsUnitModalOpen(false)}
-                type="Unit"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, units: [...prev.units, created] }));
-                        setFormData(prev => ({ ...prev, unitId: created._id }));
-                    }
-                    setIsUnitModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isTaxModalOpen}
-                onClose={() => setIsTaxModalOpen(false)}
-                type="Tax"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, taxes: [...prev.taxes, created] }));
-                        setFormData(prev => ({ ...prev, pricing: { ...prev.pricing, taxId: created._id } }));
-                    }
-                    setIsTaxModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isAttrModalOpen}
-                onClose={() => setIsAttrModalOpen(false)}
-                type="Attribute"
-                masters={{}}
-                editItem={null}
-                onSuccess={(created) => {
-                    if (created?._id) {
-                        setMasters(prev => ({ ...prev, variantAttributes: [...prev.variantAttributes, created] }));
-                        // The user requested that we do NOT auto-select the new attribute automatically
-                        // toggleAttribute(created._id); 
-                    }
-                    setIsAttrModalOpen(false);
-                }}
-            />
-
-            <QuickCreateModal
-                isOpen={isValueModalOpen}
-                onClose={() => { setIsValueModalOpen(false); setActiveAttrForValue(null); }}
-                type="Value"
-                masters={{ variantTypeId: activeAttrForValue?._id, inputType: activeAttrForValue?.inputType }}
-                editItem={null}
-                onSuccess={(created, result) => {
-                    const fullList = result?.variantValues || (created ? [created] : []);
-                    if (activeAttrForValue) {
-                        setMasters(prev => {
-                            const updatedAttrs = prev.variantAttributes.map(a => {
-                                if (a._id === activeAttrForValue._id) {
-                                    return { ...a, values: fullList };
-                                }
-                                return a;
-                            });
-                            return { ...prev, variantAttributes: updatedAttrs };
-                        });
-
-                        // Also update the selectedAttributes state which drives the immediate UI rendering
-                        setSelectedAttributes(prev => prev.map(a => {
-                            if (a._id === activeAttrForValue._id) {
-                                return { ...a, values: fullList };
-                            }
-                            return a;
-                        }));
-
-                        // Auto-toggle the newly created value if it was a single creation
-                        if (created?._id) {
-                            toggleValue(activeAttrForValue._id, created._id);
-                        }
-                    }
-                    setIsValueModalOpen(false);
-                }}
-            />
-            {
-                editingVariantData && editingVariantIndex !== null && createPortal(
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => { setEditingVariantData(null); setEditingVariantIndex(null); }}>
-                        <div className="quick-modal-container animate-in zoom-in" onClick={e => e.stopPropagation()} style={{ width: '650px', maxWidth: '95%', position: 'relative', margin: 0, maxHeight: '95vh', overflowY: 'auto' }}>
-                            <div className="quick-modal-gradient-bar" />
-                            <div className="quick-modal-content">
-                                <div className="quick-modal-header">
-                                    <div>
-                                        <h3 className="quick-modal-title">
-                                            <Zap size={20} style={{ color: 'hsl(var(--primary))' }} />
-                                            Edit Variant Data
-                                        </h3>
-                                        <p className="quick-modal-subtitle">
-                                            {editingVariantData.variantValues && editingVariantData.variantValues.length > 0 ? (
-                                                <span style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginTop: '4px' }}>
-                                                    {editingVariantData.variantValues.map((av, i) => (
-                                                        <span key={i} style={{ background: 'hsl(var(--primary)/0.1)', color: 'hsl(var(--primary))', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, border: '1px solid hsl(var(--primary)/0.2)' }}>
-                                                            {av.typeName}: {av.valueName}
-                                                        </span>
-                                                    ))}
-                                                </span>
-                                            ) : (
-                                                "Update pricing and stock for this specific variant"
-                                            )}
-                                        </p>
-                                    </div>
-                                    <button onClick={() => { setEditingVariantData(null); setEditingVariantIndex(null); }} className="quick-modal-close-btn" title="Close Modal">
-                                        <X size={20} />
-                                    </button>
-                                </div>
-
-                                <div className="quick-modal-form" style={{ marginTop: '1.5rem' }}>
-                                    {editingVariantData._id && (
-                                        <div style={{ marginBottom: '1.5rem', padding: '0.8rem 1rem', background: 'hsl(var(--primary)/0.05)', borderRadius: '12px', border: '1px solid hsl(var(--primary)/0.2)', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                            <div style={{ background: 'hsl(var(--primary))', color: 'white', width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                                <Lock size={12} />
-                                            </div>
-                                            <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 600, color: 'hsl(var(--primary))', lineHeight: 1.4 }}>
-                                                Existing variants are batch-managed. Pricing and stock must be updated via the Stock Module.
-                                            </p>
-                                        </div>
-                                    )}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">SKU</label>
-                                            <div style={{ display: 'flex', gap: '0.4rem' }}>
-                                                <input type="text" className="quick-modal-input" name="sku" value={editingVariantData.sku} onChange={handleVariantEditChange} placeholder="AUTO" style={{ fontFamily: 'monospace', textTransform: 'uppercase' }} />
-                                                <button className="btn-premium-outline" style={{ padding: '0 0.75rem' }} onClick={() => generateSKUAction('variant', editingVariantIndex)} title="Regenerate">
-                                                    <RefreshCw size={13} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Cost Price</label>
-                                            <input type="number" min="0" disabled={!!editingVariantData._id} onWheel={(e) => e.target.blur()} className="quick-modal-input" name="costPrice" value={editingVariantData.costPrice} onChange={handleVariantEditChange} placeholder="0.00" style={{ opacity: editingVariantData._id ? 0.6 : 1 }} />
-                                        </div>
-
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">MRP</label>
-                                            <input type="number" min="0" disabled={!!editingVariantData._id} onWheel={(e) => e.target.blur()} className="quick-modal-input" name="mrp" value={editingVariantData.mrp} onChange={handleVariantEditChange} placeholder="0.00" style={{ opacity: editingVariantData._id ? 0.6 : 1 }} />
-                                        </div>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Selling Price</label>
-                                            <input type="number" min="0" disabled={!!editingVariantData._id} onWheel={(e) => e.target.blur()} className="quick-modal-input" name="price" value={editingVariantData.price} onChange={handleVariantEditChange} placeholder="0.00" style={{ opacity: editingVariantData._id ? 0.6 : 1 }} />
-                                        </div>
-
-                                        <div className="quick-modal-form-group" style={{ gridColumn: '1 / -1' }}>
-                                            <label className="quick-modal-label">Discount Configuration</label>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem', opacity: editingVariantData._id ? 0.6 : 1, pointerEvents: editingVariantData._id ? 'none' : 'auto' }}>
-                                                <CustomSelect
-                                                    options={[{ value: 'Percentage', label: 'Percentage (%)' }, { value: 'Fixed', label: 'Fixed Amount (RS)' }]}
-                                                    value={editingVariantData.discountType}
-                                                    onChange={(val) => handleVariantEditChange({ target: { name: 'discountType', value: val } })}
-                                                    placeholder="Type"
-                                                />
-                                                <input type="number" min="0" disabled={!!editingVariantData._id} onWheel={(e) => e.target.blur()} className="quick-modal-input" name="discountValue" value={editingVariantData.discountValue} onChange={handleVariantEditChange} placeholder="0" />
-                                            </div>
-                                        </div>
-
-                                        <div className="quick-modal-form-group" style={{ gridColumn: '1 / -1' }}>
-                                            <label className="quick-modal-label" style={{ color: 'hsl(var(--primary))' }}>Final Selling Price</label>
-                                            <input type="number" min="0" disabled={!!editingVariantData._id} onWheel={(e) => e.target.blur()} className="quick-modal-input" style={{ fontWeight: 800, fontSize: '1.2rem', background: 'hsl(var(--primary)/0.05)', borderColor: 'hsl(var(--primary)/0.3)', color: 'hsl(var(--primary))', height: '3rem', opacity: editingVariantData._id ? 0.6 : 1 }} name="finalSellingPrice" value={editingVariantData.finalSellingPrice} onChange={handleVariantEditChange} placeholder="0.00" />
-                                        </div>
-
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Stock Quantity</label>
-                                            <input type="number" min="0" disabled={!!editingVariantData._id} onWheel={(e) => e.target.blur()} className="quick-modal-input" name="quantity" value={editingVariantData.quantity} onChange={handleVariantEditChange} placeholder="0" style={{ opacity: editingVariantData._id ? 0.8 : 1, backgroundColor: editingVariantData._id ? 'hsl(var(--primary)/0.02)' : 'white' }} />
-                                        </div>
-                                        <div className="quick-modal-form-group">
-                                            <label className="quick-modal-label">Min Stock Level</label>
-                                            <input type="number" min="0" disabled={!!editingVariantData._id} onWheel={(e) => e.target.blur()} className="quick-modal-input" name="minStock" value={editingVariantData.minStock} onChange={handleVariantEditChange} placeholder="0" style={{ opacity: editingVariantData._id ? 0.6 : 1 }} />
-                                        </div>
-
-                                        <div className="quick-modal-form-group" style={{ gridColumn: '1 / -1' }}>
-                                            <label className="quick-modal-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span>Tax Configuration</span>
-                                                <button type="button" className="add-new-chip-btn" onClick={() => setIsTaxModalOpen(true)} disabled={!!editingVariantData._id} style={{ opacity: !!editingVariantData._id ? 0.4 : 1 }}>
-                                                    <span className="add-new-chip-icon"><Plus size={10} strokeWidth={3.5} /></span>
-                                                    Add New
-                                                </button>
-                                            </label>
-                                            <div style={{ position: 'relative', opacity: editingVariantData._id ? 0.6 : 1, pointerEvents: editingVariantData._id ? 'none' : 'auto' }}>
-                                                <CustomSelect
-                                                    direction="up"
-                                                    options={[{ value: '', label: 'No Tax' }, ...masters.taxes.filter(t => t && t.name).map(t => ({ value: t._id, label: `${t.name} (${t.rate || 0}%)` }))]}
-                                                    value={editingVariantData.taxId}
-                                                    onChange={(val) => handleVariantEditChange({ target: { name: 'taxId', value: val } })}
-                                                    placeholder="Select Tax"
-                                                />
-                                                {editingVariantData._id && (
-                                                    <div style={{ position: 'absolute', right: '2.5rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.5 }}>
-                                                        <Lock size={14} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="quick-modal-form-actions" style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid hsl(var(--border)/0.2)' }}>
-                                        <button type="button" className="quick-modal-submit-btn" style={{ width: '100%' }} onClick={handleSaveVariantRow}>
-                                            Save Variant Data
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>, document.body
-                )
-            }
-        </div >
+            {editingVariantData && createPortal(
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setEditingVariantData(null)}>
+                    <div style={{ background: 'white', padding: '2rem', borderRadius: '1.5rem', width: 400 }} onClick={e => e.stopPropagation()}>
+                        <h3>Edit Variant</h3>
+                        <input className="product-input" value={editingVariantData.sku} onChange={(e) => setEditingVariantData({ ...editingVariantData, sku: e.target.value })} placeholder="SKU" />
+                        <input type="number" className="product-input" value={editingVariantData.price} onChange={(e) => setEditingVariantData({ ...editingVariantData, price: e.target.value })} placeholder="Price" />
+                        <button className="btn-premium-primary" onClick={handleSaveVariantRow}>Save</button>
+                    </div>
+                </div>,
+                document.body
+            )}
+        </div>
     );
 };
 

@@ -6,7 +6,7 @@ import productService from '../../services/productService';
 import Loader from '../../components/Loader';
 import QuickCreateModal from '../../components/QuickCreateModal';
 import NestedCategoryModal from '../../components/NestedCategoryModal'; // new modal
-import { BASE_IMAGE_URL } from '../../config/env';
+import './MasterManagement.css';
 
 const MasterManagement = () => {
     const [activeMaster, setActiveMaster] = useState('Category');
@@ -43,6 +43,8 @@ const MasterManagement = () => {
         const walk = (x - startX) * 2; // Scroll speed
         tabsRef.current.scrollLeft = scrollLeft - walk;
     };
+
+    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     const masters = [
         { name: 'Category', icon: LayoutGrid, count: 0, color: 'var(--primary)', plural: 'Categories' },
@@ -129,8 +131,7 @@ const MasterManagement = () => {
     const renderImage = (item) => {
         const imageUrl = item.image || item.icon || item.logo;
         if (imageUrl) {
-            const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${BASE_IMAGE_URL}/${imageUrl}`;
-            return <img src={fullImageUrl} alt={item.name} />;
+            return <img src={imageUrl} alt={item.name} />;
         }
         return <activeMasterDetails.icon size={16} />;
     };
