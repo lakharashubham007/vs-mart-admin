@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import productService from '../../services/productService';
 import Loader from '../../components/Loader';
 import CustomSelect from '../../components/CustomSelect';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import '../category/Category.css';
 import './Product.css';
 
@@ -169,14 +170,43 @@ const ListProducts = () => {
 
                 <div className="category-glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div className="category-filter-bar">
-                        <div className="category-search-wrapper">
-                            <Search size={18} />
+                        <div 
+                            className="category-search-wrapper"
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                background: 'hsl(var(--secondary) / 0.3)', 
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '12px',
+                                paddingLeft: '12px',
+                                flex: 1,
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <Search 
+                                size={18} 
+                                style={{ 
+                                    color: 'hsl(var(--muted-foreground))', 
+                                    flexShrink: 0,
+                                    position: 'static',
+                                    marginRight: '10px'
+                                }} 
+                            />
                             <input
                                 type="text"
                                 placeholder="Search products..."
                                 className="category-search-input"
                                 value={filters.search}
                                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'hsl(var(--foreground))',
+                                    fontSize: '0.95rem'
+                                }}
                             />
                         </div>
 
@@ -331,7 +361,7 @@ const ListProducts = () => {
                                                         title="View Image Gallery"
                                                     >
                                                         {product.images?.thumbnail ? (
-                                                            <img src={`http://localhost:5000/${product.images.thumbnail}`} alt="" />
+                                                            <img src={resolveImageUrl(product.images.thumbnail)} alt="" />
                                                         ) : (
                                                             <Package size={20} className="text-muted-foreground" />
                                                         )}
@@ -391,8 +421,8 @@ const ListProducts = () => {
                                                             className="action-btn"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                setSelectedQrCode(product.qrCode ? `http://localhost:5000${product.qrCode}` : '');
-                                                                setSelectedBarcode(product.barcode ? `http://localhost:5000${product.barcode}` : '');
+                                                                setSelectedQrCode(resolveImageUrl(product.qrCode));
+                                                                setSelectedBarcode(resolveImageUrl(product.barcode));
                                                                 setSelectedQrTitle(`${product.name}`);
                                                                 setModalType('QR');
                                                                 setQrModalOpen(true);
@@ -435,8 +465,8 @@ const ListProducts = () => {
                                                                                 className="variant-qr-thumb"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
-                                                                                    setSelectedQrCode(v.qrCode ? `http://localhost:5000${v.qrCode}` : '');
-                                                                                    setSelectedBarcode(v.barcode ? `http://localhost:5000${v.barcode}` : '');
+                                                                                    setSelectedQrCode(resolveImageUrl(v.qrCode));
+                                                                                    setSelectedBarcode(resolveImageUrl(v.barcode));
                                                                                     const attrText = v.attributes?.map(attr => attr.valueName || attr.valueId?.name || attr.valueId?.valueName || attr.valueId?.value).join(' / ') || 'Variant';
                                                                                     setSelectedQrTitle(`${attrText}`);
                                                                                     setModalType('QR');
@@ -627,7 +657,7 @@ const ListProducts = () => {
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--foreground))' }}>Primary Thumbnail</span>
                                             </div>
                                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                                                <img draggable="false" src={`http://localhost:5000/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={resolveImageUrl(selectedProductForGallery.images.thumbnail)} alt="Thumbnail" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         </div>
                                     )}
@@ -644,7 +674,7 @@ const ListProducts = () => {
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))' }}>Gallery Image {idx + 1}</span>
                                             </div>
                                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-                                                <img draggable="false" src={`http://localhost:5000/${img}`} alt={`Gallery ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={resolveImageUrl(img)} alt={`Gallery ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         </div>
                                     ))}
@@ -686,7 +716,7 @@ const ListProducts = () => {
                                                     filter: selectedDisplayImage === selectedProductForGallery.images.thumbnail ? 'none' : 'grayscale(40%)'
                                                 }}
                                             >
-                                                <img draggable="false" src={`http://localhost:5000/${selectedProductForGallery.images.thumbnail}`} alt="Thumbnail View" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={resolveImageUrl(selectedProductForGallery.images.thumbnail)} alt="Thumbnail View" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         )}
 
@@ -716,7 +746,7 @@ const ListProducts = () => {
                                                     filter: selectedDisplayImage === img ? 'none' : 'grayscale(40%)'
                                                 }}
                                             >
-                                                <img draggable="false" src={`http://localhost:5000/${img}`} alt={`Gallery View ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
+                                                <img draggable="false" src={resolveImageUrl(img)} alt={`Gallery View ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }} />
                                             </div>
                                         ))}
                                     </div>

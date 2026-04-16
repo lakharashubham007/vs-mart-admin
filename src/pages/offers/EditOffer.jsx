@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Save, ImageIcon, LayoutGrid, X, RefreshCw, Calendar, Link as LinkIcon, Hash } from 'lucide-react';
 import toast from 'react-hot-toast';
 import offerService from '../../services/offerService';
-import { BASE_IMAGE_URL as ROOT_URL } from '../../config/env';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import Loader from '../../components/Loader';
 import CustomDatePicker from '../../components/CustomDatePicker';
 import CustomSelect from '../../components/CustomSelect';
@@ -50,9 +50,7 @@ const EditOffer = () => {
                 isActive: offer.isActive,
                 image: null
             });
-            if (offer.image) {
-                setPreviewUrl(`${ROOT_URL}/${offer.image}`);
-            }
+                setPreviewUrl(resolveImageUrl(offer.image));
         } catch (error) {
             toast.error('Failed to load offer details');
             navigate('/offers-list');

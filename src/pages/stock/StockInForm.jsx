@@ -10,7 +10,7 @@ import productService from '../../services/productService';
 import stockService from '../../services/stockService';
 import Loader from '../../components/Loader';
 import CustomSelect from '../../components/CustomSelect';
-import { BASE_IMAGE_URL } from '../../config/env';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import './Stock.css';
 
 const StockInForm = () => {
@@ -459,7 +459,7 @@ const StockInForm = () => {
                     <div className="stock-preview-card">
                         <div className="preview-img-box">
                             {selectedProduct?.images?.thumbnail ? (
-                                <img src={`${BASE_IMAGE_URL}/${selectedProduct.images.thumbnail}`} alt="" />
+                                <img src={resolveImageUrl(selectedProduct.images.thumbnail)} alt="" />
                             ) : (
                                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0' }}>
                                     <Box size={32} className="text-muted-foreground" style={{ opacity: 0.3 }} />

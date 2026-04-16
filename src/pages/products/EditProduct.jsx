@@ -11,6 +11,7 @@ import productService from '../../services/productService';
 import Loader from '../../components/Loader';
 import CustomSelect from '../../components/CustomSelect';
 import QuickCreateModal from '../../components/QuickCreateModal';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import './Product.css';
 
 const EditProduct = () => {
@@ -185,9 +186,9 @@ const EditProduct = () => {
 
                 if (p.images) {
                     setPreviews({
-                        thumbnail: p.images.thumbnail ? `http://localhost:5000/${p.images.thumbnail}` : '',
-                        gallery: p.images.gallery ? p.images.gallery.map(g => `http://localhost:5000/${g}`) : [],
-                        qrCode: p.qrCode ? `http://localhost:5000${p.qrCode}` : ''
+                        thumbnail: resolveImageUrl(p.images.thumbnail),
+                        gallery: p.images.gallery ? p.images.gallery.map(g => resolveImageUrl(g)) : [],
+                        qrCode: resolveImageUrl(p.qrCode)
                     });
                 }
             } catch (error) {

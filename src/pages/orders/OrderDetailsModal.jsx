@@ -22,7 +22,7 @@ import toast from 'react-hot-toast';
 import orderService from '../../services/orderService';
 import Loader from '../../components/Loader';
 import DeliveryBoySelectionModal from '../../components/DeliveryBoySelectionModal';
-import { BASE_IMAGE_URL } from '../../config/env';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import './OrderDetailsModal.css';
 
 // Safe rupee symbol constant — avoids file encoding issues with ₹
@@ -259,7 +259,7 @@ const OrderDetailsModal = ({ orderId, onClose, onUpdate }) => {
                                         }}>
                                             {order.deliveryBoyId.profileImage ? (
                                                 <img 
-                                                    src={`${BASE_IMAGE_URL}/${order.deliveryBoyId.profileImage}`} 
+                                                    src={resolveImageUrl(order.deliveryBoyId.profileImage)} 
                                                     alt="Boy" 
                                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                 />

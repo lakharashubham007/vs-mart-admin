@@ -10,7 +10,6 @@ import deliveryBoyService from '../../services/deliveryBoyService';
 import { useAuth } from '../../context/AuthContext';
 import Loader from '../../components/Loader';
 import DeliveryMapModal from '../../components/DeliveryMapModal';
-import { BASE_IMAGE_URL } from '../../config/env';
 import './DeliveryAssignmentList.css';
 
 const DeliveryAssignmentList = () => {
@@ -173,14 +172,42 @@ const DeliveryAssignmentList = () => {
 
                 <div className="category-glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div className="category-filter-bar">
-                        <div className="category-search-wrapper" style={{ flex: '1' }}>
-                            <Search size={18} />
+                        <div 
+                            className="category-search-wrapper" 
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                background: 'hsl(var(--secondary) / 0.3)', 
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '12px',
+                                paddingLeft: '12px',
+                                flex: '1',
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <Search 
+                                size={18} 
+                                style={{ 
+                                    color: 'hsl(var(--muted-foreground))', 
+                                    flexShrink: 0,
+                                    marginRight: '10px'
+                                }} 
+                            />
                             <input 
                                 type="text" 
                                 placeholder="Search order # or boy..." 
                                 className="category-search-input"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'hsl(var(--foreground))',
+                                    fontSize: '0.95rem'
+                                }}
                             />
                         </div>
                         <div className="category-filter-group" style={{ minWidth: '200px' }} ref={statusDropdownRef}>

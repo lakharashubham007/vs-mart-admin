@@ -19,10 +19,7 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Environment files
-.env
-.env.*
-!.env.example
+
 
 # IDE / Editor
 .vscode/

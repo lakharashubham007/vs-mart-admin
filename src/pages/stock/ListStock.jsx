@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import stockService from '../../services/stockService';
 import Loader from '../../components/Loader';
 import CustomSelect from '../../components/CustomSelect';
-import { BASE_IMAGE_URL } from '../../config/env';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import '../products/Product.css';
 import './Stock.css';
 
@@ -92,14 +92,45 @@ const ListStock = () => {
                 </header>
 
                 <div className="modern-filter-container" style={{ marginBottom: '2rem' }}>
-                    <div className="modern-search-box">
-                        <Search size={20} />
+                    <div 
+                        className="category-search-wrapper" 
+                        style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            background: 'hsl(var(--secondary) / 0.3)',
+                            border: '1px solid hsl(var(--border) / 0.4)',
+                            borderRadius: '12px',
+                            paddingLeft: '15px',
+                            flex: 1,
+                            transition: 'all 0.3s ease',
+                            height: '48px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+                        }}
+                    >
+                        <Search 
+                            size={20} 
+                            style={{ 
+                                color: 'hsl(var(--muted-foreground))', 
+                                flexShrink: 0,
+                                position: 'static',
+                                marginRight: '12px'
+                            }} 
+                        />
                         <input
                             type="text"
                             placeholder="Search by Batch No, Product Name..."
-                            className="modern-search-input"
+                            className="category-search-input"
                             value={filters.search}
                             onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
+                            style={{
+                                flex: 1,
+                                padding: '0.75rem 0',
+                                background: 'transparent',
+                                border: 'none',
+                                outline: 'none',
+                                color: 'hsl(var(--foreground))',
+                                fontSize: '1rem'
+                            }}
                         />
                     </div>
 
@@ -199,7 +230,7 @@ const ListStock = () => {
                                                 <div className="stock-list-image-box">
                                                     {batch.productId?.images?.thumbnail ? (
                                                         <img 
-                                                            src={`${BASE_IMAGE_URL}/${batch.productId.images.thumbnail}`} 
+                                                            src={resolveImageUrl(batch.productId.images.thumbnail)} 
                                                             alt="" 
                                                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                                         />

@@ -517,12 +517,42 @@ const RecipientsModal = ({ title, loading, users, onClose }) => {
                     <h3>Recipients — {title}</h3>
                     <button onClick={onClose}><X size={18} /></button>
                 </div>
-                <div className="spn-modal-search">
-                    <Search size={16} />
+                <div 
+                    className="spn-modal-search"
+                    style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        background: 'hsl(var(--secondary) / 0.3)', 
+                        border: '1px solid hsl(var(--border) / 0.5)',
+                        borderRadius: '10px',
+                        paddingLeft: '10px',
+                        margin: '1rem',
+                        transition: 'all 0.3s ease'
+                    }}
+                >
+                    <Search 
+                        size={16} 
+                        style={{ 
+                            color: 'hsl(var(--muted-foreground))', 
+                            flexShrink: 0,
+                            marginRight: '8px'
+                        }} 
+                    />
                     <input 
-                        type="text" placeholder="Search recipients..." 
-                        value={search} onChange={e => setSearch(e.target.value)}
+                        type="text" 
+                        placeholder="Search recipients..." 
+                        value={search} 
+                        onChange={e => setSearch(e.target.value)}
                         autoFocus
+                        style={{
+                            flex: 1,
+                            padding: '0.6rem 0',
+                            background: 'transparent',
+                            border: 'none',
+                            outline: 'none',
+                            color: 'hsl(var(--foreground))',
+                            fontSize: '0.9rem'
+                        }}
                     />
                 </div>
                 <div className="spn-modal-body">

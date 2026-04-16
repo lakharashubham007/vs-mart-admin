@@ -105,8 +105,28 @@ const ListOffer = () => {
                 <hr className="header-divider-internal" />
 
                 <div className="offer-glass-card filter-card" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div className="offer-search-wrapper" style={{ flex: 1 }}>
-                        <Search size={18} />
+                    <div 
+                        className="offer-search-wrapper" 
+                        style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            background: 'hsl(var(--secondary) / 0.3)', 
+                            border: '1px solid hsl(var(--border) / 0.5)',
+                            borderRadius: '12px',
+                            paddingLeft: '12px',
+                            flex: 1,
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        <Search 
+                            size={18} 
+                            style={{ 
+                                color: 'hsl(var(--muted-foreground))', 
+                                flexShrink: 0,
+                                position: 'static',
+                                marginRight: '10px'
+                            }} 
+                        />
                         <input
                             type="text"
                             placeholder="Search offers..."
@@ -114,6 +134,15 @@ const ListOffer = () => {
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
                                 setPagination(prev => ({ ...prev, page: 1 }));
+                            }}
+                            style={{
+                                flex: 1,
+                                padding: '0.75rem 0',
+                                background: 'transparent',
+                                border: 'none',
+                                outline: 'none',
+                                color: 'hsl(var(--foreground))',
+                                fontSize: '0.95rem'
                             }}
                         />
                     </div>

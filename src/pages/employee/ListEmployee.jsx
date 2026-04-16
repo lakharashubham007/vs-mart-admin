@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import employeeService from '../../services/employeeService';
 import Loader from '../../components/Loader';
-import { BASE_IMAGE_URL } from '../../config/env';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import '../category/Category.css';
 import './Employee.css';
 
@@ -144,8 +144,29 @@ const ListEmployee = () => {
                             )}
                         </div>
 
-                        <div className="category-search-wrapper" style={{ flex: '1', minWidth: '250px' }}>
-                            <Search size={18} />
+                        <div 
+                            className="category-search-wrapper" 
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                background: 'hsl(var(--secondary) / 0.3)', 
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '12px',
+                                paddingLeft: '12px',
+                                flex: 2,
+                                transition: 'all 0.3s ease',
+                                minWidth: '250px'
+                            }}
+                        >
+                            <Search 
+                                size={18} 
+                                style={{ 
+                                    color: 'hsl(var(--muted-foreground))', 
+                                    flexShrink: 0,
+                                    position: 'static',
+                                    marginRight: '10px'
+                                }} 
+                            />
                             <input
                                 type="text"
                                 placeholder="Find application admins..."
@@ -154,6 +175,15 @@ const ListEmployee = () => {
                                 onChange={(e) => {
                                     setSearchTerm(e.target.value);
                                     setPagination(prev => ({ ...prev, page: 1 }));
+                                }}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'hsl(var(--foreground))',
+                                    fontSize: '0.95rem'
                                 }}
                             />
                         </div>
@@ -208,7 +238,7 @@ const ListEmployee = () => {
                                             }}>
                                                 {employee.profileImage ? (
                                                     <img
-                                                        src={`${BASE_IMAGE_URL}/v1/public/admin-image/${employee._id}`}
+                                                        src={resolveImageUrl(`v1/public/admin-image/${employee._id}`)}
                                                         alt={employee.name}
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                     />

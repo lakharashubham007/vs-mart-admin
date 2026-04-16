@@ -286,6 +286,12 @@ const productService = {
             method: 'DELETE'
         });
     },
+
+    // Public
+    getProductDetailsForPublic: async (slug, variantId) => {
+        const query = variantId ? `?v=${variantId}` : '';
+        return await apiClient(`/public/product-details/${slug}${query}`);
+    },
 };
 
 

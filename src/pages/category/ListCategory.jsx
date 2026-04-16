@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import productService from '../../services/productService';
 import Loader from '../../components/Loader';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import QuickCreateModal from '../../components/QuickCreateModal';
 import './Category.css';
 
@@ -19,7 +20,6 @@ const ListCategory = () => {
     const [editSelectedItem, setEditSelectedItem] = useState(null);
     const navigate = useNavigate();
 
-    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     useEffect(() => {
         fetchCategories();
@@ -115,14 +115,43 @@ const ListCategory = () => {
 
                 <div className="category-glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div className="category-filter-bar">
-                        <div className="category-search-wrapper">
-                            <Search size={18} />
+                        <div 
+                            className="category-search-wrapper"
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                background: 'hsl(var(--secondary) / 0.3)', 
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '12px',
+                                paddingLeft: '12px',
+                                flex: 1,
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <Search 
+                                size={18} 
+                                style={{ 
+                                    color: 'hsl(var(--muted-foreground))', 
+                                    flexShrink: 0,
+                                    position: 'static',
+                                    marginRight: '10px'
+                                }} 
+                            />
                             <input
                                 type="text"
                                 placeholder="Search by category name..."
                                 className="category-search-input"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'hsl(var(--foreground))',
+                                    fontSize: '0.95rem'
+                                }}
                             />
                         </div>
                         <button className="secondary-button" style={{ padding: '0.75rem' }}>
@@ -210,7 +239,7 @@ const ListCategory = () => {
                                         <div className="category-cell-name">
                                             <div className="category-img-box">
                                                 {cat.image ? (
-                                                    <img src={`${API_BASE_URL}/${cat.image}`} alt="" />
+                                                    <img src={resolveImageUrl(cat.image)} alt="" />
                                                 ) : (
                                                     <LayoutGrid size={20} className="text-muted-foreground" />
                                                 )}

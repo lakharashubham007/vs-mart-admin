@@ -110,14 +110,44 @@ const ListSupport = () => {
 
                 <div className="category-glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div className="category-filter-bar">
-                        <div className="category-search-wrapper">
-                            <Search size={18} />
+                        <div 
+                            className="category-search-wrapper" 
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                background: 'hsl(var(--secondary) / 0.3)', 
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '12px',
+                                paddingLeft: '12px',
+                                flex: 2,
+                                transition: 'all 0.3s ease',
+                                minWidth: '250px'
+                            }}
+                        >
+                            <Search 
+                                size={18} 
+                                style={{ 
+                                    color: 'hsl(var(--muted-foreground))', 
+                                    flexShrink: 0,
+                                    position: 'static',
+                                    marginRight: '10px'
+                                }} 
+                            />
                             <input
                                 type="text"
                                 placeholder="Search support methods..."
                                 className="category-search-input"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'hsl(var(--foreground))',
+                                    fontSize: '0.95rem'
+                                }}
                             />
                         </div>
                     </div>

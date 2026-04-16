@@ -17,7 +17,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import './Header.css';
 
-import { BASE_IMAGE_URL as IMAGE_BASE_URL } from '../../config/env';
+import { resolveImageUrl } from '../../utils/imageUtils';
 
 const Header = ({ isSidebarCollapsed, toggleSidebar }) => {
     const { theme, toggleTheme } = useTheme();
@@ -83,7 +83,7 @@ const Header = ({ isSidebarCollapsed, toggleSidebar }) => {
                     >
                         <div className="avatar">
                             {user?.profileImage ? (
-                                <img src={`${IMAGE_BASE_URL}/${user.profileImage}`} alt="Profile" className="avatar-img-small" />
+                                <img src={resolveImageUrl(user.profileImage)} alt="Profile" className="avatar-img-small" />
                             ) : (
                                 <User size={18} />
                             )}
@@ -100,7 +100,7 @@ const Header = ({ isSidebarCollapsed, toggleSidebar }) => {
                             <div className="dropdown-info">
                                 <div className="dropdown-avatar">
                                     {user?.profileImage ? (
-                                        <img src={`${IMAGE_BASE_URL}/${user.profileImage}`} alt="Profile" className="avatar-img-small" />
+                                        <img src={resolveImageUrl(user.profileImage)} alt="Profile" className="avatar-img-small" />
                                     ) : (
                                         <User size={20} />
                                     )}

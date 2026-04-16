@@ -5,19 +5,13 @@ import {
     ArrowUpRight, Clock, CheckCircle, XCircle, PackageCheck, Map as MapIcon 
 } from 'lucide-react';
 import analyticsService from '../services/analyticsService';
-import { BASE_IMAGE_URL } from '../config/env';
 import { useAuth } from '../context/AuthContext';
 import OptimizedImage from '../components/OptimizedImage';
 import DeliveryMapModal from '../components/DeliveryMapModal';
 import DeliveryDashboard from './DeliveryDashboard';
+import { resolveImageUrl } from '../utils/imageUtils';
 import './Dashboard.css';
 
-const getImageUrl = (path) => {
-    if (!path) return null;
-    if (path.startsWith('http')) return path;
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${BASE_IMAGE_URL}${cleanPath}`;
-};
 
 const fmtRupee = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
 
@@ -286,12 +280,11 @@ export default function Dashboard() {
                                 {loading ? [1, 2, 3, 4].map(k => <tr key={k}><td colSpan="4"><Sk h={40} /></td></tr>) : (
                                     recentOrders.map((o, i) => {
                                         const pName = o.items?.[0]?.name || 'Luxury Product';
-                                        const pImg = getImageUrl(o.items?.[0]?.image) || `https://i.pravatar.cc/100?img=${i + 40}`;
                                         return (
                                             <tr key={o._id || i}>
                                                 <td>
                                                     <div className="table-product">
-                                                        <OptimizedImage src={getImageUrl(o.items?.[0]?.image)} alt={pName} className="p-thumb shadow-sm" />
+                                                        <OptimizedImage src={resolveImageUrl(o.items?.[0]?.image)} alt={pName} className="p-thumb shadow-sm" />
                                                         <div><div className="p-name">{pName}</div><div className="p-id">ORDER #{o.orderId || o._id?.substring(0, 8)}</div></div>
                                                     </div>
                                                 </td>
@@ -324,11 +317,10 @@ export default function Dashboard() {
                     <div className="bs-list">
                         {loading ? [1, 2, 3, 4, 5].map(k => <Sk key={k} h={64} r={12} />) : (
                             bestSellers.map((p, i) => {
-                                const pImg = getImageUrl(p.image) || 'https://pub-8078970e704e427f99990b797825a072.r2.dev/placeholder-product.png';
                                 return (
                                     <div key={p._id || i} className="bs-item-card">
                                         <div className="bs-img-box">
-                                            <OptimizedImage src={getImageUrl(p.image)} alt={p.name} className="bs-thumb" />
+                                            <OptimizedImage src={resolveImageUrl(p.image)} alt={p.name} className="bs-thumb" />
                                             <div className="bs-rank-badge">{i + 1}</div>
                                         </div>
                                     <div className="bs-content">

@@ -6,6 +6,7 @@ import productService from '../../services/productService';
 import Loader from '../../components/Loader';
 import QuickCreateModal from '../../components/QuickCreateModal';
 import NestedCategoryModal from '../../components/NestedCategoryModal'; // new modal
+import { resolveImageUrl } from '../../utils/imageUtils';
 import './MasterManagement.css';
 
 const MasterManagement = () => {
@@ -44,7 +45,6 @@ const MasterManagement = () => {
         tabsRef.current.scrollLeft = scrollLeft - walk;
     };
 
-    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     const masters = [
         { name: 'Category', icon: LayoutGrid, count: 0, color: 'var(--primary)', plural: 'Categories' },
@@ -129,7 +129,7 @@ const MasterManagement = () => {
     const activeMasterDetails = masters.find(m => m.name === activeMaster);
 
     const renderImage = (item) => {
-        const imageUrl = item.image || item.icon || item.logo;
+        const imageUrl = resolveImageUrl(item.image || item.icon || item.logo);
         if (imageUrl) {
             return <img src={imageUrl} alt={item.name} />;
         }
@@ -175,13 +175,41 @@ const MasterManagement = () => {
                     </div>
 
                     <div className="header-actions compact">
-                        <div className="master-search-mini">
-                            <Search size={14} />
+                        <div 
+                            className="master-search-mini"
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                background: 'hsl(var(--secondary) / 0.3)', 
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '8px',
+                                paddingLeft: '8px',
+                                transition: 'all 0.3s ease',
+                                width: '200px'
+                            }}
+                        >
+                            <Search 
+                                size={14} 
+                                style={{ 
+                                    color: 'hsl(var(--muted-foreground))', 
+                                    flexShrink: 0,
+                                    marginRight: '6px'
+                                }} 
+                            />
                             <input
                                 type="text"
                                 placeholder="Search..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.4rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'hsl(var(--foreground))',
+                                    fontSize: '0.85rem'
+                                }}
                             />
                         </div>
                         <div className="action-divider" />

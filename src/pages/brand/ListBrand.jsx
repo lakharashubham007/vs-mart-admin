@@ -8,7 +8,7 @@ import QuickCreateModal from '../../components/QuickCreateModal';
 import '../category/Category.css';
 import Loader from '../../components/Loader';
 
-import { BASE_IMAGE_URL as API_BASE_URL } from '../../config/env';
+import { resolveImageUrl } from '../../utils/imageUtils';
 
 const ListBrand = () => {
     const [brands, setBrands] = useState([]);
@@ -116,14 +116,43 @@ const ListBrand = () => {
 
                 <div className="category-glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div className="category-filter-bar">
-                        <div className="category-search-wrapper">
-                            <Search size={18} />
+                        <div 
+                            className="category-search-wrapper"
+                            style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                background: 'hsl(var(--secondary) / 0.3)', 
+                                border: '1px solid hsl(var(--border) / 0.5)',
+                                borderRadius: '12px',
+                                paddingLeft: '12px',
+                                flex: 1,
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <Search 
+                                size={18} 
+                                style={{ 
+                                    color: 'hsl(var(--muted-foreground))', 
+                                    flexShrink: 0,
+                                    position: 'static',
+                                    marginRight: '10px'
+                                }} 
+                            />
                             <input
                                 type="text"
                                 placeholder="Search by brand name..."
                                 className="category-search-input"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'hsl(var(--foreground))',
+                                    fontSize: '0.95rem'
+                                }}
                             />
                         </div>
                         <button className="secondary-button" style={{ padding: '0.75rem' }}>
@@ -234,7 +263,7 @@ const ListBrand = () => {
                                             <div className="category-cell-name">
                                                 <div className="category-img-box">
                                                     {brand.logo ? (
-                                                        <img src={`${API_BASE_URL}/${brand.logo}`} alt={brand.name} crossOrigin="anonymous" />
+                                                        <img src={resolveImageUrl(brand.logo)} alt={brand.name} crossOrigin="anonymous" />
                                                     ) : (
                                                         <Award size={20} className="text-muted-foreground" />
 

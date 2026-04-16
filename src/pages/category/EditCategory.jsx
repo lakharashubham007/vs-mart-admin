@@ -4,6 +4,7 @@ import { ArrowLeft, Save, LayoutGrid, Layers, Image as ImageIcon, Check, Info, X
 import toast from 'react-hot-toast';
 import productService from '../../services/productService';
 import Loader from '../../components/Loader';
+import { resolveImageUrl } from '../../utils/imageUtils';
 import './Category.css';
 
 const EditCategory = () => {
@@ -33,7 +34,6 @@ const EditCategory = () => {
         addons: []
     });
 
-    const API_BASE_URL = import.meta.env.VITE_BASE_IMAGE_URL || 'http://localhost:5000';
 
     useEffect(() => {
         fetchData();
@@ -64,7 +64,7 @@ const EditCategory = () => {
             });
 
             if (cat.image) {
-                setExistingImageUrl(`${API_BASE_URL}/public/category-image/${cat._id}`);
+                setExistingImageUrl(resolveImageUrl(cat.image));
             }
 
             setParentCategories(allCatsRes.categories || []);

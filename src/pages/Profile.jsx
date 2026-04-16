@@ -6,14 +6,14 @@ import toast from 'react-hot-toast';
 import * as authService from '../services/authService';
 import './Profile.css';
 import Loader from '../components/Loader';
-import { BASE_IMAGE_URL } from '../config/env';
+import { resolveImageUrl } from '../utils/imageUtils';
 
 const Profile = () => {
     const { user, setUser } = useAuth();
     const navigate = useNavigate();
     const [isSaving, setIsSaving] = useState(false);
     const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState(user?.profileImage ? `${BASE_IMAGE_URL}/${user.profileImage}` : null);
+    const [imagePreview, setImagePreview] = useState(resolveImageUrl(user?.profileImage));
 
     const [formData, setFormData] = useState({
         name: user?.name || '',

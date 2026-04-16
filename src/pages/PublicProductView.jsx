@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { ShoppingBag, Zap, ChevronRight, Package, Truck, ShieldCheck } from 'lucide-react';
+import { 
+    ShoppingBag, Zap, ChevronRight, Package, Truck, 
+    ShieldCheck, Star, Heart, Share2, ArrowLeft, 
+    Plus, Minus, ShoppingCart 
+} from 'lucide-react';
 import Loader from '../components/Loader';
 import { BASE_URL } from '../config/env';
 
@@ -12,6 +16,8 @@ const PublicProductView = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [qty, setQty] = useState(1);
+    const [isAdded, setIsAdded] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -36,16 +42,21 @@ const PublicProductView = () => {
         fetchProduct();
     }, [slug, variantId]);
 
+    const handleAddToCart = () => {
+        setIsAdded(true);
+        setTimeout(() => setIsAdded(false), 2000);
+    };
+
     if (loading) return <Loader />;
     if (error) return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 text-center">
-            <div className="bg-white p-8 rounded-3xl shadow-xl max-w-sm w-full border border-red-100">
-                <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Package size={32} />
+        <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-6 text-center">
+            <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl max-w-sm w-full border border-red-100">
+                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Package size={40} />
                 </div>
-                <h1 className="text-2xl font-bold text-slate-800 mb-2">Oops!</h1>
-                <p className="text-slate-500 mb-6">{error}</p>
-                <a href="/" className="inline-block bg-slate-800 text-white px-6 py-3 rounded-xl font-semibold">Go to Home</a>
+                <h1 className="text-3xl font-black text-slate-800 mb-3">Oops!</h1>
+                <p className="text-slate-500 mb-8 leading-relaxed">{error}</p>
+                <a href="/" className="inline-block bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold transition-transform hover:scale-105 active:scale-95 shadow-lg">Go to Home</a>
             </div>
         </div>
     );
@@ -53,367 +64,332 @@ const PublicProductView = () => {
     const { data, deepLink } = product;
 
     return (
-        <div className="public-landing-wrapper">
+        <div className="premium-landing-container">
             <style>{`
-                .public-landing-wrapper {
+                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+                :root {
                     --primary: #1A6B3A;
-                    --primary-hover: #155a30;
-                    --glass: rgba(255, 255, 255, 0.92);
-                    min-height: 100vh;
-                    height: auto;
+                    --primary-light: #2D9A54;
+                    --primary-dark: #064E3B;
+                    --accent: #FFD700;
+                    --white: #FFFFFF;
+                    --bg-soft: #F0F9F4;
+                    --text-main: #111827;
+                    --text-soft: #4B5563;
+                    --glass: rgba(255, 255, 255, 0.85);
+                }
+
+                .premium-landing-container {
+                    height: 100vh;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                    background: var(--bg-soft);
+                    font-family: 'Outfit', sans-serif;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    justify-content: flex-start;
-                    padding: 4rem 1.25rem 12rem; /* Even more bottom space */
-                    background: linear-gradient(135deg, #1A6B3A 0%, #064E3B 100%);
-                    font-family: 'Outfit', sans-serif;
                     position: relative;
-                    width: 100%;
                 }
-                html, body {
-                    height: auto !important;
-                    overflow: auto !important;
+                
+                body, html {
                     margin: 0;
                     padding: 0;
+                    overflow: hidden;
+                    height: 100%;
                 }
-                .public-landing-wrapper::before {
-                    content: '';
+
+                /* Decorative Background Blobs */
+                .blob {
                     position: absolute;
-                    top: -10%; left: -10%;
-                    width: 50%; height: 50%;
-                    background: rgba(45, 154, 84, 0.4);
-                    filter: blur(120px);
-                    border-radius: 50%;
+                    filter: blur(80px);
                     z-index: 0;
+                    border-radius: 50%;
+                    opacity: 0.6;
                     pointer-events: none;
                 }
-                .landing-card {
-                    background: var(--glass);
-                    backdrop-filter: blur(40px);
-                    -webkit-backdrop-filter: blur(40px);
-                    border-radius: 2.5rem;
-                    padding: 2.5rem 2rem;
-                    width: 92%; /* Slightly narrower for floating feel */
-                    max-width: 450px;
-                    margin: 2rem 0; /* Clear vertical margins for separation */
-                    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
-                    border: 1px solid rgba(255, 255, 255, 0.6);
-                    text-align: center;
-                    z-index: 1;
-                    animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-                    position: relative;
-                    flex-shrink: 0;
-                }
-                @keyframes floatIn {
-                    from { opacity: 0; transform: translateY(60px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .brand-tag {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    background: rgba(26, 107, 58, 0.12);
-                    color: var(--primary);
-                    padding: 0.5rem 1.25rem;
-                    border-radius: 100px;
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                    text-transform: uppercase;
-                    letter-spacing: 0.08em;
-                    margin-bottom: 2rem;
-                }
-                .discount-tag {
-                    position: absolute;
-                    top: 1rem;
-                    right: 1rem;
-                    background: #ff4b4b;
-                    color: white;
-                    padding: 0.5rem 1rem;
-                    border-radius: 1rem;
-                    font-size: 0.875rem;
-                    font-weight: 800;
-                    box-shadow: 0 10px 20px rgba(255, 75, 75, 0.3);
-                    z-index: 2;
-                    animation: pulse 2s infinite;
-                }
-                @keyframes pulse {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
-                    100% { transform: scale(1); }
-                }
-                .product-image-box {
-                    width: 240px;
-                    height: 240px;
-                    margin: 0 auto 2rem;
-                    background: white;
-                    border-radius: 2rem;
-                    padding: 1.5rem;
-                    box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    position: relative;
-                }
-                .product-image-box img {
-                    max-width: 100%;
-                    max-height: 100%;
-                    object-fit: contain;
-                    transition: transform 0.5s ease;
-                }
-                .product-image-box:hover img {
-                    transform: scale(1.1);
-                }
-                .product-name {
-                    font-size: 1.875rem;
-                    font-weight: 800;
-                    color: #111827;
-                    margin-bottom: 0.75rem;
-                    line-height: 1.1;
-                    letter-spacing: -0.02em;
-                }
-                .variant-badge {
-                    display: inline-block;
-                    background: rgba(26, 107, 58, 0.08);
-                    color: var(--primary);
-                    padding: 0.4rem 1rem;
-                    border-radius: 100px;
-                    font-size: 0.9rem;
-                    font-weight: 700;
-                    margin-bottom: 1.5rem;
-                    border: 1px solid rgba(26, 107, 58, 0.1);
-                }
-                .price-container {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.75rem;
-                    margin-bottom: 2.5rem;
-                }
-                .current-price {
-                    font-size: 2.75rem;
-                    font-weight: 900;
-                    color: var(--primary);
-                    letter-spacing: -0.04em;
-                }
-                .old-price-group {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
-                .old-price {
-                    font-size: 1.125rem;
-                    color: #9ca3af;
-                    text-decoration: line-through;
-                    line-height: 1;
-                }
-                .save-banner {
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                    color: #ff4b4b;
-                    text-transform: uppercase;
-                }
-                .action-btn {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.75rem;
+                .blob-1 { top: -100px; right: -100px; width: 400px; height: 400px; background: var(--primary-light); }
+                .blob-2 { bottom: 10%; left: -150px; width: 500px; height: 500px; background: #DAF5E6; }
+
+                /* Header */
+                .header {
                     width: 100%;
-                    background: linear-gradient(135deg, #1A6B3A 0%, #2D9A54 100%);
-                    color: white;
-                    padding: 1.25rem 1rem;
-                    border-radius: 1.25rem;
-                    font-size: 1.125rem;
-                    font-weight: 700;
-                    text-decoration: none;
-                    box-shadow: 0 10px 25px -5px rgba(26, 107, 58, 0.4);
-                    transition: all 0.3s ease;
-                    border: 1px solid rgba(255,255,255,0.1);
-                    position: relative;
-                }
-                .action-btn:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 20px 40px -10px rgba(26, 107, 58, 0.5);
-                }
-                .action-btn:active {
-                    transform: translateY(-1px);
-                }
-                .promo-pill {
-                    position: absolute;
-                    top: -22px; /* Moved even higher to completely clear the text */
-                    right: 8px;
-                    background: #FFD700;
-                    color: #1a1a1a;
-                    padding: 0.35rem 0.85rem;
-                    border-radius: 0.75rem;
-                    font-size: 0.75rem;
-                    font-weight: 900;
-                    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
-                    border: 2px solid white;
+                    max-width: 500px;
+                    padding: 1.5rem;
+                    display: flex;
+                    justify-content: center; /* Center the logo */
+                    align-items: center;
                     z-index: 10;
-                    white-space: nowrap;
-                    letter-spacing: 0.02em;
-                    animation: bounce 2s infinite;
                 }
-                @keyframes bounce {
-                    0%, 100% { transform: translateY(0); }
-                    50% { transform: translateY(-4px); }
-                }
-                .app-benefits {
-                    margin-top: 2rem;
-                    background: rgba(255, 255, 255, 0.4);
-                    border-radius: 1.5rem;
-                    padding: 1.25rem;
-                    text-align: left;
-                    border: 1px solid rgba(255, 255, 255, 0.3);
-                }
-                .benefit-title {
-                    font-size: 0.875rem;
-                    font-weight: 800;
-                    color: var(--primary);
-                    margin-bottom: 0.75rem;
+                .header-logo {
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
+                    font-weight: 900;
+                    font-size: 1.4rem;
+                    color: var(--primary-dark);
+                    letter-spacing: 0.05em;
                 }
-                .benefit-list {
-                    list-style: none;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                }
-                .benefit-item {
-                    font-size: 0.8rem;
-                    color: #4b5563;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    font-weight: 600;
-                }
-                .benefit-dot {
-                    width: 6px;
-                    height: 6px;
-                    background: var(--primary);
-                    border-radius: 50%;
-                }
-                .features-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 1rem;
-                    margin-top: 2.5rem;
-                    padding-top: 2rem;
-                    border-top: 1px solid rgba(0,0,0,0.05);
-                }
-                .feature-item {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 0.5rem;
-                }
-                .feature-icon {
-                    width: 42px;
-                    height: 42px;
-                    background: white;
+                .icon-circle {
+                    width: 40px;
+                    height: 40px;
+                    background: var(--white);
                     border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: var(--primary);
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                    color: var(--text-main);
+                    cursor: pointer;
+                    transition: all 0.2s ease;
                 }
-                .feature-item:hover .feature-icon {
-                    transform: translateY(-5px);
-                    background: var(--primary);
-                    color: white;
+                .icon-circle:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+                /* Main Content Card */
+                .content-card {
+                    width: 92%;
+                    max-width: 480px;
+                    background: var(--white);
+                    border-radius: 3rem;
+                    padding: 1rem;
+                    box-shadow: 0 30px 60px -12px rgba(26, 107, 58, 0.12);
+                    z-index: 5;
+                    margin-top: 1rem;
+                    margin-bottom: 2rem;
+                    position: relative;
                 }
-                .feature-text {
-                    font-size: 0.65rem;
+
+                /* Image Gallery UI */
+                .image-container {
+                    width: 100%;
+                    aspect-ratio: 1;
+                    background: #F8FAFC;
+                    border-radius: 2.5rem;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                }
+                .image-container img {
+                    width: 75%;
+                    height: 75%;
+                    object-fit: contain;
+                    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .image-container:hover img { transform: scale(1.1); }
+
+                .badge-floating {
+                    position: absolute;
+                    top: 1.5rem;
+                    left: 1.5rem;
+                    background: var(--white);
+                    padding: 0.5rem 1rem;
+                    border-radius: 1rem;
+                    font-size: 0.75rem;
                     font-weight: 800;
-                    color: #6b7280;
+                    color: var(--primary);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
                     text-transform: uppercase;
-                    letter-spacing: 0.05em;
                 }
-                @media (max-width: 480px) {
-                    .landing-card { padding: 2rem 1.5rem; border-radius: 2rem; }
-                    .product-image-box { width: 220px; height: 220px; }
-                    .product-name { font-size: 1.6rem; }
-                    .current-price { font-size: 2.25rem; }
-                    .action-btn { padding: 1.1rem; }
-                    .app-benefits { padding: 1rem; }
+
+                .discount-pill {
+                    position: absolute;
+                    top: 1.5rem;
+                    right: 1.5rem;
+                    background: #ff4b4b;
+                    color: var(--white);
+                    padding: 0.5rem 1rem;
+                    border-radius: 1rem;
+                    font-weight: 900;
+                    font-size: 0.875rem;
+                    box-shadow: 0 8px 20px rgba(255, 75, 75, 0.3);
                 }
+
+                /* Text Content */
+                .details-wrap {
+                    padding: 2rem 1.5rem 1.5rem;
+                }
+                .category-label {
+                    color: var(--primary);
+                    font-size: 0.8rem;
+                    font-weight: 800;
+                    letter-spacing: 0.1em;
+                    text-transform: uppercase;
+                    margin-bottom: 0.5rem;
+                    display: block;
+                }
+                .prod-title {
+                    font-size: 2rem;
+                    font-weight: 900;
+                    color: var(--text-main);
+                    line-height: 1.1;
+                    margin-bottom: 0.75rem;
+                    letter-spacing: -0.02em;
+                }
+                .rating-line {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                }
+                .stars { display: flex; color: var(--accent); gap: 2px; }
+                .reviewer-count { font-size: 0.85rem; color: var(--text-soft); font-weight: 600; }
+
+                .price-grid {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+                .price-actual { font-size: 2.5rem; font-weight: 900; color: var(--text-main); letter-spacing: -0.04em; }
+                .price-mrp { font-size: 1.1rem; color: var(--text-soft); text-decoration: line-through; }
+
+                /* App Promotion Footer */
+                .app-promo-bar {
+                    position: sticky;
+                    bottom: 1.5rem;
+                    width: 90%;
+                    max-width: 440px;
+                    background: var(--primary-dark);
+                    padding: 1rem 1.25rem;
+                    border-radius: 2rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    color: var(--white);
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    z-index: 100;
+                    margin-top: 1rem;
+                    margin-bottom: 1rem;
+                    animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+                }
+                @keyframes slideUp { from { transform: translate(-50%, 100px); opacity: 0; } to { transform: translate(0, 0); opacity: 1; } }
+
+                .app-info { display: flex; align-items: center; gap: 0.75rem; }
+                .app-logo-mini { width: 44px; height: 44px; background: var(--white); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-dark); }
+                .app-text p { margin: 0; font-size: 0.75rem; opacity: 0.8; font-weight: 600; }
+                .app-text h4 { margin: 0; font-size: 1rem; font-weight: 900; }
+
+                .open-app-link {
+                    background: var(--accent);
+                    color: #000;
+                    padding: 0.75rem 1.25rem;
+                    border-radius: 1.25rem;
+                    font-weight: 900;
+                    font-size: 0.85rem;
+                    text-decoration: none;
+                    box-shadow: 0 8px 15px rgba(255, 215, 0, 0.3);
+                    transition: transform 0.2s;
+                }
+                .open-app-link:hover { transform: scale(1.05); }
+
+                /* Trust Features */
+                .trust-badges {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 0.75rem;
+                    margin-top: 0;
+                }
+                .trust-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 1rem 0.5rem;
+                    background: var(--bg-soft);
+                    border-radius: 1.5rem;
+                    border: 1px solid rgba(0,0,0,0.03);
+                }
+                .trust-icon { color: var(--primary); }
+                .trust-text { font-size: 0.6rem; font-weight: 900; color: var(--text-soft); text-transform: uppercase; }
+
             `}</style>
 
-            <div className="landing-card">
-                <div className="brand-tag">
-                    <ShoppingBag size={14} strokeWidth={3} />
-                    VS Mart Exclusive
-                </div>
+            <div className="blob blob-1"></div>
+            <div className="blob blob-2"></div>
 
-                <div className="product-image-box">
+            <header className="header">
+                <div className="header-logo">
+                    <ShoppingBag size={26} fill="currentColor" />
+                    <span>VS MART</span>
+                </div>
+            </header>
+
+            <main className="content-card">
+                <div className="image-container">
+                    <span className="badge-floating">Exclusive</span>
                     {data.discountPercentage > 0 && (
-                        <div className="discount-tag">
-                            {data.discountPercentage}% OFF
-                        </div>
+                        <div className="discount-pill">-{data.discountPercentage}%</div>
                     )}
                     <img
                         src={data.image}
                         alt={data.name}
                         onError={(e) => {
-                            e.target.src = 'https://placehold.co/400x400/FFFFFF/1A6B3A?text=Product+Image';
+                            e.target.src = 'https://placehold.co/600x600/FFFFFF/1A6B3A?text=Product+Image';
                         }}
                     />
                 </div>
 
-                <h1 className="product-name">{data.name}</h1>
-
-                {data.variantText && (
-                    <div className="variant-badge">{data.variantText}</div>
-                )}
-
-                <div className="price-container">
-                    <span className="current-price">RS{data.price}</span>
-                    {data.mrp > data.price && (
-                        <div className="old-price-group">
-                            <span className="old-price">RS{data.mrp}</span>
-                            <span className="save-banner">Save RS{data.mrp - data.price}</span>
+                <div className="details-wrap">
+                    <span className="category-label">Fresh & Premium</span>
+                    <h1 className="prod-title">{data.name}</h1>
+                    
+                    <div className="rating-line">
+                        <div className="stars">
+                            {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} fill="currentColor" />)}
                         </div>
-                    )}
-                </div>
+                        <span className="reviewer-count">(120+ Reviews)</span>
+                        {data.variantText && (
+                            <span className="ml-auto bg-[#F0FDF4] text-[#166534] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                {data.variantText}
+                            </span>
+                        )}
+                    </div>
 
-                <a href={deepLink} className="action-btn">
-                    <Zap size={22} fill="currentColor" />
-                    Open in VSMart App
-                    <div className="promo-pill">FLASH DEAL</div>
+                    <div className="price-grid">
+                        <span className="price-actual">₹{data.price}</span>
+                        {data.mrp > data.price && (
+                            <span className="price-mrp">₹{data.mrp}</span>
+                        )}
+                    </div>
+
+                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                        Experience the finest quality {data.name} picked just for you. 
+                        Premium quality, locally sourced, and delivered with care.
+                    </p>
+
+                    <div className="trust-badges">
+                        <div className="trust-item">
+                            <Truck size={20} className="trust-icon" />
+                            <span className="trust-text">Fast Delivery</span>
+                        </div>
+                        <div className="trust-item">
+                            <ShieldCheck size={20} className="trust-icon" />
+                            <span className="trust-text">100% Secure</span>
+                        </div>
+                        <div className="trust-item">
+                            <Package size={20} className="trust-icon" />
+                            <span className="trust-text">Stay Fresh</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <section className="app-promo-bar">
+                <div className="app-info">
+                    <div className="app-logo-mini">
+                        <Zap size={24} fill="currentColor" />
+                    </div>
+                    <div className="app-text">
+                        <p>Unlock 20% OFF</p>
+                        <h4>Get the App</h4>
+                    </div>
+                </div>
+                <a href={deepLink} className="open-app-link">
+                    DOWNLOAD
                 </a>
-
-                <div className="app-benefits">
-                    <div className="benefit-title">
-                        <Zap size={14} fill="currentColor" />
-                        Why use the App?
-                    </div>
-                    <ul className="benefit-list">
-                        <li className="benefit-item"><div className="benefit-dot" /> Extra 10% Off on First Order</li>
-                        <li className="benefit-item"><div className="benefit-dot" /> Live Order Tracking</li>
-                        <li className="benefit-item"><div className="benefit-dot" /> Instant Customer Support</li>
-                    </ul>
-                </div>
-
-                <div className="features-grid">
-                    <div className="feature-item">
-                        <div className="feature-icon"><Truck size={20} /></div>
-                        <span className="feature-text">Express</span>
-                    </div>
-                    <div className="feature-item">
-                        <div className="feature-icon"><ShieldCheck size={20} /></div>
-                        <span className="feature-text">Secured</span>
-                    </div>
-                    <div className="feature-item">
-                        <div className="feature-icon"><Package size={20} /></div>
-                        <span className="feature-text">Premium</span>
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
     );
 };
