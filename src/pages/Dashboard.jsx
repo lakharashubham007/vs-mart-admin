@@ -144,8 +144,8 @@ export default function Dashboard() {
                             <MapIcon size={14} /> Pickup Map
                         </button>
                     )}
-                    <button className={`vg-refresh ${refreshing ? 'spin' : ''}`} onClick={() => fetchAll(true)} disabled={refreshing}>
-                        <RefreshCw size={14} /> Refresh Data
+                    <button className="vg-refresh" onClick={() => fetchAll(true)} disabled={refreshing}>
+                        <RefreshCw size={14} className={refreshing ? 'spin' : ''} /> Refresh Data
                     </button>
                 </div>
             </div>

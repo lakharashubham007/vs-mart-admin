@@ -4,7 +4,7 @@ import {
     Bell, CheckCheck, BellOff, Package, ShoppingBag,
     Truck, CheckCircle2, XCircle, Clock, Zap, Info,
     Calendar, RefreshCw, Send, Users, Globe, History,
-    ChevronDown, X, AlertCircle, CheckCircle
+    ChevronDown, X, AlertCircle, CheckCircle, Search
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
 import customerService from '../../services/customerService';
@@ -429,7 +429,7 @@ const SendPushPanel = () => {
                         <p>Recent push notifications sent from admin</p>
                     </div>
                     <button className="spn-refresh-btn" onClick={fetchHistory} title="Refresh">
-                        <RefreshCw size={14} />
+                        <RefreshCw size={14} className={historyLoading ? 'spinning' : ''} />
                     </button>
                 </div>
 

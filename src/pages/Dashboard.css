@@ -51,8 +51,8 @@
     background: hsl(var(--secondary));
 }
 
-.vg-refresh.spin svg {
-    animation: rotate 1s linear infinite;
+.vg-refresh .spin {
+    animation: spin 1s linear infinite;
 }
 
 .vg-card {
