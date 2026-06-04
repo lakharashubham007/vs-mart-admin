@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { 
     UserPlus, Search, Plus, ChevronLeft, ChevronRight, 
     ChevronDown, RefreshCw, Mail, Phone, User, 
-    Calendar, CheckCircle2, X, Trash2, Edit 
+    Calendar, CheckCircle2, X, Trash2, Edit, ShoppingCart, History 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import customerService from '../../services/customerService';
 import Loader from '../../components/Loader';
+import { resolveImageUrl } from '../../utils/imageUtils';
+import CartHistoryModal from './CartHistoryModal';
 import '../category/Category.css';
 import '../employee/Employee.css';
 import './Customer.css';
@@ -24,6 +26,14 @@ const ListCustomer = () => {
     // Register Form State
     const [formData, setFormData] = useState({ name: '', phone: '', email: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Cart Modal State
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+    const [selectedCartUser, setSelectedCartUser] = useState(null);
+    const [cartData, setCartData] = useState({ items: [], summary: null, isLoading: false });
+
+    // History Modal State
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -69,6 +79,24 @@ const ListCustomer = () => {
             toast.error(error.response?.data?.message || 'Registration failed');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleViewCart = async (customer) => {
+        setSelectedCartUser(customer);
+        setIsCartModalOpen(true);
+        setCartData({ items: [], summary: null, isLoading: true });
+        try {
+            const res = await customerService.getCustomerCart(customer._id);
+            if (res.success) {
+                setCartData({ items: res.cartItems, summary: res.summary, isLoading: false });
+            } else {
+                toast.error('Failed to load cart');
+                setCartData(prev => ({ ...prev, isLoading: false }));
+            }
+        } catch (error) {
+            toast.error('Failed to load cart');
+            setCartData(prev => ({ ...prev, isLoading: false }));
         }
     };
 
@@ -234,6 +262,9 @@ const ListCustomer = () => {
                                             <button className="action-btn" title="View Details">
                                                 <Plus size={14} />
                                             </button>
+                                            <button className="action-btn" title="View Cart" onClick={() => handleViewCart(customer)}>
+                                                <ShoppingCart size={14} />
+                                            </button>
                                             <button className="action-btn" title="Edit Profile">
                                                 <Edit size={14} />
                                             </button>
@@ -357,6 +388,99 @@ const ListCustomer = () => {
                 </div>,
                 document.body
             )}
+
+            {isCartModalOpen && createPortal(
+                <div className="quick-modal-overlay" onClick={(e) => { if (e.target.className === 'quick-modal-overlay') setIsCartModalOpen(false); }}>
+                    <div className="quick-modal-container" style={{ maxWidth: '800px' }}>
+                        <div className="quick-modal-gradient-bar" />
+                        <div className="quick-modal-content">
+                            <div className="quick-modal-header">
+                                <div>
+                                    <h3 className="quick-modal-title">
+                                        <ShoppingCart size={20} style={{ color: 'hsl(var(--primary))' }} />
+                                        User Cart
+                                    </h3>
+                                    <p className="quick-modal-subtitle">Current cart items for {selectedCartUser?.name || 'Customer'}</p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                    <button 
+                                        className="secondary-button" 
+                                        onClick={() => {
+                                            setIsCartModalOpen(false);
+                                            setIsHistoryModalOpen(true);
+                                        }}
+                                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', display: 'flex', gap: '0.4rem', height: 'auto', background: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.2)' }}
+                                    >
+                                        <History size={16} />
+                                        View History
+                                    </button>
+                                    <button onClick={() => setIsCartModalOpen(false)} className="quick-modal-close-btn" title="Close">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                                {cartData.isLoading ? (
+                                    <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                                        <Loader />
+                                    </div>
+                                ) : cartData.items.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'hsl(var(--muted-foreground))' }}>
+                                        <ShoppingCart size={40} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+                                        <p>Cart is currently empty</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                                        {cartData.items.map((item, index) => (
+                                            <div key={index} style={{ border: '1px solid hsl(var(--border) / 0.5)', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'hsl(var(--secondary) / 0.1)' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <img 
+                                                        src={item.productId?.images?.thumbnail ? resolveImageUrl(item.productId.images.thumbnail) : 'https://via.placeholder.com/60'} 
+                                                        alt={item.productId?.name}
+                                                        style={{ width: '50px', height: '50px', objectFit: 'contain', borderRadius: '6px', background: '#fff', border: '1px solid hsl(var(--border) / 0.3)' }}
+                                                    />
+                                                    <div style={{ flex: 1 }}>
+                                                        <h4 style={{ margin: '0 0 2px', fontSize: '0.85rem', lineHeight: '1.2' }} className="line-clamp-2">{item.productId?.name}</h4>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div style={{ borderTop: '1px dashed hsl(var(--border) / 0.5)', paddingTop: '0.5rem' }}>
+                                                    {item.variantId && (
+                                                        <p style={{ margin: '0 0 6px', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                                                            {item.variantId.attributes?.map(a => a.value).join(', ')}
+                                                        </p>
+                                                    )}
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                                                        <span style={{ fontSize: '0.8rem', fontWeight: '500', color: 'hsl(var(--muted-foreground))' }}>Qty: <span style={{ color: 'hsl(var(--foreground))', fontWeight: '700' }}>{item.quantity}</span></span>
+                                                        <span style={{ fontSize: '0.9rem', color: 'hsl(var(--primary))', fontWeight: 'bold' }}>
+                                                            ₹{item.itemSummary?.finalSellingPrice || item.pricing?.sellingPrice || 0}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                
+                                {!cartData.isLoading && cartData.summary && cartData.items.length > 0 && (
+                                    <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'hsl(var(--secondary) / 0.2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ fontWeight: '600' }}>Total Estimated Value:</span>
+                                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'hsl(var(--primary))' }}>₹{cartData.summary.orderTotal}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            <CartHistoryModal 
+                isOpen={isHistoryModalOpen} 
+                onClose={() => setIsHistoryModalOpen(false)} 
+                customer={selectedCartUser} 
+            />
 
             {isLoading && <Loader />}
         </div>

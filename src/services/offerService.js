@@ -1,59 +1,39 @@
-import axios from 'axios';
-import { BASE_URL as API_BASE_URL } from '../config/env';
+import apiClient from './apiClient';
 
 const offerService = {
-    createOffer: async (formData) => {
-        const response = await axios.post(`${API_BASE_URL}/private/offers/create-offer`, formData, {
-            headers: { 
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        return response.data;
-    },
-
-    getOffers: async (params = {}) => {
-        const response = await axios.get(`${API_BASE_URL}/private/offers/offer-list`, {
-            params,
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        return response.data;
-    },
-
-    getActiveOffers: async () => {
-        const response = await axios.get(`${API_BASE_URL}/public/offers/active`);
-        return response.data;
+    getOffers: async (params) => {
+        const response = await apiClient.get('/private/offers', { params });
+        return response;
     },
 
     getOfferById: async (id) => {
-        const response = await axios.get(`${API_BASE_URL}/private/offers/get-by-id/${id}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        return response.data;
+        const response = await apiClient.get(`/private/offers/${id}`);
+        return response;
     },
 
-    updateOffer: async (id, formData) => {
-        const response = await axios.patch(`${API_BASE_URL}/private/offers/offer-edit/${id}`, formData, {
-            headers: { 
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        return response.data;
+    createOffer: async (offerData) => {
+        const response = await apiClient.post('/private/offers', offerData);
+        return response;
     },
 
-    updateOfferStatus: async (id, isActive) => {
-        const response = await axios.patch(`${API_BASE_URL}/private/offers/update-offer-status/${id}`, { isActive }, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        return response.data;
+    updateOffer: async (id, offerData) => {
+        const response = await apiClient.put(`/private/offers/${id}`, offerData);
+        return response;
     },
 
     deleteOffer: async (id) => {
-        const response = await axios.delete(`${API_BASE_URL}/private/offers/offer-delete/${id}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        return response.data;
+        const response = await apiClient.delete(`/private/offers/${id}`);
+        return response;
+    },
+
+    toggleStatus: async (id) => {
+        const response = await apiClient.patch(`/private/offers/${id}/toggle-status`);
+        return response;
+    },
+    
+    getUsageAnalytics: async (id, params) => {
+        const response = await apiClient.get(`/private/offers/${id}/usage`, { params });
+        return response;
     }
 };
 

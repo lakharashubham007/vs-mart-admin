@@ -70,7 +70,7 @@ const SCREEN_OPTIONS = [
     { value: 'Notification', label: '🔔 Notification Center', paramKey: null,        paramLabel: null },
     { value: 'OrderDetails', label: '📦 Order Details',       paramKey: 'orderId',   paramLabel: 'Order ID' },
     { value: 'MyOrders',     label: '🛒 My Orders',           paramKey: null,        paramLabel: null },
-    { value: 'OfferDetails', label: '🏷️ Offers & Coupons',   paramKey: 'offerId',   paramLabel: 'Offer ID' },
+    { value: 'OfferDetails', label: '🏷️ Offers',            paramKey: 'offerId',   paramLabel: 'Offer ID' },
     { value: 'ProductDetails',label: '🛍️ Product Details',   paramKey: 'productId', paramLabel: 'Product ID' },
     { value: 'Chat',         label: '💬 Chat',                paramKey: 'userId',    paramLabel: 'User ID' },
     { value: 'Tabs',         label: '🏠 Home Screen',         paramKey: null,        paramLabel: null },

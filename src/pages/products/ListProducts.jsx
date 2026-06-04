@@ -170,12 +170,12 @@ const ListProducts = () => {
 
                 <div className="category-glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div className="category-filter-bar">
-                        <div 
+                        <div
                             className="category-search-wrapper"
-                            style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                background: 'hsl(var(--secondary) / 0.3)', 
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                background: 'hsl(var(--secondary) / 0.3)',
                                 border: '1px solid hsl(var(--border) / 0.5)',
                                 borderRadius: '12px',
                                 paddingLeft: '12px',
@@ -183,14 +183,14 @@ const ListProducts = () => {
                                 transition: 'all 0.3s ease'
                             }}
                         >
-                            <Search 
-                                size={18} 
-                                style={{ 
-                                    color: 'hsl(var(--muted-foreground))', 
+                            <Search
+                                size={18}
+                                style={{
+                                    color: 'hsl(var(--muted-foreground))',
                                     flexShrink: 0,
                                     position: 'static',
                                     marginRight: '10px'
-                                }} 
+                                }}
                             />
                             <input
                                 type="text"
@@ -508,17 +508,17 @@ const ListProducts = () => {
                                             </div>
                                             <div className="text-center">
                                                 <h3 className="text-2xl font-black" style={{ letterSpacing: '0.1em', color: 'hsl(var(--foreground))' }}>
-                                                    {filters.categoryId ? 'NO PRODUCTS IN CATEGORY' : 
-                                                     filters.search ? 'NO MATCHING PRODUCTS' : 'CATALOG EMPTY'}
+                                                    {filters.categoryId ? 'NO PRODUCTS IN CATEGORY' :
+                                                        filters.search ? 'NO MATCHING PRODUCTS' : 'CATALOG EMPTY'}
                                                 </h3>
                                                 <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))', marginTop: '4px' }}>
                                                     {filters.categoryId ? 'We couldn\'t find any active listings in the selected category.' :
-                                                     filters.search ? `No results found for "${filters.search}". Try different keywords.` :
-                                                     'Initiate your first product to begin tracking your global assets.'}
+                                                        filters.search ? `No results found for "${filters.search}". Try different keywords.` :
+                                                            'Initiate your first product to begin tracking your global assets.'}
                                                 </p>
                                                 {(filters.categoryId || filters.search || filters.brandId || filters.productType || filters.status) && (
-                                                    <button 
-                                                        className="secondary-button" 
+                                                    <button
+                                                        className="secondary-button"
                                                         style={{ marginTop: '1.5rem' }}
                                                         onClick={() => setFilters({ search: '', categoryId: '', brandId: '', productType: '', status: '' })}
                                                     >
@@ -869,7 +869,7 @@ const ListProducts = () => {
                             </div>
                             <h4 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', fontWeight: '700' }}>{selectedQrTitle}</h4>
                             <p style={{ margin: 0, fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))' }}>Global assets identity tag for internal logistics tracking.</p>
-                            
+
                             <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
                                 <button className="secondary-button" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setQrModalOpen(false)}>
                                     Close

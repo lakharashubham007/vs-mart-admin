@@ -51,10 +51,10 @@ const Sidebar = ({ isCollapsed }) => {
         <aside className={`sidebar-container glass ${isCollapsed ? 'collapsed' : ''}`}>
             <div className="sidebar-header">
                 <div className="logo-container">
-                    <div className="logo-icon">VS</div>
+                    <div className="logo-icon">Vs</div>
                     {!isCollapsed && (
                         <div className="logo-text-wrapper" style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span className="logo-text">VS MART</span>
+                            <span className="logo-text">Vs Apani Dukan</span>
                             <span className="powered-by-sidebar" style={{ fontSize: '0.55rem', color: 'hsl(var(--muted-foreground))', letterSpacing: '0.5px' }}>POWERED BY DEXTERDIGI.COM</span>
                         </div>
                     )}

@@ -1,49 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Edit3, Trash2, Image as ImageIcon, RefreshCw, Calendar, Eye, EyeOff, Tag, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Edit3, Trash2, Video, RefreshCw, ChevronLeft, ChevronRight, ChevronDown, Calendar, Eye, EyeOff, PlayCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import offerService from '../../services/offerService';
-import { BASE_URL as SERVICE_URL } from '../../config/env';
+import storyService from '../../services/storyService';
+import { BASE_URL as SERVICE_URL, BASE_IMAGE_URL } from '../../config/env';
 import Loader from '../../components/Loader';
-import './Offer.css';
+import './Story.css';
 
-const ListOffer = () => {
-    const [offers, setOffers] = useState([]);
+const ListStory = () => {
+    const [stories, setStories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [pagination, setPagination] = useState({
-        page: 1,
-        limit: 10,
-        total: 0,
-        pages: 0
-    });
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
     const [isRowsDropdownOpen, setIsRowsDropdownOpen] = useState(false);
     const navigate = useNavigate();
 
-    // Get the root URL (without /v1) for images
-    const ROOT_URL = SERVICE_URL.replace('/v1', '');
+    // Helper to resolve media URLs (handles local server vs Cloudinary)
+    const resolveMediaUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        
+        const cleanPath = path.replace(/^\//, '');
+        // If it looks like a Cloudinary path
+        if (cleanPath.includes('vsmart/') || cleanPath.startsWith('thumbnail-') || cleanPath.startsWith('image-')) {
+            return `https://res.cloudinary.com/dlucla0js/image/upload/q_auto,f_jpg/${cleanPath}`;
+        }
+        // Otherwise use the local base image URL
+        return `${BASE_IMAGE_URL}/${cleanPath}`;
+    };
 
     useEffect(() => {
-        fetchOffers();
+        const timer = setTimeout(() => {
+            fetchStories();
+        }, 300);
+        return () => clearTimeout(timer);
     }, [pagination.page, pagination.limit, searchTerm]);
 
-    const fetchOffers = async () => {
+    const fetchStories = async () => {
         setIsLoading(true);
         try {
-            const res = await offerService.getOffers({
+            const res = await storyService.getStories({
                 page: pagination.page,
                 limit: pagination.limit,
                 search: searchTerm
             });
-            setOffers(res.offers || []);
+            setStories(res.data || []);
             setPagination(prev => ({
                 ...prev,
                 total: res.pagination?.total || 0,
                 pages: res.pagination?.pages || 0
             }));
         } catch (error) {
-            toast.error('Failed to load offer list');
+            toast.error('Failed to load stories');
         } finally {
             setIsLoading(false);
         }
@@ -51,9 +60,9 @@ const ListOffer = () => {
 
     const handleToggleStatus = async (id, currentStatus) => {
         try {
-            await offerService.updateOfferStatus(id, !currentStatus);
-            toast.success(`Offer ${!currentStatus ? 'Activated' : 'Deactivated'}! 🚀`);
-            fetchOffers();
+            await storyService.updateStory(id, { isActive: !currentStatus });
+            toast.success(`Story ${!currentStatus ? 'Activated' : 'Deactivated'}! 🚀`);
+            fetchStories();
         } catch (error) {
             toast.error('Failed to update status');
         }
@@ -61,7 +70,7 @@ const ListOffer = () => {
 
     const handleDelete = async (id) => {
         const result = await Swal.fire({
-            title: 'Delete Offer?',
+            title: 'Delete Story?',
             text: 'This action cannot be undone.',
             icon: 'warning',
             showCancelButton: true,
@@ -73,40 +82,41 @@ const ListOffer = () => {
         if (result.isConfirmed) {
             setIsLoading(true);
             try {
-                await offerService.deleteOffer(id);
-                toast.success('Offer deleted');
-                fetchOffers();
+                await storyService.deleteStory(id);
+                toast.success('Story deleted');
+                fetchStories();
             } catch (error) {
                 toast.error('Deletion failed');
+            } finally {
                 setIsLoading(false);
             }
         }
     };
 
     return (
-        <div className="offer-page-container fade-in">
-            <div className="offer-glass-card power-ui absolute-unified">
+        <div className="category-page-container fade-in">
+            <div className="category-content-pane absolute-unified power-ui">
                 <header className="internal-page-header">
                     <div className="page-header-content">
-                        <h1>Offer Management</h1>
-                        <p>Create and manage {pagination.total} promotional campaigns across the platform.</p>
+                        <h1>Stories Management</h1>
+                        <p>Create and manage 24h auto-expiring stories (image/video).</p>
                     </div>
                     <div className="header-actions">
-                        <button className="secondary-button" onClick={fetchOffers}>
+                        <button className="secondary-button" onClick={fetchStories}>
                             <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
                             <span>Refresh</span>
                         </button>
-                        <button className="primary-button" onClick={() => navigate('/offers/create')}>
-                            <Plus size={16} /> Create Offer
+                        <button className="primary-button" onClick={() => navigate('/stories/create')}>
+                            <Plus size={16} /> Create Story
                         </button>
                     </div>
                 </header>
 
                 <hr className="header-divider-internal" />
 
-                <div className="offer-glass-card filter-card" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div className="banner-glass-card filter-card" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <div 
-                        className="offer-search-wrapper" 
+                        className="banner-search-wrapper" 
                         style={{ 
                             display: 'flex', 
                             alignItems: 'center', 
@@ -129,7 +139,7 @@ const ListOffer = () => {
                         />
                         <input
                             type="text"
-                            placeholder="Search offers..."
+                            placeholder="Search stories..."
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
@@ -196,81 +206,94 @@ const ListOffer = () => {
                     </div>
                 </div>
 
-                <div className="offer-table-wrapper">
-                    <table className="offer-table">
+                <div className="banner-table-wrapper">
+                    <table className="banner-table">
                         <thead>
                             <tr>
-                                <th style={{ width: '60px' }}>S.N.</th>
-                                <th>Offer Details</th>
-                                <th>Discount</th>
-                                <th>Schedule</th>
+                                <th>Preview & Title</th>
+                                <th>Type & Duration</th>
+                                <th>Expiry</th>
                                 <th>Status</th>
                                 <th style={{ textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {offers.length > 0 ? offers.map((offer, index) => (
-                                <tr key={offer._id} className="offer-row">
-                                    <td style={{ fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>
-                                        {(pagination.page - 1) * pagination.limit + index + 1}
-                                    </td>
-                                    <td>
-                                        <div className="offer-cell-info">
-                                            <div className="offer-img-preview">
-                                                <img src={`${ROOT_URL}/${offer.image}`} alt="" />
+                            {stories.length > 0 ? stories.map((story) => {
+                                const previewMedia = story.mediaType === 'video' ? (story.thumbnail || story.media) : story.media;
+                                const previewUrl = resolveMediaUrl(previewMedia);
+
+                                return (
+                                    <tr key={story._id} className="banner-row">
+                                        <td>
+                                            <div className="banner-cell-info">
+                                                <div className="banner-img-preview" style={{ width: '45px', height: '80px', borderRadius: '8px', position: 'relative', overflow: 'hidden', backgroundColor: 'hsl(var(--secondary) / 0.2)' }}>
+                                                    <img 
+                                                        src={previewUrl} 
+                                                        alt="" 
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                        onError={(e) => {
+                                                            e.target.src = 'https://placehold.co/45x80?text=No+Img';
+                                                        }}
+                                                    />
+                                                    {story.mediaType === 'video' && (
+                                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                                                            <Video size={14} color="#fff" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div className="banner-title-text">{story.title || 'Untitled Story'}</div>
+                                                    <div className="banner-id-text">ID: {story._id.slice(-6).toUpperCase()}</div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div className="offer-title-text">{offer.title}</div>
-                                                <div className="offer-id-text">ID: {offer._id.slice(-6).toUpperCase()}</div>
-                                            </div>
-                                        </div>
-                                    </td>
+                                        </td>
                                     <td>
-                                        <div className="offer-discount-badge">
-                                            <Tag size={12} style={{ marginRight: '4px' }} />
-                                            {offer.discountValue}{offer.discountType === 'Percentage' ? '%' : ' OFF'}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                {story.mediaType === 'video' ? <Video size={14} /> : <PlayCircle size={14} />}
+                                                <span style={{ textTransform: 'capitalize' }}>{story.mediaType}</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))' }}>
+                                                Duration: {story.duration}s
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
                                         <div className="schedule-info">
-                                            <div className="date-item">
+                                            <div className="date-item expiry">
                                                 <Calendar size={12} />
-                                                <span>{new Date(offer.startDate).toLocaleDateString()}</span>
+                                                <span>Exp: {new Date(story.expireAt).toLocaleString()}</span>
                                             </div>
-                                            {offer.expiryDate && (
-                                                <div className="date-item expiry">
-                                                    <Calendar size={12} />
-                                                    <span>Exp: {new Date(offer.expiryDate).toLocaleDateString()}</span>
-                                                </div>
-                                            )}
                                         </div>
                                     </td>
                                     <td>
                                         <div
-                                            className={`status-badge ${offer.isActive ? 'active' : 'inactive'} clickable`}
-                                            onClick={() => handleToggleStatus(offer._id, offer.isActive)}
+                                            className={`status-badge ${story.isActive ? 'active' : 'inactive'} clickable`}
+                                            onClick={() => handleToggleStatus(story._id, story.isActive)}
                                             style={{ cursor: 'pointer' }}
+                                            title="Click to toggle status"
                                         >
-                                            {offer.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
-                                            <span>{offer.isActive ? 'Active' : 'Hidden'}</span>
+                                            {story.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
+                                            <span>{story.isActive ? 'Active' : 'Hidden'}</span>
                                         </div>
                                     </td>
                                     <td style={{ textAlign: 'right' }}>
-                                        <div className="offer-action-btns">
-                                            <button className="action-btn" onClick={() => navigate(`/offers/edit/${offer._id}`)}>
+                                        <div className="banner-actions" style={{ justifyContent: 'flex-end' }}>
+                                            <button className="action-btn" onClick={() => navigate(`/stories/edit/${story._id}`)}>
                                                 <Edit3 size={14} />
                                             </button>
-                                            <button className="action-btn delete" onClick={() => handleDelete(offer._id)}>
+                                            <button className="action-btn delete" onClick={() => handleDelete(story._id)}>
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-                            )) : (
+                                    );
+                                }) : (
                                 <tr>
-                                    <td colSpan="6" className="empty-state">
-                                        <ImageIcon size={48} strokeWidth={1} style={{ marginBottom: '1rem', display: 'block', margin: '0 auto' }} />
-                                        <p>No offers found.</p>
+                                    <td colSpan="5" className="empty-state">
+                                        <Video size={48} strokeWidth={1} style={{ marginBottom: '1rem', display: 'block', margin: '0 auto' }} />
+                                        <p>No stories found.</p>
                                     </td>
                                 </tr>
                             )}
@@ -309,4 +332,4 @@ const ListOffer = () => {
     );
 };
 
-export default ListOffer;
+export default ListStory;

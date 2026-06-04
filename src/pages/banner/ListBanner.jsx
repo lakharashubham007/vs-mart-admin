@@ -1,300 +1,206 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Edit3, Trash2, Image as ImageIcon, RefreshCw, ChevronLeft, ChevronRight, ChevronDown, Calendar, Eye, EyeOff } from 'lucide-react';
+import { 
+    Plus, 
+    Search, 
+    MoreVertical, 
+    Edit, 
+    Trash2, 
+    ExternalLink, 
+    Eye, 
+    EyeOff, 
+    Filter,
+    Calendar,
+    Home,
+    Gift,
+    ImageIcon,
+    LayoutGrid,
+    Tag
+} from 'lucide-react';
 import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 import bannerService from '../../services/bannerService';
-import { BASE_URL as SERVICE_URL } from '../../config/env';
 import Loader from '../../components/Loader';
-import CustomSelect from '../../components/CustomSelect';
+import { BASE_IMAGE_URL } from '../../config/env';
 import './Banner.css';
 
-const ListBanner = () => {
-    const [banners, setBanners] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
-    const [isRowsDropdownOpen, setIsRowsDropdownOpen] = useState(false);
-    const navigate = useNavigate();
 
-    // Get the root URL (without /v1) for images
-    const ROOT_URL = SERVICE_URL.replace('/v1', '');
+const ListBanner = () => {
+    const navigate = useNavigate();
+    const [banners, setBanners] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState('ALL');
+    const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
+
+    const fetchBanners = async (page = 1, type = '') => {
+        setLoading(true);
+        try {
+            const params = { 
+                page, 
+                limit: 10, 
+                search: searchTerm,
+                type: type === 'ALL' ? '' : type
+            };
+            const response = await bannerService.getBanners(params);
+            if (response.success) {
+                setBanners(response.banners);
+                setPagination(response.pagination);
+            }
+        } catch (error) {
+            toast.error('Failed to fetch banners');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            fetchBanners();
-        }, 300);
+            fetchBanners(1, activeTab);
+        }, 500);
         return () => clearTimeout(timer);
-    }, [pagination.page, pagination.limit, searchTerm]);
-
-    const fetchBanners = async () => {
-        setIsLoading(true);
-        try {
-            const res = await bannerService.getBanners({
-                page: pagination.page,
-                limit: pagination.limit,
-                search: searchTerm
-            });
-            setBanners(res.banners || []);
-            setPagination(prev => ({
-                ...prev,
-                total: res.pagination?.total || 0,
-                pages: res.pagination?.pages || 0
-            }));
-        } catch (error) {
-            toast.error('Failed to load banner list');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    }, [searchTerm, activeTab]);
 
     const handleToggleStatus = async (id, currentStatus) => {
         try {
             await bannerService.updateBannerStatus(id, !currentStatus);
-            toast.success(`Banner ${!currentStatus ? 'Activated' : 'Deactivated'}! 🚀`);
-            fetchBanners();
+            toast.success(`Banner ${!currentStatus ? 'activated' : 'deactivated'}!`);
+            fetchBanners(pagination.page, activeTab);
         } catch (error) {
             toast.error('Failed to update status');
         }
     };
 
     const handleDelete = async (id) => {
-        const result = await Swal.fire({
-            title: 'Delete Banner?',
-            text: 'This action cannot be undone.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Delete'
-        });
-
-        if (result.isConfirmed) {
-            setIsLoading(true);
-            try {
-                await bannerService.deleteBanner(id);
-                toast.success('Banner deleted');
-                fetchBanners();
-            } catch (error) {
-                toast.error('Deletion failed');
-            } finally {
-                setIsLoading(false);
-            }
+        if (!window.confirm('Are you sure you want to delete this banner permanently?')) return;
+        try {
+            await bannerService.deleteBanner(id);
+            toast.success('Banner deleted successfully');
+            fetchBanners(pagination.page, activeTab);
+        } catch (error) {
+            toast.error('Failed to delete banner');
         }
     };
 
     return (
-        <div className="category-page-container fade-in">
-            <div className="category-content-pane absolute-unified power-ui">
-                <header className="internal-page-header">
+        <div className="banner-page-container fade-in">
+            <div className="banner-content-pane absolute-unified power-ui">
+                <header className="banner-header-section">
+
                     <div className="page-header-content">
                         <h1>Banner Management</h1>
-                        <p>Manage home screen dynamic banners and promotions.</p>
+                        <p>Control and monitor all active promotions across your ecosystem.</p>
                     </div>
                     <div className="header-actions">
-                        <button className="secondary-button" onClick={fetchBanners}>
-                            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                            <span>Refresh</span>
-                        </button>
-                        <button className="primary-button" onClick={() => navigate('/banners/create')}>
-                            <Plus size={16} /> Create Banner
+                        <button className="primary-button" onClick={() => navigate('/create-banner')}>
+                            <Plus size={18} /> New Banner
                         </button>
                     </div>
                 </header>
 
                 <hr className="header-divider-internal" />
 
-                <div className="banner-glass-card filter-card" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div 
-                        className="banner-search-wrapper" 
-                        style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            background: 'hsl(var(--secondary) / 0.3)', 
-                            border: '1px solid hsl(var(--border) / 0.5)',
-                            borderRadius: '12px',
-                            paddingLeft: '12px',
-                            flex: 1,
-                            transition: 'all 0.3s ease'
-                        }}
-                    >
-                        <Search 
-                            size={18} 
-                            style={{ 
-                                color: 'hsl(var(--muted-foreground))', 
-                                flexShrink: 0,
-                                position: 'static',
-                                marginRight: '10px'
-                            }} 
-                        />
-                        <input
-                            type="text"
-                            placeholder="Search banners..."
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setPagination(prev => ({ ...prev, page: 1 }));
-                            }}
-                            style={{
-                                flex: 1,
-                                padding: '0.75rem 0',
-                                background: 'transparent',
-                                border: 'none',
-                                outline: 'none',
-                                color: 'hsl(var(--foreground))',
-                                fontSize: '0.95rem'
-                            }}
-                        />
+                {/* Filter Bar */}
+                <div className="banner-list-toolbar">
+                    <div className="list-tabs">
+                        <button className={`tab-btn ${activeTab === 'ALL' ? 'active' : ''}`} onClick={() => setActiveTab('ALL')}>All Banners</button>
+                        <button className={`tab-btn ${activeTab === 'HOME_BANNER' ? 'active' : ''}`} onClick={() => setActiveTab('HOME_BANNER')}><Home size={14} /> Home</button>
+                        <button className={`tab-btn ${activeTab === 'OFFER_BANNER' ? 'active' : ''}`} onClick={() => setActiveTab('OFFER_BANNER')}><Gift size={14} /> Offers</button>
                     </div>
-
-                    <div style={{ position: 'relative', marginLeft: 'auto' }}>
-                        <button
-                            className="secondary-button"
-                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem', background: 'hsl(var(--card))', height: '42px', minWidth: '110px' }}
-                            onClick={() => setIsRowsDropdownOpen(!isRowsDropdownOpen)}
-                        >
-                            <span style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>Rows:</span>
-                            <span style={{ fontWeight: '600' }}>{pagination.limit}</span>
-                            <ChevronDown size={14} className={isRowsDropdownOpen ? 'rotate-180' : ''} />
-                        </button>
-
-                        {isRowsDropdownOpen && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '100%',
-                                right: 0,
-                                marginTop: '0.5rem',
-                                background: 'hsl(var(--card))',
-                                border: '1px solid hsl(var(--border) / 0.5)',
-                                borderRadius: '8px',
-                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                                zIndex: 50,
-                                minWidth: '120px',
-                                overflow: 'hidden'
-                            }}>
-                                {[10, 20, 50, 100].map(limit => (
-                                    <div
-                                        key={limit}
-                                        style={{
-                                            padding: '0.6rem 1rem',
-                                            cursor: 'pointer',
-                                            background: pagination.limit === limit ? 'hsl(var(--primary) / 0.1)' : 'transparent',
-                                            color: pagination.limit === limit ? 'hsl(var(--primary))' : 'hsl(var(--foreground))',
-                                            fontSize: '0.9rem',
-                                            fontWeight: pagination.limit === limit ? '600' : '400',
-                                        }}
-                                        onClick={() => {
-                                            setPagination(prev => ({ ...prev, limit, page: 1 }));
-                                            setIsRowsDropdownOpen(false);
-                                        }}
-                                    >
-                                        {limit} rows
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                    <div className="search-box-wrapper">
+                        <Search size={16} className="search-icon" />
+                        <input 
+                            type="text" 
+                            placeholder="Search by title or link..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
 
-                <div className="banner-table-wrapper">
-                    <table className="banner-table">
-                        <thead>
-                            <tr>
-                                <th>Preview & Title</th>
-                                <th>Schedule</th>
-                                <th>Status</th>
-                                <th style={{ textAlign: 'right' }}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {banners.length > 0 ? banners.map((banner) => (
-                                <tr key={banner._id} className="banner-row">
-                                    <td>
-                                        <div className="banner-cell-info">
-                                            <div className="banner-img-preview">
-                                                <img src={`${ROOT_URL}/${banner.image}`} alt="" />
+                {loading ? <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader /></div> : (
+                    <div className="banner-grid-layout">
+                        {banners.length === 0 ? (
+                            <div className="empty-state-card">
+                                <ImageIcon size={48} strokeWidth={1} />
+                                <h3>No Banners Found</h3>
+                                <p>Start by creating a new banner to drive more engagement.</p>
+                            </div>
+                        ) : (
+                            banners.map((banner) => (
+                                <div key={banner._id} className={`banner-list-card ${!banner.isActive ? 'is-disabled' : ''}`}>
+
+                                    <div className="banner-card-image">
+                                        <img 
+                                            src={banner.image?.startsWith('http') ? banner.image : `${BASE_IMAGE_URL}/${banner.image?.replace(/^\//, '')}`} 
+                                            alt={banner.title} 
+                                            onError={(e) => {
+                                                if (e.target.src !== 'https://via.placeholder.com/800x400?text=Graphic+Not+Found') {
+                                                    e.target.src = 'https://via.placeholder.com/800x400?text=Graphic+Not+Found';
+                                                }
+                                            }}
+                                        />
+                                        <div className="banner-type-badge">
+                                            {banner.type === 'OFFER_BANNER' ? <Gift size={12} /> : <Home size={12} />}
+                                            {banner.type ? (banner.type === 'HOME_BANNER' ? 'Home' : 'Offer') : 'Home'}
+                                        </div>
+                                    </div>
+                                    <div className="banner-card-details">
+                                        <div className="banner-card-header">
+                                            <div className="title-area">
+                                                <div className="type-label-tiny" style={{ color: banner.isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
+                                                    {banner.type === 'OFFER_BANNER' ? 'OFFER PLACEMENT' : 'HOME PLACEMENT'} • {banner.isActive ? 'LIVE' : 'DRAFT'}
+                                                </div>
+                                                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', margin: '0.1rem 0' }}>{banner.title}</h3>
                                             </div>
-                                            <div>
-                                                <div className="banner-title-text">{banner.title}</div>
-                                                <div className="banner-id-text">ID: {banner._id.slice(-6).toUpperCase()}</div>
+                                            <div className="banner-card-actions" style={{ display: 'flex', gap: '0.4rem' }}>
+                                                <button className="action-btn edit" onClick={() => navigate(`/edit-banner/${banner._id}`)} title="Edit" style={{ width: '30px', height: '30px' }}><Edit size={14} /></button>
+                                                <button className="action-btn delete" onClick={() => handleDelete(banner._id)} title="Delete" style={{ width: '30px', height: '30px' }}><Trash2 size={14} /></button>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div className="schedule-info">
-                                            <div className="date-item">
-                                                <Calendar size={12} />
-                                                <span>{new Date(banner.publishDate).toLocaleDateString()}</span>
+                                        
+                                        <div className="banner-info-row" style={{ marginTop: '0.25rem', marginBottom: '0.5rem' }}>
+                                            <div className="info-item" style={{ fontSize: '0.75rem' }}>
+                                                <Tag size={12} color="hsl(var(--primary))" />
+                                                <span>{banner.linkType || 'No Link'}</span>
                                             </div>
-                                            {banner.expiryDate && (
-                                                <div className="date-item expiry">
-                                                    <Calendar size={12} />
-                                                    <span>Exp: {new Date(banner.expiryDate).toLocaleDateString()}</span>
+                                            <div className="info-item" style={{ fontSize: '0.75rem' }}>
+                                                <Calendar size={12} />
+                                                <span>{new Date(banner.publishDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                                            </div>
+                                            {banner.linkId && banner.linkType !== 'None' && (
+                                                <div className="info-item" style={{ fontSize: '0.75rem', marginLeft: 'auto', opacity: 0.7 }}>
+                                                    <LayoutGrid size={12} />
+                                                    <span>ID: {banner.linkId.substring(0, 5)}...</span>
                                                 </div>
                                             )}
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div
-                                            className={`status-badge ${banner.isActive ? 'active' : 'inactive'} clickable`}
-                                            onClick={() => handleToggleStatus(banner._id, banner.isActive)}
-                                            style={{ cursor: 'pointer' }}
-                                            title="Click to toggle status"
-                                        >
-                                            {banner.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
-                                            <span>{banner.isActive ? 'Active' : 'Hidden'}</span>
-                                        </div>
-                                    </td>
-                                    <td style={{ textAlign: 'right' }}>
-                                        <div className="banner-actions" style={{ justifyContent: 'flex-end' }}>
-                                            <button className="action-btn" onClick={() => navigate(`/banners/edit/${banner._id}`)}>
-                                                <Edit3 size={14} />
-                                            </button>
-                                            <button className="action-btn delete" onClick={() => handleDelete(banner._id)}>
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="4" className="empty-state">
-                                        <ImageIcon size={48} strokeWidth={1} style={{ marginBottom: '1rem', display: 'block', margin: '0 auto' }} />
-                                        <p>No banners found.</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
 
-                {pagination.total > 0 && (
-                    <div className="pagination-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid hsl(var(--border) / 0.1)' }}>
-                        <div style={{ fontSize: '0.85rem', color: 'hsl(var(--muted-foreground))' }}>
-                            <span>Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button
-                                className="secondary-button"
-                                disabled={pagination.page === 1}
-                                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                                style={{ padding: '8px', minWidth: '40px' }}
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                            <button
-                                className="secondary-button"
-                                disabled={pagination.page >= pagination.pages}
-                                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                                style={{ padding: '8px', minWidth: '40px' }}
-                            >
-                                <ChevronRight size={16} />
-                            </button>
-                        </div>
+                                        <div className="banner-card-footer" style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid hsl(var(--border) / 0.1)' }}>
+                                            <button 
+                                                className={`toggle-status-btn ${banner.isActive ? 'is-active' : ''}`}
+                                                onClick={() => handleToggleStatus(banner._id, banner.isActive)}
+                                                style={{ 
+                                                    width: '100%', 
+                                                    justifyContent: 'center', 
+                                                    height: '38px', 
+                                                    fontSize: '0.8rem',
+                                                    borderRadius: '12px',
+                                                    background: banner.isActive ? 'hsl(var(--destructive) / 0.05)' : 'hsl(var(--primary) / 0.05)',
+                                                    color: banner.isActive ? 'hsl(var(--destructive))' : 'hsl(var(--primary))',
+                                                    borderColor: banner.isActive ? 'hsl(var(--destructive) / 0.1)' : 'hsl(var(--primary) / 0.1)'
+                                                }}
+                                            >
+                                                {banner.isActive ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                {banner.isActive ? 'Deactivate Banner' : 'Activate Banner'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 )}
             </div>
-            {isLoading && <Loader />}
         </div>
     );
 };

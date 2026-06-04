@@ -24,9 +24,8 @@ import EditCategory from "../pages/category/EditCategory";
 import ListBanner from "../pages/banner/ListBanner";
 import CreateBanner from "../pages/banner/CreateBanner";
 import EditBanner from "../pages/banner/EditBanner";
-import ListOffer from "../pages/offers/ListOffer";
-import CreateOffer from "../pages/offers/CreateOffer";
-import EditOffer from "../pages/offers/EditOffer";
+import OfferList from "../pages/offers/OfferList";
+import OfferForm from "../pages/offers/OfferForm";
 import ListSubcategory from "../pages/subcategory/ListSubcategory";
 import ListBrand from "../pages/brand/ListBrand";
 import ListUnit from "../pages/unit/ListUnit";
@@ -50,8 +49,11 @@ import DeliveryBoyList from "../pages/deliveryBoy/DeliveryBoyList";
 import AddDeliveryBoy from "../pages/deliveryBoy/AddDeliveryBoy";
 import EditDeliveryBoy from "../pages/deliveryBoy/EditDeliveryBoy";
 import DeliveryAssignmentList from "../pages/deliveryBoy/DeliveryAssignmentList";
-
-
+import ListStory from "../pages/stories/ListStory";
+import CreateStory from "../pages/stories/CreateStory";
+import EditStory from "../pages/stories/EditStory";
+import DeliveryConfigList from "../pages/deliveryConfig/DeliveryConfigList";
+import DeliveryConfigForm from "../pages/deliveryConfig/DeliveryConfigForm";
 
 /// Error Pages (Stubs for now)
 const Error404 = () => <div className="p-5"><h1>404</h1><p>Page Not Found</p></div>;
@@ -93,15 +95,18 @@ const Markup = () => {
         { url: "variants", component: <ListVariantAttribute /> },
         { url: "variants/values/:attributeId", component: <ListVariantValue /> },
 
-        // Banners
+        // Banners (Unified Banner Management)
         { url: "banners-list", component: <ListBanner /> },
+        { url: "create-banner", component: <CreateBanner /> },
+        { url: "edit-banner/:id", component: <EditBanner /> },
         { url: "banners/create", component: <CreateBanner /> },
         { url: "banners/edit/:id", component: <EditBanner /> },
 
+
         // Offers
-        { url: "offers-list", component: <ListOffer /> },
-        { url: "offers/create", component: <CreateOffer /> },
-        { url: "offers/edit/:id", component: <EditOffer /> },
+        { url: "offers-list", component: <OfferList /> },
+        { url: "offers/create", component: <OfferForm /> },
+        { url: "offers/edit/:id", component: <OfferForm /> },
 
         // Orders
         { url: "orders", component: <ListOrders /> },
@@ -141,6 +146,16 @@ const Markup = () => {
         { url: "delivery-boy/add", component: <AddDeliveryBoy /> },
         { url: "delivery-boy/edit/:id", component: <EditDeliveryBoy /> },
         { url: "delivery-boy/assignments", component: <DeliveryAssignmentList /> },
+
+        // Stories
+        { url: "stories-list", component: <ListStory /> },
+        { url: "stories/create", component: <CreateStory /> },
+        { url: "stories/edit/:id", component: <EditStory /> },
+
+        // Delivery Radius & Buckets Config
+        { url: "delivery-list", component: <DeliveryConfigList /> },
+        { url: "delivery/create", component: <DeliveryConfigForm /> },
+        { url: "delivery/edit/:id", component: <DeliveryConfigForm /> },
     ]
 
 

@@ -89,7 +89,7 @@
 }
 
 .custom-select-search-wrapper {
-    padding: 0.75rem;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -100,7 +100,10 @@
 .search-icon {
     color: hsl(var(--muted-foreground));
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
 }
+
 
 .custom-select-search-input {
     width: 100%;

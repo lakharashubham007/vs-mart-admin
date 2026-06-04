@@ -18,6 +18,15 @@ const customerService = {
             method: 'PATCH',
             body: { status }
         });
+    },
+
+    getCustomerCart: async (userId) => {
+        return await apiClient(`/private/carts?userId=${userId}`);
+    },
+
+    getCustomerCartHistory: async (userId, params = {}) => {
+        const query = new URLSearchParams({ ...params, userId }).toString();
+        return await apiClient(`/private/carts/history?${query}`);
     }
 };
 

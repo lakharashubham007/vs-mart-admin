@@ -1,8 +1,23 @@
 import { BASE_URL } from '../config/env';
 
 const apiClient = async (endpoint, options = {}) => {
-    const { method = 'GET', body, headers = {}, ...customConfig } = options;
+    const { method = 'GET', body, headers = {}, params, ...customConfig } = options;
     const token = localStorage.getItem('token');
+
+    // Handle query parameters
+    let url = `${BASE_URL}${endpoint}`;
+    if (params) {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                queryParams.append(key, value);
+            }
+        });
+        const queryString = queryParams.toString();
+        if (queryString) {
+            url += (url.includes('?') ? '&' : '?') + queryString;
+        }
+    }
 
     const isFormData = body instanceof FormData;
     const defaultHeaders = {
@@ -22,7 +37,7 @@ const apiClient = async (endpoint, options = {}) => {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}${endpoint}`, config);
+        const response = await fetch(url, config);
 
         // Handle 401 Unauthorized globally if needed (e.g., auto-logout)
         if (response.status === 401) {
@@ -55,5 +70,12 @@ const apiClient = async (endpoint, options = {}) => {
         throw err;
     }
 };
+
+// Attach helper methods to support apiClient.get(), apiClient.post(), etc.
+apiClient.get = (endpoint, options = {}) => apiClient(endpoint, { ...options, method: 'GET' });
+apiClient.post = (endpoint, body, options = {}) => apiClient(endpoint, { ...options, method: 'POST', body });
+apiClient.put = (endpoint, body, options = {}) => apiClient(endpoint, { ...options, method: 'PUT', body });
+apiClient.patch = (endpoint, body, options = {}) => apiClient(endpoint, { ...options, method: 'PATCH', body });
+apiClient.delete = (endpoint, options = {}) => apiClient(endpoint, { ...options, method: 'DELETE' });
 
 export default apiClient;

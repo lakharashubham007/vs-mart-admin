@@ -115,12 +115,12 @@ const ListCategory = () => {
 
                 <div className="category-glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div className="category-filter-bar">
-                        <div 
+                        <div
                             className="category-search-wrapper"
-                            style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                background: 'hsl(var(--secondary) / 0.3)', 
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                background: 'hsl(var(--secondary) / 0.3)',
                                 border: '1px solid hsl(var(--border) / 0.5)',
                                 borderRadius: '12px',
                                 paddingLeft: '12px',
@@ -128,14 +128,14 @@ const ListCategory = () => {
                                 transition: 'all 0.3s ease'
                             }}
                         >
-                            <Search 
-                                size={18} 
-                                style={{ 
-                                    color: 'hsl(var(--muted-foreground))', 
+                            <Search
+                                size={18}
+                                style={{
+                                    color: 'hsl(var(--muted-foreground))',
                                     flexShrink: 0,
                                     position: 'static',
                                     marginRight: '10px'
-                                }} 
+                                }}
                             />
                             <input
                                 type="text"
