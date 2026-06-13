@@ -1613,3 +1613,168 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* Pet Store Specific Chips */
+.pet-chip-btn {
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+    padding: 0.5rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.pet-chip-btn:hover {
+    background: hsl(var(--primary) / 0.05);
+    border-color: hsl(var(--primary) / 0.3);
+    color: hsl(var(--primary));
+}
+
+.pet-chip-btn.active {
+    background: hsl(var(--primary) / 0.1);
+    border-color: hsl(var(--primary) / 0.5);
+    color: hsl(var(--primary));
+    box-shadow: 0 2px 8px hsl(var(--primary) / 0.1);
+}
+
+/* ─── Variant Edit Modal Styles (Portal) ──────────────────────────────────── */
+.variant-edit-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 2rem;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.variant-edit-modal {
+    background: #ffffff;
+    width: 100%;
+    max-width: 850px;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.variant-edit-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.75rem 2rem;
+    border-bottom: 1px solid #f1f5f9;
+    background: linear-gradient(to right, #ffffff, #f8fafc);
+}
+
+.variant-edit-modal .modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.variant-edit-modal .modal-subtitle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.variant-edit-modal .modal-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.variant-edit-modal .modal-badge strong {
+    color: #1e40af;
+    font-weight: 800;
+}
+
+.variant-edit-modal .modal-close {
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.variant-edit-modal .modal-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    transform: rotate(90deg);
+}
+
+.variant-edit-modal .modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.variant-edit-modal .modal-footer {
+    padding: 1.5rem 2rem;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Modal Custom Responsiveness Override */
+@media (max-width: 768px) {
+    .variant-edit-modal-overlay {
+        padding: 1rem;
+    }
+    .variant-edit-modal {
+        max-height: 95vh;
+    }
+    .variant-edit-modal .modal-body {
+        padding: 1.25rem;
+    }
+    .variant-edit-modal .product-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+}

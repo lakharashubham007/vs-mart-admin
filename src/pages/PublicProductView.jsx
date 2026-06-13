@@ -312,7 +312,7 @@ const PublicProductView = () => {
             <header className="header">
                 <div className="header-logo">
                     <ShoppingBag size={26} fill="currentColor" />
-                    <span>Vs Apani Dukan</span>
+                    <span>VS Apani Dukan</span>
                 </div>
             </header>
 

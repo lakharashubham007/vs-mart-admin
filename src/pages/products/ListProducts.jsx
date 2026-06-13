@@ -347,25 +347,40 @@ const ListProducts = () => {
                                             </td>
                                             <td>
                                                 <div className="category-cell-name">
-                                                    <div
-                                                        className="category-img-box"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedProductForGallery(product);
-                                                            // Set default display image to thumbnail, or first gallery image, or null
-                                                            const defaultImg = product.images?.thumbnail || (product.images?.gallery?.[0]) || null;
-                                                            setSelectedDisplayImage(defaultImg);
-                                                            setGalleryModalOpen(true);
-                                                        }}
-                                                        style={{ cursor: 'pointer', position: 'relative' }}
-                                                        title="View Image Gallery"
-                                                    >
-                                                        {product.images?.thumbnail ? (
-                                                            <img src={resolveImageUrl(product.images.thumbnail)} alt="" />
-                                                        ) : (
-                                                            <Package size={20} className="text-muted-foreground" />
-                                                        )}
-                                                    </div>
+                                                    {(() => {
+                                                        const firstVarThumb = product.productType === 'Variant' && (product.variants?.[0]?.images?.thumbnail || product.variants?.[0]?.thumbnail);
+                                                        const thumbToDisplay = firstVarThumb || product.images?.thumbnail;
+                                                        return (
+                                                            <div
+                                                                className="category-img-box"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (product.productType === 'Variant' && firstVarThumb) {
+                                                                        const attrText = product.variants?.[0]?.attributes?.map(attr => attr.valueName || attr.valueId?.name || attr.valueId?.valueName || attr.valueId?.value).join(' / ') || 'Variant';
+                                                                        setSelectedProductForGallery({
+                                                                            name: `${product.name} (${attrText})`,
+                                                                            images: {
+                                                                                thumbnail: firstVarThumb,
+                                                                                gallery: product.variants?.[0]?.images?.gallery || (Array.isArray(product.variants?.[0]?.images) ? product.variants[0].images : [])
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        setSelectedProductForGallery(product);
+                                                                    }
+                                                                    setSelectedDisplayImage(thumbToDisplay);
+                                                                    setGalleryModalOpen(true);
+                                                                }}
+                                                                style={{ cursor: 'pointer', position: 'relative' }}
+                                                                title="View Image Gallery"
+                                                            >
+                                                                {thumbToDisplay ? (
+                                                                    <img src={resolveImageUrl(thumbToDisplay)} alt="" />
+                                                                ) : (
+                                                                    <Package size={20} className="text-muted-foreground" />
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()}
                                                     <div>
                                                         <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>{product.name}</div>
                                                         <div style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -451,9 +466,10 @@ const ListProducts = () => {
                                                             <thead>
                                                                 <tr>
                                                                     <th style={{ width: '10%' }}>QR</th>
-                                                                    <th style={{ width: '30%' }}>Variant Combination</th>
-                                                                    <th style={{ width: '25%' }}>SKU</th>
-                                                                    <th style={{ width: '20%', textAlign: 'right' }}>Price (MRP)</th>
+                                                                    <th style={{ width: '15%' }}>Image</th>
+                                                                    <th style={{ width: '25%' }}>Variant Combination</th>
+                                                                    <th style={{ width: '20%' }}>SKU</th>
+                                                                    <th style={{ width: '15%', textAlign: 'right' }}>Price (MRP)</th>
                                                                     <th style={{ width: '15%', textAlign: 'right', paddingRight: '1.5rem' }}>In Stock</th>
                                                                 </tr>
                                                             </thead>
@@ -475,6 +491,32 @@ const ListProducts = () => {
                                                                                 title="View QR/Barcode"
                                                                             >
                                                                                 <QrCode size={16} className="text-muted-foreground opacity-40 hover:text-primary transition-colors" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div
+                                                                                className="category-img-box"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    const attrText = v.attributes?.map(attr => attr.valueName || attr.valueId?.name || attr.valueId?.valueName || attr.valueId?.value).join(' / ') || 'Variant';
+                                                                                    setSelectedProductForGallery({
+                                                                                        name: `${product.name} (${attrText})`,
+                                                                                        images: {
+                                                                                            thumbnail: v.images?.thumbnail || v.thumbnail || '',
+                                                                                            gallery: v.images?.gallery || (Array.isArray(v.images) ? v.images : [])
+                                                                                        }
+                                                                                    });
+                                                                                    setSelectedDisplayImage(v.images?.thumbnail || v.thumbnail || null);
+                                                                                    setGalleryModalOpen(true);
+                                                                                }}
+                                                                                style={{ cursor: 'pointer', position: 'relative', width: '32px', height: '32px', borderRadius: '6px', overflow: 'hidden' }}
+                                                                                title="View Variant Images"
+                                                                            >
+                                                                                {v.images?.thumbnail || v.thumbnail ? (
+                                                                                    <img src={resolveImageUrl(v.images.thumbnail || v.thumbnail)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                                ) : (
+                                                                                    <Package size={14} className="text-muted-foreground" />
+                                                                                )}
                                                                             </div>
                                                                         </td>
                                                                         <td style={{ fontWeight: '500' }}>

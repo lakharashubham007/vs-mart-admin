@@ -460,9 +460,25 @@ const AddProduct = () => {
                 const cleanVariants = formData.variants.map(v => {
                     const cleanV = { ...v };
                     if (!cleanV.taxId) delete cleanV.taxId;
+                    delete cleanV.thumbnailFile;
+                    delete cleanV.thumbnailPreview;
+                    delete cleanV.imagesFiles;
+                    delete cleanV.imagesPreviews;
                     return cleanV;
                 });
                 data.append('variants', JSON.stringify(cleanVariants));
+
+                // Append variant files dynamically using indices
+                formData.variants.forEach((v, idx) => {
+                    if (v.thumbnailFile) {
+                        data.append(`variants[${idx}][thumbnail]`, v.thumbnailFile);
+                    }
+                    if (v.imagesFiles && v.imagesFiles.length > 0) {
+                        v.imagesFiles.forEach(file => {
+                            data.append(`variants[${idx}][images]`, file);
+                        });
+                    }
+                });
             }
             if (images.thumbnail) data.append('image', images.thumbnail);
             images.gallery.forEach(img => data.append('images', img));
@@ -814,51 +830,74 @@ const AddProduct = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="vb-col-header">
+                                                <div className="vb-col-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1fr 0.5fr 0.5fr', padding: '1rem', background: 'hsl(var(--secondary)/0.5)', fontWeight: 700, fontSize: '0.75rem' }}>
                                                     <div>VARIANT</div>
                                                     <div>SKU</div>
-                                                    <div className="text-center">STOCK</div>
-                                                    <div className="text-center">MIN</div>
-                                                    <div className="text-center">MRP</div>
-                                                    <div className="text-center">PRICE</div>
-                                                    <div className="text-center">TAX</div>
-                                                    <div className="text-center">ACTIONS</div>
+                                                    <div>MRP</div>
+                                                    <div>PRICE</div>
+                                                    <div>DISC.</div>
+                                                    <div>FINAL</div>
+                                                    <div>COST</div>
+                                                    <div>STOCK</div>
+                                                    <div style={{ justifyContent: 'center' }}>EDIT</div>
+                                                    <div style={{ justifyContent: 'center' }}>DEL</div>
                                                 </div>
 
                                                 <div className="vb-table-body" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                                     {formData.variants.map((v, idx) => (
-                                                        <div key={idx} className="vb-variant-row">
-                                                            <div>
-                                                                <div className="variant-badge-group">
-                                                                    {v.variantValues.map((vv, i) => (
-                                                                        <div key={i} className="variant-attr-badge" title={vv.typeName}>
-                                                                            {vv.colorCode && (
-                                                                                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: vv.colorCode, marginRight: 4, border: '1px solid rgba(0,0,0,0.1)' }} />
-                                                                            )}
-                                                                            {vv.valueName}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
+                                                        <div 
+                                                            key={idx} 
+                                                            className="vb-variant-row"
+                                                            onClick={() => { setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }}
+                                                            style={{ 
+                                                                display: 'grid', 
+                                                                gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1fr 0.5fr 0.5fr', 
+                                                                padding: '0.8rem 1rem', 
+                                                                borderTop: '1px solid hsl(var(--border)/0.2)', 
+                                                                fontSize: '0.85rem', 
+                                                                alignItems: 'center',
+                                                                cursor: 'pointer',
+                                                                transition: 'background-color 0.2s'
+                                                            }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--secondary)/0.2)'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                                        >
+                                                            <div className="vb-badge-group" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                                {v.variantValues.map((vv, i) => (
+                                                                    <span key={i} style={{ background: 'hsl(var(--primary)/0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center' }} title={vv.typeName}>
+                                                                        {vv.colorCode && (
+                                                                            <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: vv.colorCode, marginRight: 4, border: '1px solid rgba(0,0,0,0.1)' }} />
+                                                                        )}
+                                                                        {vv.typeName ? `${vv.typeName}: ` : ''}{vv.valueName}
+                                                                    </span>
+                                                                ))}
                                                             </div>
-                                                            <div>
-                                                                <div style={{ display: 'flex', gap: '4px', width: '100%' }}>
-                                                                    <input className="vb-row-input" style={{ flex: 1, textTransform: 'uppercase', fontSize: '0.7rem' }} value={v.sku} onChange={(e) => updateVariantRow(idx, 'sku', e.target.value)} placeholder="SKU" />
-                                                                    <button className="vb-icon-btn small" onClick={() => generateSKUAction('variant', idx)}><RefreshCw size={12} /></button>
-                                                                </div>
+                                                            <div style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem', textTransform: 'uppercase' }}>{v.sku || 'AUTO-SKU'}</div>
+                                                            <div>{v.mrp ? `₹${v.mrp}` : '—'}</div>
+                                                            <div>{v.price ? `₹${v.price}` : '—'}</div>
+                                                            <div>{v.discountValue ? `${v.discountValue}${v.discountType === 'Percentage' ? '%' : ' ₹'}` : '0'}</div>
+                                                            <div style={{ fontWeight: 800, color: 'hsl(var(--primary))' }}>{v.finalSellingPrice ? `₹${v.finalSellingPrice}` : '₹0'}</div>
+                                                            <div style={{ color: 'hsl(var(--muted-foreground))' }}>{v.costPrice ? `₹${v.costPrice}` : '—'}</div>
+                                                            <div style={{ fontWeight: 600 }}>{v.quantity || 0}</div>
+                                                            <div onClick={e => e.stopPropagation()} style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                <button 
+                                                                    type="button"
+                                                                    className="vb-action-btn edit" 
+                                                                    onClick={() => { setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }}
+                                                                    style={{ border: '1px solid hsl(var(--border))', background: 'white', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                >
+                                                                    <Edit2 size={13} />
+                                                                </button>
                                                             </div>
-                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.quantity} onChange={(e) => updateVariantRow(idx, 'quantity', e.target.value)} placeholder="0" /></div>
-                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.minStock} onChange={(e) => updateVariantRow(idx, 'minStock', e.target.value)} placeholder="0" /></div>
-                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.mrp} onChange={(e) => updateVariantRow(idx, 'mrp', e.target.value)} placeholder="0" /></div>
-                                                            <div><input type="number" min="0" onWheel={(e) => e.target.blur()} className="vb-row-input text-center" value={v.price} onChange={(e) => updateVariantRow(idx, 'price', e.target.value)} placeholder="0" /></div>
-                                                            <div>
-                                                                <select className="vb-row-select" value={v.taxId} onChange={(e) => updateVariantRow(idx, 'taxId', e.target.value)}>
-                                                                    <option value="">No Tax</option>
-                                                                    {masters.taxes.map(t => <option key={t._id} value={t._id}>{t.rate}%</option>)}
-                                                                </select>
-                                                            </div>
-                                                            <div style={{ display: 'flex', gap: '4px' }}>
-                                                                <button className="vb-action-btn edit" onClick={() => { setEditingVariantIndex(idx); setEditingVariantData({ ...v }); }} title="Advanced Edit"><Edit2 size={12} /></button>
-                                                                <button className="vb-action-btn delete" onClick={() => deleteVariantRow(idx)} title="Remove Variant"><Trash2 size={12} /></button>
+                                                            <div onClick={e => e.stopPropagation()} style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                <button 
+                                                                    type="button"
+                                                                    className="vb-action-btn delete" 
+                                                                    onClick={() => deleteVariantRow(idx)}
+                                                                    style={{ border: '1px solid hsl(var(--border))', background: 'white', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                >
+                                                                    <Trash2 size={13} />
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -1118,6 +1157,125 @@ const AddProduct = () => {
                                 <div className="product-field-group">
                                     <label className="product-label">Min Stock</label>
                                     <input type="number" min="0" onWheel={(e) => e.target.blur()} name="minStock" className="product-input" value={editingVariantData.minStock} onChange={handleVariantEditChange} />
+                                </div>
+
+                                <div className="product-field-group" style={{ gridColumn: '1 / -1', borderTop: '1px solid hsl(var(--border)/0.2)', paddingTop: '1.25rem', marginTop: '0.5rem' }}>
+                                    <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: 'hsl(var(--primary))', marginBottom: '0.75rem' }}>Variant Media Assets</h4>
+                                </div>
+                                <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
+                                    <label className="product-label">Variant Thumbnail</label>
+                                    <div className="image-upload-zone" onClick={() => document.getElementById('varThumbInput').click()} style={{ height: '140px', cursor: 'pointer', border: '2px dashed hsl(var(--border)/0.4)', borderRadius: '0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--card)/0.2)', position: 'relative', overflow: 'hidden' }}>
+                                        {editingVariantData.thumbnailPreview ? (
+                                            <>
+                                                <img src={editingVariantData.thumbnailPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingVariantData(prev => ({ ...prev, thumbnailFile: null, thumbnailPreview: '' }));
+                                                        const input = document.getElementById('varThumbInput');
+                                                        if (input) input.value = '';
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: 5,
+                                                        right: 5,
+                                                        background: 'rgba(239, 68, 68, 0.9)',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '50%',
+                                                        width: 24,
+                                                        height: 24,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        cursor: 'pointer',
+                                                        zIndex: 20
+                                                    }}
+                                                    title="Remove Thumbnail"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ImageIcon size={20} color="hsl(var(--primary))" style={{ marginBottom: '0.25rem' }} />
+                                                <p style={{ fontWeight: 700, margin: 0, fontSize: '0.8rem' }}>Click to upload variant thumbnail</p>
+                                                <p style={{ fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', margin: 0 }}>PNG/JPG up to 5MB</p>
+                                            </>
+                                        )}
+                                        <input
+                                            id="varThumbInput"
+                                            type="file"
+                                            hidden
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    if (file.size > 5 * 1024 * 1024) return toast.error('File size exceeds 5MB');
+                                                    setEditingVariantData(prev => ({
+                                                        ...prev,
+                                                        thumbnailFile: file,
+                                                        thumbnailPreview: URL.createObjectURL(file)
+                                                    }));
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="product-field-group" style={{ gridColumn: '1 / -1' }}>
+                                    <label className="product-label">Variant Gallery Images</label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.75rem' }}>
+                                        {(editingVariantData.imagesPreviews || []).map((url, idx) => (
+                                            <div key={idx} style={{ position: 'relative', aspectRatio: '1/1', border: '1px solid hsl(var(--border)/0.4)', borderRadius: '0.5rem', overflow: 'hidden', background: 'white' }}>
+                                                <img src={url} alt="Gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingVariantData(prev => {
+                                                            const newFiles = (prev.imagesFiles || []).filter((_, i) => i !== idx);
+                                                            const newPreviews = (prev.imagesPreviews || []).filter((_, i) => i !== idx);
+                                                            return { ...prev, imagesFiles: newFiles, imagesPreviews: newPreviews };
+                                                        });
+                                                    }}
+                                                    style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            type="button"
+                                            onClick={() => document.getElementById('varGalleryInput').click()}
+                                            style={{ aspectRatio: '1/1', border: '2px dashed hsl(var(--border)/0.3)', borderRadius: '0.5rem', background: 'hsl(var(--secondary)/0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: '0.3s' }}
+                                        >
+                                            <Plus size={20} color="hsl(var(--muted-foreground))" />
+                                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'hsl(var(--muted-foreground))', marginTop: 2 }}>Add Image</span>
+                                        </button>
+                                    </div>
+                                    <input
+                                        id="varGalleryInput"
+                                        type="file"
+                                        hidden
+                                        multiple
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const files = Array.from(e.target.files);
+                                            const validFiles = [];
+                                            files.forEach(f => {
+                                                if (f.size <= 5 * 1024 * 1024) validFiles.push(f);
+                                                else toast.error(`${f.name} exceeds 5MB limit`);
+                                            });
+                                            if (validFiles.length > 0) {
+                                                setEditingVariantData(prev => {
+                                                    const filesArr = [...(prev.imagesFiles || []), ...validFiles];
+                                                    const previewsArr = [...(prev.imagesPreviews || []), ...validFiles.map(f => URL.createObjectURL(f))];
+                                                    return { ...prev, imagesFiles: filesArr, imagesPreviews: previewsArr };
+                                                });
+                                            }
+                                        }}
+                                    />
                                 </div>
                             </div>
                         </div>

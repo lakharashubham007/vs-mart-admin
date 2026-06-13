@@ -17,11 +17,11 @@ import Loader from '../../components/Loader';
 import toast from 'react-hot-toast';
 
 const INDIAN_GROCERY_TERMS = `
-<h1>Terms and Conditions for Vs Apani Dukan</h1>
+<h1>Terms and Conditions for VS Apani Dukan</h1>
 <p>Effective Date: ${new Date().toLocaleDateString()}</p>
 
 <h2>1. Introduction</h2>
-<p>Welcome to Vs Apani Dukan. These Terms and Conditions govern your use of our mobile application and services for grocery delivery in India.</p>
+<p>Welcome to VS Apani Dukan. These Terms and Conditions govern your use of our mobile application and services for grocery delivery in India.</p>
 
 <h2>2. Service Availability</h2>
 <p>Our services are currently available in selected cities across India. Delivery times are estimates and may vary based on traffic, weather, and stock availability.</p>
@@ -33,7 +33,7 @@ const INDIAN_GROCERY_TERMS = `
 <p>We strive to provide fresh produce and quality products. If you receive damaged or expired items, please report it within 2 hours of delivery for fresh items and 24 hours for packaged goods.</p>
 
 <h2>5. Licensing and Compliance</h2>
-<p>Vs Apani Dukan operates in compliance with FSSAI regulations and other local Indian laws pertaining to food safety and e-commerce.</p>
+<p>VS Apani Dukan operates in compliance with FSSAI regulations and other local Indian laws pertaining to food safety and e-commerce.</p>
 
 <p>By using our app, you agree to these terms.</p>
 `;

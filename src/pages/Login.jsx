@@ -130,7 +130,7 @@ const Login = () => {
                             <div className="brand-glow"></div>
                         </div>
                         <h1 className="premium-title">
-                            {loginType === 'staff' ? 'Vs Apani Dukan Admin' : 'Delivery Portal'}
+                            {loginType === 'staff' ? 'VS Apani Dukan Admin' : 'Delivery Portal'}
                         </h1>
                         <p className="powered-by-text" style={{ fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', marginTop: '-0.3rem', letterSpacing: '1px', textAlign: 'center' }}>POWERED BY DEXTERDIGI.COM</p>
                         <p className="premium-subtitle" style={{ marginTop: '0.5rem' }}>
@@ -196,7 +196,7 @@ const Login = () => {
                     </form>
 
                     <div className="login-footer-branding">
-                        <p className="copyright">© 2026 Vs Apani Dukan</p>
+                        <p className="copyright">© 2026 VS Apani Dukan</p>
                         <div className="trust-badges">
                             <div className="badge-item"><Lock size={10} /> Validated</div>
                             <div className="badge-separator"></div>
